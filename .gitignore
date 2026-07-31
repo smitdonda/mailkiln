@@ -1,0 +1,18 @@
+node_modules/
+dist/
+coverage/
+*.tgz
+*.log
+.DS_Store
+.vite/
+.idea/
+.vscode/*
+!.vscode/settings.json
+examples/demo/dist/
+tests/types/dist/
+
+# Playwright MCP artefacts
+.playwright-mcp/
+
+# Showcase build output
+examples/showcase/out/

@@ -1,0 +1,2228 @@
+/*
+ * mailforge editor chrome.
+ *
+ * CRITICAL: we deliberately do NOT `@import "tailwindcss"` — that pulls in
+ * preflight, which would reset the consumer's whole page. We import only the
+ * theme and utilities layers, both prefixed, so every generated utility is
+ * `mf:flex`-style and can never collide with the host app's Tailwind.
+ *
+ * CRITICAL, and counter-intuitive: the component rules below are NOT wrapped in
+ * `@layer`. In the CSS cascade, *unlayered* styles beat every layered style
+ * regardless of specificity — so with the chrome inside `@layer components`, a
+ * host app's plain `button { background: hotpink }` overrode all of it. Being
+ * immune to the consumer's stylesheet matters more than layer tidiness, so only
+ * Tailwind's theme (variables, no conflicts possible) stays layered.
+ *
+ * Consequence to know about: a `mf:`-prefixed Tailwind utility is also layered,
+ * so it loses to these component classes. Use Tailwind's important modifier
+ * (`mf:hidden!`) when you need a utility to win.
+ */
+@layer theme, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme) prefix(mf);
+@import 'tailwindcss/utilities.css' layer(utilities) prefix(mf);
+
+@source "./**/*.{js,jsx}";
+
+@theme {
+  --color-mf-accent: #4f46e5;
+}
+
+/* --- unlayered from here down: see the note above --- */
+
+/* ===========================================================================
+   Tokens
+   ===========================================================================
+   `--mf-ui-*` rather than `--mf-font-*`: with prefix(mf) Tailwind owns the
+   `--mf-font-*` / `--mf-color-*` / `--mf-text-*` theme namespaces, and reusing
+   one of its keys makes Tailwind emit its own default into `:root, :host` — a
+   style leak into the consumer's page. Stay clear of those prefixes.
+   =========================================================================== */
+
+.mf-root {
+  --mf-accent: #4f46e5;
+  --mf-accent-hover: #4338ca;
+  --mf-accent-contrast: #ffffff;
+  --mf-accent-soft: color-mix(in srgb, var(--mf-accent) 8%, transparent);
+  --mf-accent-softer: color-mix(in srgb, var(--mf-accent) 4%, transparent);
+  --mf-accent-ring: color-mix(in srgb, var(--mf-accent) 22%, transparent);
+
+  --mf-bg: #ffffff;
+  --mf-bg-subtle: #f9fafb;
+  --mf-bg-sunken: #eef0f4;
+  --mf-bg-hover: #f3f4f6;
+
+  --mf-border: #e7e9ee;
+  --mf-border-strong: #d3d7e0;
+
+  --mf-fg: #111827;
+  --mf-fg-muted: #6b7280;
+  --mf-fg-subtle: #9ca3af;
+
+  --mf-danger: #dc2626;
+  --mf-danger-soft: color-mix(in srgb, #dc2626 10%, transparent);
+  --mf-warn: #d97706;
+  --mf-warn-soft: color-mix(in srgb, #d97706 12%, transparent);
+  --mf-info: #2563eb;
+  --mf-info-soft: color-mix(in srgb, #2563eb 10%, transparent);
+  --mf-success: #059669;
+
+  --mf-radius: 12px;
+  --mf-radius-md: 9px;
+  --mf-radius-sm: 6px;
+
+  --mf-shadow-sm: 0 1px 2px rgb(16 24 40 / 6%);
+  --mf-shadow-md: 0 2px 8px rgb(16 24 40 / 8%);
+  --mf-shadow-lg: 0 12px 32px rgb(16 24 40 / 14%);
+  --mf-shadow-paper: 0 1px 2px rgb(16 24 40 / 5%), 0 8px 24px rgb(16 24 40 / 8%);
+
+  --mf-ui-font:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mf-ui-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --mf-panel-width: 320px;
+
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 520px;
+  overflow: hidden;
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius);
+  background: var(--mf-bg-sunken);
+  color: var(--mf-fg);
+  font-family: var(--mf-ui-font);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizelegibility;
+}
+
+/* The root takes focus so keyboard shortcuts reach it; a focus ring around the
+   whole editor would be noise, and the focused controls inside keep theirs. */
+.mf-root:focus {
+  outline: none;
+}
+
+.mf-root *,
+.mf-root *::before,
+.mf-root *::after {
+  box-sizing: border-box;
+}
+
+.mf-root[data-mf-theme='dark'] {
+  --mf-accent: #6366f1;
+  --mf-accent-hover: #818cf8;
+  --mf-accent-soft: color-mix(in srgb, var(--mf-accent) 16%, transparent);
+  --mf-accent-softer: color-mix(in srgb, var(--mf-accent) 8%, transparent);
+
+  --mf-bg: #171a21;
+  --mf-bg-subtle: #1c2028;
+  --mf-bg-sunken: #0f1116;
+  --mf-bg-hover: #232833;
+
+  --mf-border: #262b35;
+  --mf-border-strong: #383f4d;
+
+  --mf-fg: #e8eaf0;
+  --mf-fg-muted: #9aa2b1;
+  --mf-fg-subtle: #6b7382;
+
+  --mf-shadow-paper: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
+  --mf-shadow-lg: 0 12px 32px rgb(0 0 0 / 45%);
+}
+
+/* Scrollbars: the default Windows ones are visually loud next to this chrome. */
+.mf-root ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.mf-root ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mf-root ::-webkit-scrollbar-thumb {
+  background: var(--mf-border-strong);
+  border: 3px solid transparent;
+  border-radius: 8px;
+  background-clip: content-box;
+}
+
+.mf-root ::-webkit-scrollbar-thumb:hover {
+  background: var(--mf-fg-subtle);
+  background-clip: content-box;
+}
+
+/* ===========================================================================
+   Shell
+   =========================================================================== */
+
+.mf-shell {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.mf-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  background: var(--mf-bg-sunken);
+}
+
+.mf-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mf-spacer-flex {
+  flex: 1;
+}
+
+.mf-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ===========================================================================
+   Toolbar
+   =========================================================================== */
+
+.mf-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  height: 56px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--mf-border);
+  background: var(--mf-bg);
+  flex-shrink: 0;
+}
+
+.mf-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* The template name: reads as a title until you interact with it, which is what
+   makes it discoverable as editable without adding a field to the panel. */
+.mf-title {
+  flex: 0 1 auto;
+  width: 168px;
+  min-width: 84px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--mf-radius-sm);
+  background: transparent;
+  color: var(--mf-fg);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  transition:
+    background 130ms ease,
+    border-color 130ms ease;
+}
+
+.mf-title::placeholder {
+  color: var(--mf-fg-subtle);
+  font-weight: 500;
+}
+
+.mf-title:hover {
+  background: var(--mf-bg-hover);
+}
+
+.mf-title:focus {
+  outline: none;
+  border-color: var(--mf-accent);
+  background: var(--mf-bg);
+  box-shadow: 0 0 0 3px var(--mf-accent-ring);
+}
+
+.mf-toolbar-sep {
+  width: 1px;
+  height: 22px;
+  background: var(--mf-border);
+}
+
+/* Segmented control — views, devices, code languages */
+.mf-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg-sunken);
+}
+
+.mf-segmented > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: var(--mf-radius-sm);
+  background: transparent;
+  color: var(--mf-fg-muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 130ms ease,
+    color 130ms ease,
+    box-shadow 130ms ease;
+}
+
+.mf-segmented > button:hover:not([aria-selected='true']):not([aria-pressed='true']) {
+  color: var(--mf-fg);
+}
+
+.mf-segmented > button[aria-selected='true'],
+.mf-segmented > button[aria-pressed='true'] {
+  background: var(--mf-bg);
+  color: var(--mf-fg);
+  box-shadow: var(--mf-shadow-sm);
+}
+
+.mf-segmented > button:focus-visible {
+  outline: 2px solid var(--mf-accent);
+  outline-offset: 1px;
+}
+
+.mf-segmented svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* ===========================================================================
+   Buttons
+   =========================================================================== */
+
+.mf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--mf-radius-md);
+  background: transparent;
+  color: var(--mf-fg);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 130ms ease,
+    border-color 130ms ease,
+    box-shadow 130ms ease,
+    transform 130ms ease;
+}
+
+.mf-btn svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.mf-btn:hover:not(:disabled) {
+  background: var(--mf-bg-hover);
+}
+
+.mf-btn:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+
+.mf-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--mf-accent-ring);
+}
+
+.mf-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mf-btn[aria-pressed='true'] {
+  background: var(--mf-accent-soft);
+  color: var(--mf-accent);
+}
+
+.mf-btn-primary {
+  background: var(--mf-accent);
+  color: var(--mf-accent-contrast);
+  box-shadow: var(--mf-shadow-sm);
+}
+
+.mf-btn-primary:hover:not(:disabled) {
+  background: var(--mf-accent-hover);
+}
+
+.mf-btn-outline {
+  border-color: var(--mf-border-strong);
+  background: var(--mf-bg);
+}
+
+.mf-btn-outline:hover:not(:disabled) {
+  background: var(--mf-bg-hover);
+  border-color: var(--mf-fg-subtle);
+}
+
+.mf-btn-icon {
+  width: 32px;
+  padding: 0;
+}
+
+.mf-btn-sm {
+  height: 28px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+/* ===========================================================================
+   Side panel
+   =========================================================================== */
+
+.mf-panel {
+  display: flex;
+  flex-direction: column;
+  width: var(--mf-panel-width);
+  flex-shrink: 0;
+  border-left: 1px solid var(--mf-border);
+  background: var(--mf-bg);
+  overflow: hidden;
+}
+
+.mf-panel-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 10px 10px 0;
+  flex-shrink: 0;
+}
+
+.mf-panel-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  border: 0;
+  border-radius: var(--mf-radius-sm);
+  background: transparent;
+  color: var(--mf-fg-muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 130ms ease,
+    color 130ms ease;
+}
+
+.mf-panel-tab svg {
+  width: 15px;
+  height: 15px;
+}
+
+.mf-panel-tab:hover {
+  color: var(--mf-fg);
+  background: var(--mf-bg-hover);
+}
+
+.mf-panel-tab[aria-selected='true'] {
+  background: var(--mf-accent-soft);
+  color: var(--mf-accent);
+}
+
+.mf-panel-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--mf-accent-ring);
+}
+
+.mf-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--mf-border);
+  flex-shrink: 0;
+}
+
+.mf-panel-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mf-panel-kind {
+  color: var(--mf-fg-subtle);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mf-panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.mf-section-label {
+  padding: 14px 14px 6px;
+  color: var(--mf-fg-subtle);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+/* ===========================================================================
+   Content tiles (block palette)
+   =========================================================================== */
+
+.mf-search {
+  padding: 10px 12px;
+}
+
+.mf-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.mf-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  aspect-ratio: 1 / 0.92;
+  padding: 8px 4px;
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg);
+  color: var(--mf-fg-muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  cursor: grab;
+  touch-action: none;
+  transition:
+    border-color 130ms ease,
+    color 130ms ease,
+    box-shadow 130ms ease,
+    transform 130ms ease;
+}
+
+.mf-tile:hover:not(:disabled) {
+  border-color: var(--mf-accent);
+  color: var(--mf-accent);
+  box-shadow: var(--mf-shadow-md);
+  transform: translateY(-1px);
+}
+
+/* A tool at its `usageLimit`. It keeps its tooltip — a tile that greys out with
+   no explanation reads as a bug rather than a rule. */
+.mf-tile:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mf-tile:focus-visible {
+  outline: none;
+  border-color: var(--mf-accent);
+  box-shadow: 0 0 0 3px var(--mf-accent-ring);
+}
+
+.mf-tile[data-dragging='true'] {
+  opacity: 0.35;
+  border-style: dashed;
+}
+
+.mf-tile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--mf-bg-sunken);
+  color: var(--mf-fg-muted);
+  transition:
+    background 130ms ease,
+    color 130ms ease;
+}
+
+.mf-tile-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mf-tile:hover .mf-tile-icon {
+  background: var(--mf-accent-soft);
+  color: var(--mf-accent);
+}
+
+/* ===========================================================================
+   Row layout presets
+   =========================================================================== */
+
+.mf-layouts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.mf-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg);
+  color: var(--mf-fg-muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 130ms ease,
+    color 130ms ease,
+    box-shadow 130ms ease;
+}
+
+.mf-layout:hover {
+  border-color: var(--mf-accent);
+  color: var(--mf-accent);
+  box-shadow: var(--mf-shadow-md);
+}
+
+.mf-layout:focus-visible {
+  outline: none;
+  border-color: var(--mf-accent);
+  box-shadow: 0 0 0 3px var(--mf-accent-ring);
+}
+
+.mf-layout-preview {
+  display: flex;
+  gap: 4px;
+  height: 30px;
+}
+
+.mf-layout-preview span {
+  border-radius: 4px;
+  background: var(--mf-bg-sunken);
+  border: 1px solid var(--mf-border);
+}
+
+.mf-layout:hover .mf-layout-preview span {
+  background: var(--mf-accent-soft);
+  border-color: color-mix(in srgb, var(--mf-accent) 30%, transparent);
+}
+
+.mf-layouts-compact {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 0 14px 14px;
+}
+
+.mf-layouts-compact .mf-layout {
+  padding: 7px;
+}
+
+.mf-layouts-compact .mf-layout-preview {
+  height: 22px;
+  gap: 3px;
+}
+
+.mf-layout[aria-pressed='true'] {
+  border-color: var(--mf-accent);
+  color: var(--mf-accent);
+  background: var(--mf-accent-softer);
+}
+
+.mf-layout[aria-pressed='true'] .mf-layout-preview span {
+  background: var(--mf-accent-soft);
+  border-color: color-mix(in srgb, var(--mf-accent) 45%, transparent);
+}
+
+/* ===========================================================================
+   Empty canvas
+   =========================================================================== */
+
+.mf-blank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 380px;
+  padding: 56px 32px;
+  text-align: center;
+  user-select: none;
+}
+
+.mf-blank-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  background: linear-gradient(140deg, var(--mf-accent), color-mix(in srgb, var(--mf-accent) 62%, #ec4899));
+  color: #fff;
+  /* The glow is what makes this read as an illustration rather than a stray
+     button on an otherwise blank page. */
+  box-shadow:
+    0 8px 24px color-mix(in srgb, var(--mf-accent) 38%, transparent),
+    0 2px 6px color-mix(in srgb, var(--mf-accent) 28%, transparent);
+}
+
+.mf-blank-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.mf-blank-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.mf-blank-body {
+  max-width: 330px;
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* Fixed slate values, not theme tokens: this sits on the email paper, whose
+   background is the document's. See the note on `.mf-col-empty`. */
+.mf-kbd {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 5px;
+  border: 1px solid #cbd5e1;
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: #f8fafc;
+  color: #475569;
+  font-family: var(--mf-ui-mono);
+  font-size: 11px;
+  line-height: 17px;
+  text-align: center;
+}
+
+.mf-blank-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.mf-blank-actions .mf-btn {
+  border-color: #d3d7e0;
+  background: #fff;
+  color: #334155;
+}
+
+.mf-blank-actions .mf-btn:hover {
+  border-color: var(--mf-accent);
+  color: var(--mf-accent);
+  background: #fff;
+}
+
+/* ===========================================================================
+   Quick insert
+   =========================================================================== */
+
+.mf-overlay-top {
+  align-items: flex-start;
+  padding-top: 12vh;
+}
+
+.mf-quick {
+  display: flex;
+  flex-direction: column;
+  width: min(460px, 100%);
+  max-height: 60vh;
+  overflow: hidden;
+  border-radius: var(--mf-radius);
+  background: var(--mf-bg);
+  box-shadow: var(--mf-shadow-lg);
+}
+
+.mf-quick-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid var(--mf-border);
+}
+
+.mf-quick-search svg {
+  position: absolute;
+  left: 20px;
+  width: 15px;
+  height: 15px;
+  color: var(--mf-fg-subtle);
+  pointer-events: none;
+}
+
+.mf-quick-search .mf-input {
+  height: 36px;
+  padding-left: 32px;
+  border-color: transparent;
+  font-size: 13.5px;
+}
+
+.mf-quick-search .mf-input:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.mf-quick-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px;
+  margin: 0;
+  list-style: none;
+}
+
+.mf-quick-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--mf-radius-sm);
+  cursor: pointer;
+}
+
+.mf-quick-item[data-active='true'] {
+  background: var(--mf-accent-soft);
+}
+
+.mf-quick-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: var(--mf-bg-sunken);
+  color: var(--mf-fg-muted);
+}
+
+.mf-quick-item[data-active='true'] .mf-quick-icon {
+  background: var(--mf-accent);
+  color: var(--mf-accent-contrast);
+}
+
+.mf-quick-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mf-quick-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.mf-quick-group {
+  color: var(--mf-fg-subtle);
+  font-size: 11px;
+}
+
+/* ===========================================================================
+   Canvas
+   =========================================================================== */
+
+.mf-canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 24px 120px;
+}
+
+.mf-canvas {
+  position: relative;
+  width: 100%;
+  min-height: 180px;
+  border-radius: 4px;
+  box-shadow: var(--mf-shadow-paper);
+  transition: max-width 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile framing in the design view — the same document, narrowed. */
+.mf-canvas[data-device='mobile'] {
+  max-width: 375px !important;
+  border-radius: 18px;
+  overflow: hidden;
+  outline: 8px solid color-mix(in srgb, var(--mf-fg) 82%, transparent);
+  outline-offset: 0;
+}
+
+/* A block marked "hide on mobile" is dimmed on the design canvas rather than
+   hidden. Actually hiding it would make it unselectable — you could turn the
+   setting on and have no way to turn it back off. The preview iframe and the
+   exported HTML do hide it for real; this is the editor's job, not the email's. */
+.mf-canvas .mf-hide-sm {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
+.mf-canvas[data-device='mobile'] .mf-hide-sm {
+  opacity: 0.22;
+}
+
+.mf-add-section {
+  width: 100%;
+  flex-shrink: 0;
+  border-style: dashed;
+  color: var(--mf-fg-muted);
+  background: transparent;
+}
+
+.mf-add-section:hover:not(:disabled) {
+  border-style: solid;
+  border-color: var(--mf-accent);
+  color: var(--mf-accent);
+  background: var(--mf-accent-softer);
+}
+
+/* --- section / row / column --------------------------------------------- */
+
+.mf-section {
+  position: relative;
+  transition: outline-color 120ms ease;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+}
+
+.mf-section:hover {
+  outline-color: color-mix(in srgb, var(--mf-accent) 22%, transparent);
+}
+
+.mf-section[data-selected='true'] {
+  outline: 2px solid var(--mf-accent);
+  outline-offset: -2px;
+}
+
+.mf-row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  outline: 1px dashed transparent;
+  outline-offset: -1px;
+  transition: outline-color 120ms ease;
+}
+
+.mf-row:hover {
+  outline-color: color-mix(in srgb, var(--mf-accent) 35%, transparent);
+}
+
+.mf-row[data-selected='true'] {
+  outline: 2px solid var(--mf-accent);
+  outline-offset: -2px;
+}
+
+.mf-col {
+  position: relative;
+  min-height: 44px;
+  min-width: 0;
+  transition: background 120ms ease;
+}
+
+.mf-col[data-over='true'] {
+  background: var(--mf-accent-soft);
+  outline: 1px dashed var(--mf-accent);
+  outline-offset: -1px;
+}
+
+/*
+ * Accent-tinted rather than theme-tinted, and deliberately so: this chrome sits
+ * *inside* the email paper, whose background is the document's, not the editor's.
+ * Using `--mf-bg-subtle` here painted a dark box onto white paper in dark mode.
+ * Any chrome rendered inside `.mf-canvas` has to be palette-independent.
+ */
+.mf-col-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 76px;
+  margin: 8px;
+  border: 1.5px dashed color-mix(in srgb, var(--mf-accent) 38%, transparent);
+  border-radius: var(--mf-radius-md);
+  /* An opaque-ish surface of its own, not a tint of the paper: on a dark section
+     background a tint left this label at roughly 2:1 contrast. The placeholder
+     never reaches the output, so covering the section colour here is free. */
+  background: rgb(255 255 255 / 86%);
+  color: var(--mf-accent);
+  font-size: 11.5px;
+  font-weight: 500;
+  text-align: center;
+  /* Chrome text should not be selectable — double-clicking it looked like a
+     broken inline edit. */
+  user-select: none;
+  transition:
+    border-color 130ms ease,
+    color 130ms ease,
+    background 130ms ease;
+}
+
+.mf-col-empty svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+}
+
+.mf-col[data-over='true'] .mf-col-empty {
+  border-color: var(--mf-accent);
+  border-style: solid;
+  background: rgb(255 255 255 / 96%);
+}
+
+/* --- block -------------------------------------------------------------- */
+
+.mf-node {
+  position: relative;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  transition: outline-color 120ms ease;
+}
+
+.mf-node:hover {
+  outline-color: color-mix(in srgb, var(--mf-accent) 45%, transparent);
+}
+
+.mf-node[data-selected='true'] {
+  outline: 2px solid var(--mf-accent);
+  outline-offset: -2px;
+  z-index: 2;
+}
+
+.mf-node[data-dragging='true'] {
+  opacity: 0.4;
+}
+
+.mf-node[contenteditable='true'],
+.mf-node [contenteditable='true']:focus {
+  outline-color: var(--mf-accent);
+}
+
+/* The floating vertical action strip, on the block's outer edge. */
+.mf-node-tools {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 3px;
+  border-radius: var(--mf-radius-sm) 0 0 var(--mf-radius-sm);
+  background: var(--mf-accent);
+  box-shadow: var(--mf-shadow-md);
+}
+
+/* Sections and rows carry four actions, which is too tall as a column. Only the
+   selected node shows a strip and only one node is selected at a time, so these
+   can share the corner with the block strip. */
+.mf-node-tools[data-orientation='horizontal'] {
+  flex-direction: row;
+  border-radius: 0 0 0 var(--mf-radius-sm);
+}
+
+.mf-node-tool:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mf-node-tool:disabled:hover {
+  background: transparent;
+}
+
+.mf-node-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--mf-accent-contrast);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.mf-node-tool svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mf-node-tool:hover {
+  background: rgb(255 255 255 / 24%);
+}
+
+.mf-node-tool:focus-visible {
+  outline: 2px solid var(--mf-bg);
+  outline-offset: -1px;
+}
+
+.mf-node-tool[data-handle='true'] {
+  cursor: grab;
+  touch-action: none;
+}
+
+/*
+ * Type label as a tab above the block, left-aligned — the action strip is on the
+ * right, so the two never collide. Anchoring it *below* the block instead (the
+ * obvious way to avoid clipping at the top of the canvas) makes it overlap
+ * whatever block follows, which is worse.
+ */
+.mf-node-label {
+  position: absolute;
+  top: -18px;
+  left: -1px;
+  z-index: 5;
+  padding: 1px 7px;
+  border-radius: var(--mf-radius-sm) var(--mf-radius-sm) 0 0;
+  background: var(--mf-accent);
+  color: var(--mf-accent-contrast);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 17px;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* --- display conditions & repeats ---------------------------------------- */
+
+/* A conditional node is outlined, never hidden. Hiding it would make it
+   unselectable, and a condition you cannot select is one you cannot remove. The
+   preview and every export do hide it for real. */
+.mf-canvas [data-conditional] {
+  outline: 1px dashed color-mix(in srgb, var(--mf-accent) 55%, transparent);
+  outline-offset: -1px;
+}
+
+/* Condition false against the sample data: dim the *content*, never the chrome —
+   the action strip and the badge have to stay legible so the condition can be
+   changed or removed. */
+.mf-node[data-cond-off] .mf-node-body,
+.mf-row[data-cond-off] > .mf-col,
+.mf-section[data-cond-off] > .mf-row {
+  opacity: 0.4;
+}
+
+/* Inside the node's own box, never overhanging it.
+   The top-right belongs to the action strip and the top-left to the type label
+   and inline toolbar; a badge that overhangs the bottom lands on the *next*
+   node's chrome. Staying inside means a badge can only ever overlap its own
+   content — the content already being dimmed.
+   A row and its only block have almost the same box, so the corner is chosen by
+   node kind (below) rather than shared, or the two chips sit on top of each
+   other. Palette-independent, like everything else on email paper. */
+.mf-cond-badge {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  z-index: 5;
+  max-width: calc(100% - 40px);
+  padding: 1px 7px;
+  overflow: hidden;
+  border-radius: var(--mf-radius-sm);
+  background: var(--mf-accent);
+  color: var(--mf-accent-contrast);
+  font-family: var(--mf-ui-mono);
+  font-size: 10px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Rows take the opposite bottom corner from their blocks; sections go to the
+   top, where they only ever meet their own type label — and only while
+   selected, when the Inspector is showing the same condition anyway. */
+.mf-row > .mf-cond-badge {
+  right: auto;
+  left: 2px;
+}
+
+.mf-section > .mf-cond-badge {
+  top: 2px;
+  right: auto;
+  bottom: auto;
+  left: 2px;
+}
+
+/* Condition false against the sample data: same badge, muted, so "this exists"
+   and "this would not render right now" are one glance apart. */
+.mf-cond-badge[data-off] {
+  background: var(--mf-fg-subtle);
+}
+
+/* --- inline rich-text toolbar -------------------------------------------- */
+
+/* Shares the accent chrome of the action strip: this sits on the white email
+   paper, so it must not pick up the editor's light/dark surface colours. It
+   takes the top-left slot the type label normally occupies. */
+.mf-inline-toolbar {
+  position: absolute;
+  top: -30px;
+  left: -1px;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 3px;
+  border-radius: var(--mf-radius-sm) var(--mf-radius-sm) 0 0;
+  background: var(--mf-accent);
+  box-shadow: var(--mf-shadow-md);
+  user-select: none;
+}
+
+.mf-rt-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--mf-accent-contrast);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.mf-rt-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mf-rt-button:hover {
+  background: rgb(255 255 255 / 24%);
+}
+
+.mf-rt-button[data-active='true'] {
+  background: rgb(255 255 255 / 90%);
+  color: var(--mf-accent);
+}
+
+.mf-rt-button:focus-visible {
+  outline: 2px solid var(--mf-bg);
+  outline-offset: -1px;
+}
+
+.mf-rt-sep {
+  width: 1px;
+  height: 14px;
+  margin: 0 2px;
+  background: rgb(255 255 255 / 32%);
+}
+
+/* The popover does carry editor surface colours — it holds real form controls,
+   and they have to match every other input in the app. */
+.mf-rt-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 260px;
+  padding: 10px;
+  border: 1px solid var(--mf-border-strong);
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg);
+  box-shadow: var(--mf-shadow-lg);
+  cursor: default;
+}
+
+.mf-rt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mf-rt-popover-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* --- drop indicator ----------------------------------------------------- */
+
+.mf-drop-indicator {
+  position: relative;
+  height: 0;
+  z-index: 4;
+}
+
+.mf-drop-indicator::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: -1.5px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--mf-accent);
+  box-shadow: 0 0 0 3px var(--mf-accent-soft);
+}
+
+.mf-drop-indicator::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mf-accent);
+}
+
+.mf-drag-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-accent);
+  color: var(--mf-accent-contrast);
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: var(--mf-shadow-lg);
+  pointer-events: none;
+  cursor: grabbing;
+}
+
+.mf-drag-ghost svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ===========================================================================
+   Fields
+   =========================================================================== */
+
+.mf-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+}
+
+.mf-group {
+  border-top: 1px solid var(--mf-border);
+}
+
+.mf-group:first-child {
+  border-top: 0;
+}
+
+.mf-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--mf-fg);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.mf-group-head:hover {
+  color: var(--mf-accent);
+}
+
+.mf-group-head svg {
+  width: 14px;
+  height: 14px;
+  color: var(--mf-fg-subtle);
+  transition: transform 160ms ease;
+}
+
+.mf-group-head[aria-expanded='true'] svg {
+  transform: rotate(90deg);
+}
+
+.mf-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 14px 16px;
+}
+
+.mf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.mf-field-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mf-label {
+  color: var(--mf-fg-muted);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.mf-help {
+  color: var(--mf-fg-subtle);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.mf-input,
+.mf-select,
+.mf-textarea {
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--mf-border-strong);
+  border-radius: var(--mf-radius-sm);
+  background: var(--mf-bg);
+  color: var(--mf-fg);
+  font: inherit;
+  font-size: 12.5px;
+  transition:
+    border-color 130ms ease,
+    box-shadow 130ms ease;
+}
+
+.mf-textarea {
+  height: auto;
+  min-height: 84px;
+  padding: 8px 10px;
+  resize: vertical;
+  font-family: var(--mf-ui-mono);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.mf-select {
+  padding-right: 26px;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentcolor 50%),
+    linear-gradient(135deg, currentcolor 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) calc(50% - 1px),
+    calc(100% - 9px) calc(50% - 1px);
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.mf-input::placeholder,
+.mf-textarea::placeholder {
+  color: var(--mf-fg-subtle);
+}
+
+.mf-input:hover,
+.mf-select:hover,
+.mf-textarea:hover {
+  border-color: var(--mf-fg-subtle);
+}
+
+.mf-input:focus,
+.mf-select:focus,
+.mf-textarea:focus {
+  outline: none;
+  border-color: var(--mf-accent);
+  box-shadow: 0 0 0 3px var(--mf-accent-ring);
+}
+
+.mf-input[type='search'] {
+  padding-left: 30px;
+  background-image: none;
+}
+
+.mf-search-wrap {
+  position: relative;
+}
+
+.mf-search-wrap svg {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translateY(-50%);
+  color: var(--mf-fg-subtle);
+  pointer-events: none;
+}
+
+/* --- colour ------------------------------------------------------------- */
+
+.mf-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mf-color-swatch {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: 1px solid var(--mf-border-strong);
+  border-radius: var(--mf-radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  /* Chequerboard shows through when the value is empty (= inherit). */
+  background-image:
+    linear-gradient(45deg, var(--mf-bg-sunken) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--mf-bg-sunken) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--mf-bg-sunken) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--mf-bg-sunken) 75%);
+  background-size: 8px 8px;
+  background-position:
+    0 0,
+    0 4px,
+    4px -4px,
+    -4px 0;
+}
+
+.mf-color-swatch input[type='color'] {
+  position: absolute;
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.mf-color-swatch[data-empty='false']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--mf-swatch);
+}
+
+.mf-color-swatch:focus-within {
+  border-color: var(--mf-accent);
+  box-shadow: 0 0 0 3px var(--mf-accent-ring);
+}
+
+.mf-color .mf-input {
+  font-family: var(--mf-ui-mono);
+  font-size: 12px;
+}
+
+/* --- spacing ------------------------------------------------------------ */
+
+.mf-spacing {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.mf-spacing-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mf-spacing-cell .mf-input {
+  height: 30px;
+  padding: 0 6px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.mf-spacing-cell span {
+  color: var(--mf-fg-subtle);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* --- toggle ------------------------------------------------------------- */
+
+.mf-toggle {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--mf-border-strong);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.mf-toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--mf-shadow-sm);
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mf-toggle[aria-checked='true'] {
+  background: var(--mf-accent);
+}
+
+.mf-toggle[aria-checked='true']::after {
+  transform: translateX(16px);
+}
+
+.mf-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--mf-accent-ring);
+}
+
+/* --- range -------------------------------------------------------------- */
+
+.mf-range {
+  width: 100%;
+  height: 18px;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mf-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--mf-border-strong);
+}
+
+.mf-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border: 2px solid var(--mf-bg);
+  border-radius: 50%;
+  background: var(--mf-accent);
+  box-shadow: var(--mf-shadow-sm);
+}
+
+.mf-range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--mf-border-strong);
+}
+
+.mf-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--mf-bg);
+  border-radius: 50%;
+  background: var(--mf-accent);
+}
+
+.mf-range:focus-visible {
+  outline: none;
+}
+
+.mf-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--mf-accent-ring);
+}
+
+.mf-value {
+  color: var(--mf-fg);
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- segmented field (align) -------------------------------------------- */
+
+.mf-seg {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--mf-radius-sm);
+  background: var(--mf-bg-sunken);
+}
+
+.mf-seg button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 26px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--mf-fg-muted);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 130ms ease,
+    color 130ms ease;
+}
+
+.mf-seg button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mf-seg button:hover:not([aria-pressed='true']) {
+  color: var(--mf-fg);
+}
+
+.mf-seg button[aria-pressed='true'] {
+  background: var(--mf-bg);
+  color: var(--mf-fg);
+  box-shadow: var(--mf-shadow-sm);
+}
+
+.mf-seg button:focus-visible {
+  outline: 2px solid var(--mf-accent);
+  outline-offset: -1px;
+}
+
+/* --- list field --------------------------------------------------------- */
+
+.mf-list-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg-subtle);
+}
+
+.mf-list-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mf-list-item-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* --- image field -------------------------------------------------------- */
+
+.mf-image-preview {
+  display: block;
+  width: 100%;
+  max-height: 132px;
+  object-fit: contain;
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg-sunken);
+}
+
+/* --- merge-var autocomplete --------------------------------------------- */
+
+.mf-var-wrap {
+  position: relative;
+}
+
+/* The input plus its special-link picker. `position: relative` is on this row,
+   not on the input's own wrapper, so the menu spans the full width. */
+.mf-link-field {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.mf-link-field .mf-var-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.mf-link-pick {
+  flex-shrink: 0;
+}
+
+.mf-link-pick svg {
+  transform: rotate(90deg);
+}
+
+.mf-var-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+  margin: 0;
+  border: 1px solid var(--mf-border-strong);
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg);
+  box-shadow: var(--mf-shadow-lg);
+  list-style: none;
+}
+
+.mf-var-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: var(--mf-radius-sm);
+  cursor: pointer;
+  font-family: var(--mf-ui-mono);
+  font-size: 12px;
+}
+
+.mf-var-item[data-active='true'] {
+  background: var(--mf-accent);
+  color: var(--mf-accent-contrast);
+}
+
+.mf-var-sample {
+  color: var(--mf-fg-subtle);
+  font-size: 10.5px;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mf-var-item[data-active='true'] .mf-var-sample {
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* ===========================================================================
+   Preview / code / lint
+   =========================================================================== */
+
+.mf-preview-wrap {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  padding: 28px 24px;
+}
+
+.mf-preview-device {
+  height: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: var(--mf-shadow-paper);
+  transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mf-preview-device[data-device='mobile'] {
+  border-radius: 22px;
+  outline: 9px solid color-mix(in srgb, var(--mf-fg) 82%, transparent);
+}
+
+.mf-preview-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+.mf-code-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--mf-border);
+  background: var(--mf-bg);
+  flex-shrink: 0;
+}
+
+.mf-code {
+  margin: 0;
+  padding: 16px 18px;
+  overflow: auto;
+  color: var(--mf-fg);
+  font-family: var(--mf-ui-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre;
+}
+
+.mf-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 12px 0;
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--mf-warn) 30%, transparent);
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-warn-soft);
+  color: var(--mf-fg);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.mf-note svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: var(--mf-warn);
+}
+
+.mf-note[data-level='error'] {
+  border-color: color-mix(in srgb, var(--mf-danger) 30%, transparent);
+  background: var(--mf-danger-soft);
+}
+
+.mf-note[data-level='error'] svg {
+  color: var(--mf-danger);
+}
+
+.mf-note[data-level='ok'] {
+  border-color: color-mix(in srgb, var(--mf-success) 30%, transparent);
+  background: color-mix(in srgb, var(--mf-success) 10%, transparent);
+}
+
+.mf-note[data-level='ok'] svg {
+  color: var(--mf-success);
+}
+
+.mf-lint-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px;
+  border-bottom: 1px solid var(--mf-border);
+  background: var(--mf-bg);
+  flex-shrink: 0;
+}
+
+.mf-lint-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  margin: 0;
+  list-style: none;
+}
+
+.mf-lint-item {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--mf-border);
+  border-left-width: 3px;
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg);
+  color: var(--mf-fg);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    box-shadow 130ms ease,
+    border-color 130ms ease;
+}
+
+.mf-lint-item:hover:not(:disabled) {
+  box-shadow: var(--mf-shadow-md);
+}
+
+.mf-lint-item:disabled {
+  cursor: default;
+}
+
+.mf-lint-item[data-level='error'] {
+  border-left-color: var(--mf-danger);
+}
+
+.mf-lint-item[data-level='warn'] {
+  border-left-color: var(--mf-warn);
+}
+
+.mf-lint-item[data-level='info'] {
+  border-left-color: var(--mf-info);
+}
+
+.mf-lint-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 5px;
+}
+
+.mf-lint-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.mf-lint-item[data-level='error'] .mf-lint-icon {
+  background: var(--mf-danger-soft);
+  color: var(--mf-danger);
+}
+
+.mf-lint-item[data-level='warn'] .mf-lint-icon {
+  background: var(--mf-warn-soft);
+  color: var(--mf-warn);
+}
+
+.mf-lint-item[data-level='info'] .mf-lint-icon {
+  background: var(--mf-info-soft);
+  color: var(--mf-info);
+}
+
+.mf-lint-message {
+  flex: 1;
+  min-width: 0;
+}
+
+.mf-lint-id {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--mf-bg-sunken);
+  color: var(--mf-fg-subtle);
+  font-family: var(--mf-ui-mono);
+  font-size: 10px;
+}
+
+.mf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--mf-bg-sunken);
+  color: var(--mf-fg-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 19px;
+  font-variant-numeric: tabular-nums;
+}
+
+.mf-badge[data-level='error'] {
+  background: var(--mf-danger-soft);
+  color: var(--mf-danger);
+}
+
+.mf-badge[data-level='warn'] {
+  background: var(--mf-warn-soft);
+  color: var(--mf-warn);
+}
+
+.mf-badge[data-level='info'] {
+  background: var(--mf-info-soft);
+  color: var(--mf-info);
+}
+
+.mf-badge-count {
+  min-width: 18px;
+  justify-content: center;
+  padding: 0 5px;
+  background: var(--mf-accent);
+  color: var(--mf-accent-contrast);
+  line-height: 17px;
+}
+
+.mf-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 20px;
+  color: var(--mf-fg-subtle);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.mf-empty svg {
+  width: 26px;
+  height: 26px;
+  opacity: 0.6;
+}
+
+.mf-empty-ok svg {
+  color: var(--mf-success);
+  opacity: 1;
+}
+
+/* ===========================================================================
+   Dialog
+   =========================================================================== */
+
+.mf-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgb(16 24 40 / 55%);
+  backdrop-filter: blur(2px);
+}
+
+.mf-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(680px, 100%);
+  max-height: 100%;
+  padding: 20px;
+  overflow-y: auto;
+  border-radius: var(--mf-radius);
+  background: var(--mf-bg);
+  box-shadow: var(--mf-shadow-lg);
+}
+
+.mf-dialog h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.mf-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.mf-report {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg-subtle);
+  font-size: 12px;
+}
+
+.mf-report-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mf-meter {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--mf-bg-sunken);
+}
+
+.mf-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--mf-success);
+  transition: width 220ms ease;
+}
+
+.mf-dropzone {
+  padding: 20px;
+  border: 1.5px dashed var(--mf-border-strong);
+  border-radius: var(--mf-radius-md);
+  background: var(--mf-bg-subtle);
+  color: var(--mf-fg-muted);
+  font-size: 12px;
+  text-align: center;
+  transition:
+    border-color 130ms ease,
+    background 130ms ease;
+}
+
+.mf-dropzone[data-over='true'] {
+  border-color: var(--mf-accent);
+  background: var(--mf-accent-softer);
+  color: var(--mf-accent);
+}

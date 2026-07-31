@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": false,
+    "types": [],
+    // Resolve `mailforge` to the built package, exactly as a consumer would.
+    "baseUrl": ".",
+    "paths": {
+      "mailforge": ["../../dist/index.d.ts"],
+      "mailforge/core": ["../../dist/core/index.d.ts"]
+    }
+  },
+  "include": ["check.js"]
+}

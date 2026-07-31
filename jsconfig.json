@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    // No ambient test types: pulling in vitest's globals drags jsdom's untyped
+    // JS into the program, and `checkJs` then reports hundreds of errors from
+    // node_modules. Tests import from 'vitest' explicitly instead.
+    "types": ["node"],
+    "maxNodeModuleJsDepth": 0
+  },
+  "include": ["src/**/*.js", "src/**/*.jsx", "tests/**/*.js", "tests/**/*.jsx"],
+  "exclude": ["node_modules", "dist", "examples", "tests/types"]
+}

@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - run: npm ci
+
+      # tsc --checkJs over the JSDoc. This is the type safety net for a JS
+      # codebase, so it runs before anything else.
+      - run: npm run typecheck
+
+      - run: npm run lint
+
+      - run: npm test
+
+      - run: npm run build
+
+      # The published .d.ts files get their own strict, consumer-style check.
+      - run: npm run verify:types
+
+      # Catches the classic "works locally, broken on install": a wrong exports
+      # map or types that don't resolve for the consumer's module system.
+      #
+      # `no-resolution` is ignored because it only fires for node10 (EOL 2021,
+      # and `engines` requires Node >=20) and for the `./style.css` entrypoint,
+      # which is a stylesheet and has no types by design. Every other rule —
+      # false-esm, false-cjs, cjs-resolves-to-esm — stays on.
+      - run: npx publint
+      - run: npm run verify:attw
+
+      - name: Confirm React is not bundled
+        run: |
+          if grep -qE "^import \{[^}]*\} from \"react\"" dist/index.js; then
+            echo "React is externalized (expected)"
+          fi
+          if grep -q "react/cjs/react.production" dist/index.js dist/index.cjs; then
+            echo "::error::React appears to be bundled into dist/"
+            exit 1
+          fi
