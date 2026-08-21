@@ -2,7 +2,7 @@
  * Structural rules — the things that are wrong with the document itself rather
  * than with a client's rendering of it.
  *
- * @module mailforge/core/lint/rules/structure
+ * @module mailkiln/core/lint/rules/structure
  */
 
 import { eachBlock } from '../walk.js'
@@ -69,7 +69,7 @@ export const structureRule = {
         id: 'structure',
         level: 'info',
         message: 'No subject line set.',
-        hint: 'mailforge uses it for the <title>, the export filename and the component name.',
+        hint: 'mailkiln uses it for the <title>, the export filename and the component name.',
       })
     }
 

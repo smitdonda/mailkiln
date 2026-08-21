@@ -2,7 +2,7 @@
  * Environment probe, in its own module so `registry.js` and `schema.js` can both
  * use it without importing each other.
  *
- * @module mailforge/core/env
+ * @module mailkiln/core/env
  */
 
 /**

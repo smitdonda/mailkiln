@@ -5,7 +5,7 @@
  * which is the point: built-ins are just the first nine consumers of the public
  * `defineBlock` API.
  *
- * @module mailforge/core/blocks/shared
+ * @module mailkiln/core/blocks/shared
  */
 
 import { spacing } from '../schema.js'
@@ -53,7 +53,7 @@ export const BACKGROUND_FIELD = {
 /**
  * Hide this block on narrow screens.
  *
- * The renderer has always emitted a `.mf-hide-sm{display:none}` rule and nothing
+ * The renderer has always emitted a `.mk-hide-sm{display:none}` rule and nothing
  * ever set the class — a capability with no way to reach it. This is the switch.
  *
  * @type {FieldDef}
@@ -167,7 +167,7 @@ export function mjCommonAttrs(props, options = {}) {
  * @returns {string} an attribute string with a leading space, or ''
  */
 export function editableAttr(ctx, propKey) {
-  return ctx.options?.editable ? ` data-mf-edit="${propKey}"` : ''
+  return ctx.options?.editable ? ` data-mk-edit="${propKey}"` : ''
 }
 
 /**

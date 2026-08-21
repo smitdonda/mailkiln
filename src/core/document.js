@@ -7,7 +7,7 @@
  * the DOM, React or dnd-kit — which is exactly why drag & drop is unit-testable
  * without a browser: the drop handler is a one-line call into `moveBlock`.
  *
- * @module mailforge/core/document
+ * @module mailkiln/core/document
  */
 
 import {

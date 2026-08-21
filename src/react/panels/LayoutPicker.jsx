@@ -1,7 +1,7 @@
 /**
  * The layout thumbnail grid.
  *
- * @module mailforge/react/panels/LayoutPicker
+ * @module mailkiln/react/panels/LayoutPicker
  */
 
 import { useI18n } from '../i18n/index.jsx'
@@ -18,19 +18,19 @@ export function LayoutPicker({ active, onPick, compact = false }) {
   const t = useI18n()
 
   return (
-    <div className={compact ? 'mf-layouts mf-layouts-compact' : 'mf-layouts'}>
+    <div className={compact ? 'mk-layouts mk-layouts-compact' : 'mk-layouts'}>
       {ROW_PRESETS.map((preset) => (
         <button
           key={preset.id}
           type="button"
-          className="mf-layout"
+          className="mk-layout"
           data-row-preset={preset.id}
           aria-pressed={active === preset.id}
           aria-label={t(`rows.${preset.id}`)}
           title={t(`rows.${preset.id}`)}
           onClick={() => onPick(preset.widths, preset.id)}
         >
-          <span className="mf-layout-preview" aria-hidden="true">
+          <span className="mk-layout-preview" aria-hidden="true">
             {preset.widths.map((width, index) => (
               <span key={index} style={{ flexGrow: width }} />
             ))}

@@ -1,7 +1,7 @@
 /**
  * PILLAR 1 — eject to React Email code.
  *
- * This emitter is the reason mailforge exists. Every other visual builder hands
+ * This emitter is the reason mailkiln exists. Every other visual builder hands
  * you a proprietary JSON blob and a rendered HTML string; this one hands you a
  * component you own, in the framework the ecosystem already uses, with your merge
  * variables as real props.
@@ -17,7 +17,7 @@
  *
  * The formatter is ~90 lines and has no `prettier` dependency, on purpose.
  *
- * @module mailforge/core/render/jsx
+ * @module mailkiln/core/render/jsx
  */
 
 import { getBlockDef } from '../registry.js'

@@ -10,7 +10,7 @@
  * Only the *selected* node shows a strip, and one node is selected at a time, so
  * these can share the top-right corner with the block strip without colliding.
  *
- * @module mailforge/react/panels/NodeToolbar
+ * @module mailkiln/react/panels/NodeToolbar
  */
 
 import { useI18n } from '../i18n/index.jsx'
@@ -53,12 +53,12 @@ export function NodeToolbar({
 
   return (
     <>
-      <span className="mf-node-label">{label}</span>
-      <div className="mf-node-tools" data-orientation="horizontal">
+      <span className="mk-node-label">{label}</span>
+      <div className="mk-node-tools" data-orientation="horizontal">
         {onMoveUp ? (
           <button
             type="button"
-            className="mf-node-tool"
+            className="mk-node-tool"
             disabled={!canMoveUp}
             aria-label={`${t('canvas.moveUp')} ${label}`}
             title={t('canvas.moveUp')}
@@ -70,7 +70,7 @@ export function NodeToolbar({
         {onMoveDown ? (
           <button
             type="button"
-            className="mf-node-tool"
+            className="mk-node-tool"
             disabled={!canMoveDown}
             aria-label={`${t('canvas.moveDown')} ${label}`}
             title={t('canvas.moveDown')}
@@ -81,7 +81,7 @@ export function NodeToolbar({
         ) : null}
         <button
           type="button"
-          className="mf-node-tool"
+          className="mk-node-tool"
           aria-label={`${t('canvas.duplicate')} ${label}`}
           title={t('canvas.duplicate')}
           onClick={run(onDuplicate)}
@@ -90,7 +90,7 @@ export function NodeToolbar({
         </button>
         <button
           type="button"
-          className="mf-node-tool"
+          className="mk-node-tool"
           aria-label={`${t('canvas.delete')} ${label}`}
           title={t('canvas.delete')}
           onClick={run(onDelete)}

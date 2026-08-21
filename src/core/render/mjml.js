@@ -7,10 +7,10 @@
  * `mjml-browser` yourself on this output. This is stated in the README too,
  * because a surprise here is a bad surprise.
  *
- * Structural note: MJML's `mj-section` *is* a row of columns, so one mailforge
+ * Structural note: MJML's `mj-section` *is* a row of columns, so one mailkiln
  * Section with three Rows becomes three `mj-section`s inside one `mj-wrapper`.
  *
- * @module mailforge/core/render/mjml
+ * @module mailkiln/core/render/mjml
  */
 
 import { getBlockDef } from '../registry.js'

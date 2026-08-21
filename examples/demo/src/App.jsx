@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { MailForge } from 'mailforge'
-import { createDocument, defineBlock, defineVars, normalize, spacing } from 'mailforge/core'
-import 'mailforge/style.css'
+import { MailKiln } from 'mailkiln'
+import { createDocument, defineBlock, defineVars, normalize, spacing } from 'mailkiln/core'
+import 'mailkiln/style.css'
 
 // --- pillar 4: one sample object drives autocomplete, lint, preview and the
 // typed export. Try typing {{ in any text field.
@@ -11,7 +11,7 @@ const vars = defineVars({
   sample: {
     user: { name: 'Smit', email: 'smit@example.com' },
     order: {
-      id: 'MF-2291',
+      id: 'MK-2291',
       total: '£133.99',
       eta: 'Thursday',
       items: [{ title: 'Mechanical keyboard', price: '£129.00' }],
@@ -109,7 +109,7 @@ export function App() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 16, gap: 12 }}>
       <div style={{ flex: 1, minHeight: 0 }}>
-        <MailForge
+        <MailKiln
           value={doc}
           onChange={setDoc}
           vars={vars}
@@ -126,7 +126,7 @@ export function App() {
           }}
           onSendTest={async (payload) => {
             // A real app POSTs this to its own endpoint, which talks to
-            // SendGrid/Resend/SES. mailforge only renders — it has no transport.
+            // SendGrid/Resend/SES. mailkiln only renders — it has no transport.
             await new Promise((resolve) => setTimeout(resolve, 600))
             // eslint-disable-next-line no-console
             console.log('send test', payload)

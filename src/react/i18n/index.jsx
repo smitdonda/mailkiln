@@ -3,7 +3,7 @@
  * English fallback. An i18n library would be a bigger dependency than the whole
  * feature.
  *
- * @module mailforge/react/i18n
+ * @module mailkiln/react/i18n
  */
 
 import { createContext, useContext, useMemo } from 'react'

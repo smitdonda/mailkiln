@@ -2,7 +2,7 @@
  * Hindi strings. Any key missing here falls back to English, so a partial
  * translation is always safe to ship.
  *
- * @module mailforge/react/i18n/hi
+ * @module mailkiln/react/i18n/hi
  */
 
 /** @type {Record<string, string>} */

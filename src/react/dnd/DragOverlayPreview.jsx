@@ -5,7 +5,7 @@
  * means every block renders twice for the whole drag, and a 600px-wide email
  * block under the cursor obscures the drop indicator you are trying to aim.
  *
- * @module mailforge/react/dnd/DragOverlayPreview
+ * @module mailkiln/react/dnd/DragOverlayPreview
  */
 
 import { getBlockDef } from '../../core/index.js'
@@ -23,7 +23,7 @@ export function DragOverlayPreview({ data }) {
   const Icon = BLOCK_ICONS[String(def?.icon ?? '')] ?? IconDrag
 
   return (
-    <div className="mf-drag-ghost">
+    <div className="mk-drag-ghost">
       <Icon />
       <span>{label}</span>
     </div>

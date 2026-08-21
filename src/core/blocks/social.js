@@ -7,7 +7,7 @@
  * icons; leave it empty and you get styled text links, which render everywhere.
  * The MJML target uses `mj-social`, whose icons MJML itself supplies.
  *
- * @module mailforge/core/blocks/social
+ * @module mailkiln/core/blocks/social
  */
 
 import { defineBlock } from '../registry.js'

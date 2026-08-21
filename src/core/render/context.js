@@ -2,7 +2,7 @@
  * The render context every block renderer receives. One builder, four targets,
  * so `ctx.settings` and `ctx.resolve` mean the same thing everywhere.
  *
- * @module mailforge/core/render/context
+ * @module mailkiln/core/render/context
  */
 
 import { DEFAULT_SETTINGS } from '../schema.js'

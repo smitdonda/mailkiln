@@ -2,7 +2,7 @@
  * Shared traversal for lint rules, so twelve rules don't each hand-roll four
  * nested loops.
  *
- * @module mailforge/core/lint/walk
+ * @module mailkiln/core/lint/walk
  */
 
 /** @typedef {import('../types.js').EmailDocument} EmailDocument */

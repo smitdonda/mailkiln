@@ -1,11 +1,11 @@
 /**
- * mailforge data model — types only, no runtime code.
+ * mailkiln data model — types only, no runtime code.
  *
- * This file is the single readable description of every shape mailforge passes
+ * This file is the single readable description of every shape mailkiln passes
  * around, and it is what `tsc` reads to emit the `.d.ts` files we publish. If
  * you change a shape, change it here first.
  *
- * @module mailforge/core/types
+ * @module mailkiln/core/types
  */
 
 // ---------------------------------------------------------------------------
@@ -261,7 +261,7 @@
  * @property {boolean} [void] True if the block renders nothing editable inline (spacer, divider).
  * @property {string} [inlineEdit] Prop key that canvas inline editing writes to. The
  *   block's `render.html` must mark the element holding that value with
- *   `data-mf-edit` when `ctx.options.editable` is set — only the block knows which
+ *   `data-mk-edit` when `ctx.options.editable` is set — only the block knows which
  *   element that is, and guessing at it corrupts the prop.
  */
 
@@ -400,7 +400,7 @@
 
 /**
  * What `importFromHtml` returns. The report is the honest part: it says what
- * mailforge understood and what it kept as raw markup.
+ * mailkiln understood and what it kept as raw markup.
  *
  * @typedef {object} ImportReport
  * @property {EmailDocument} document

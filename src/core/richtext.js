@@ -21,7 +21,7 @@
  * importer. It borrows the importer's parser adapter rather than requiring a
  * DOM: built-in `DOMParser` in a browser, injected `linkedom` in Node.
  *
- * @module mailforge/core/richtext
+ * @module mailkiln/core/richtext
  */
 
 import { getParser, parseStyleAttribute } from './import/parseAdapter.js'

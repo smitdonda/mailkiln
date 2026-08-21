@@ -6,12 +6,12 @@
  * turned into JSX — and the whole point of this feature is that it *becomes* JSX.
  * Path + operator + value is the largest shape that survives that trip.
  *
- * @module mailforge/react/panels/VisibilityFields
+ * @module mailkiln/react/panels/VisibilityFields
  */
 
 import { useId } from 'react'
 import { CONDITION_OPS, evaluateCondition, normalizeCondition } from '../../core/index.js'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { VarInput } from '../fields/VarInput.jsx'
 
@@ -26,7 +26,7 @@ const OP_ORDER = ['truthy', 'falsy', 'notEmpty', 'empty', 'eq', 'ne', 'gt', 'lt'
  */
 export function VisibilityFields({ node }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const id = useId()
   const condition = node.showIf ?? null
   const on = Boolean(condition)
@@ -46,14 +46,14 @@ export function VisibilityFields({ node }) {
   const matches = complete && evaluateCondition(condition, store.vars?.sample ?? {})
 
   return (
-    <div className="mf-fields">
-      <div className="mf-field mf-field-row">
-        <span className="mf-label" id={`${node.id}-showif`}>
+    <div className="mk-fields">
+      <div className="mk-field mk-field-row">
+        <span className="mk-label" id={`${node.id}-showif`}>
           {t('visibility.conditional')}
         </span>
         <button
           type="button"
-          className="mf-toggle"
+          className="mk-toggle"
           role="switch"
           aria-checked={on}
           aria-labelledby={`${node.id}-showif`}
@@ -63,8 +63,8 @@ export function VisibilityFields({ node }) {
 
       {on ? (
         <>
-          <div className="mf-field">
-            <label className="mf-label" htmlFor={`${id}-path`}>
+          <div className="mk-field">
+            <label className="mk-label" htmlFor={`${id}-path`}>
               {t('visibility.showWhen')}
             </label>
             <VarInput
@@ -75,13 +75,13 @@ export function VisibilityFields({ node }) {
             />
           </div>
 
-          <div className="mf-field">
-            <label className="mf-label" htmlFor={`${id}-op`}>
+          <div className="mk-field">
+            <label className="mk-label" htmlFor={`${id}-op`}>
               {t('visibility.operator')}
             </label>
             <select
               id={`${id}-op`}
-              className="mf-select"
+              className="mk-select"
               value={op}
               onChange={(event) => update({ op: /** @type {any} */ (event.target.value) })}
             >
@@ -94,13 +94,13 @@ export function VisibilityFields({ node }) {
           </div>
 
           {needsValue ? (
-            <div className="mf-field">
-              <label className="mf-label" htmlFor={`${id}-value`}>
+            <div className="mk-field">
+              <label className="mk-label" htmlFor={`${id}-value`}>
                 {t('visibility.value')}
               </label>
               <input
                 id={`${id}-value`}
-                className="mf-input"
+                className="mk-input"
                 type="text"
                 value={String(condition?.value ?? '')}
                 onChange={(event) => update({ value: event.target.value })}
@@ -112,7 +112,7 @@ export function VisibilityFields({ node }) {
               are guessing whether the condition you just wrote is the one you
               meant, and the canvas deliberately shows conditional nodes either
               way. */}
-          <p className="mf-help">
+          <p className="mk-help">
             {complete
               ? matches
                 ? t('visibility.previewShown')
@@ -134,7 +134,7 @@ export function VisibilityFields({ node }) {
  */
 export function RepeatFields({ row }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const id = useId()
   const repeat = row.repeat ?? null
   const on = Boolean(repeat)
@@ -149,14 +149,14 @@ export function RepeatFields({ row }) {
   const count = Array.isArray(items) ? items.length : null
 
   return (
-    <div className="mf-fields">
-      <div className="mf-field mf-field-row">
-        <span className="mf-label" id={`${row.id}-repeat`}>
+    <div className="mk-fields">
+      <div className="mk-field mk-field-row">
+        <span className="mk-label" id={`${row.id}-repeat`}>
           {t('visibility.repeat')}
         </span>
         <button
           type="button"
-          className="mf-toggle"
+          className="mk-toggle"
           role="switch"
           aria-checked={on}
           aria-labelledby={`${row.id}-repeat`}
@@ -166,8 +166,8 @@ export function RepeatFields({ row }) {
 
       {on ? (
         <>
-          <div className="mf-field">
-            <label className="mf-label" htmlFor={`${id}-path`}>
+          <div className="mk-field">
+            <label className="mk-label" htmlFor={`${id}-path`}>
               {t('visibility.repeatOver')}
             </label>
             <VarInput
@@ -177,22 +177,22 @@ export function RepeatFields({ row }) {
               onChange={(path) => update({ path })}
             />
           </div>
-          <div className="mf-field">
-            <label className="mf-label" htmlFor={`${id}-as`}>
+          <div className="mk-field">
+            <label className="mk-label" htmlFor={`${id}-as`}>
               {t('visibility.repeatAs')}
             </label>
             <input
               id={`${id}-as`}
-              className="mf-input"
+              className="mk-input"
               type="text"
               value={String(repeat?.as ?? '')}
               onChange={(event) => update({ as: event.target.value })}
             />
-            <span className="mf-help">
+            <span className="mk-help">
               {t('visibility.repeatHint', { as: String(repeat?.as || 'item') })}
             </span>
           </div>
-          <p className="mf-help">
+          <p className="mk-help">
             {count === null
               ? t('visibility.repeatNoArray')
               : t('visibility.repeatCount', { count: String(count) })}

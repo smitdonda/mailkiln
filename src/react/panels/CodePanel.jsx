@@ -3,9 +3,9 @@
  *
  * Showing the emitted component live, next to the design, is the whole pitch: the
  * visual editor is an authoring convenience, and the code is the artefact you keep.
- * Copy or download it and mailforge is out of your dependency tree.
+ * Copy or download it and mailkiln is out of your dependency tree.
  *
- * @module mailforge/react/panels/CodePanel
+ * @module mailkiln/react/panels/CodePanel
  */
 
 import { useMemo, useState } from 'react'
@@ -15,7 +15,7 @@ import {
   exportFilenames,
   toComponentName,
 } from '../../core/index.js'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { IconCheck, IconCopy, IconDownload, IconWarning } from '../icons.jsx'
 
@@ -34,7 +34,7 @@ const TABS = [
  */
 export function CodePanel() {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const [tab, setTab] = useState(
     /** @type {keyof import('../../core/types.js').ExportBundle} */ ('jsx'),
   )
@@ -70,8 +70,8 @@ export function CodePanel() {
 
   return (
     <>
-      <div className="mf-code-bar">
-        <div className="mf-segmented" role="tablist" aria-label={t('view.code')}>
+      <div className="mk-code-bar">
+        <div className="mk-segmented" role="tablist" aria-label={t('view.code')}>
           {TABS.map((entry) => (
             <button
               key={entry.id}
@@ -84,26 +84,26 @@ export function CodePanel() {
             </button>
           ))}
         </div>
-        <span className="mf-spacer-flex" />
-        <button type="button" className="mf-btn mf-btn-sm" onClick={copy}>
+        <span className="mk-spacer-flex" />
+        <button type="button" className="mk-btn mk-btn-sm" onClick={copy}>
           {copied ? <IconCheck /> : <IconCopy />}
           {copied ? t('code.copied') : t('code.copy')}
         </button>
-        <button type="button" className="mf-btn mf-btn-sm mf-btn-outline" onClick={download}>
+        <button type="button" className="mk-btn mk-btn-sm mk-btn-outline" onClick={download}>
           <IconDownload />
           {t('code.download')}
         </button>
       </div>
 
       {tab === 'mjml' ? (
-        <p className="mf-note">
+        <p className="mk-note">
           <IconWarning />
           {t('code.mjmlNote')}
         </p>
       ) : null}
 
-      <div className="mf-scroll">
-        <pre className="mf-code">
+      <div className="mk-scroll">
+        <pre className="mk-code">
           <code>{source}</code>
         </pre>
       </div>

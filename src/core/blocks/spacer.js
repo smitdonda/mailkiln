@@ -2,7 +2,7 @@
  * Spacer block. The `height` attribute is not redundant with the CSS height —
  * Outlook uses the attribute and ignores the style, so both are emitted.
  *
- * @module mailforge/core/blocks/spacer
+ * @module mailkiln/core/blocks/spacer
  */
 
 import { defineBlock } from '../registry.js'

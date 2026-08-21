@@ -1,7 +1,7 @@
 /**
  * Send a test email.
  *
- * mailforge does not send anything: it has no backend, no account and no ESP
+ * mailkiln does not send anything: it has no backend, no account and no ESP
  * integration, and adding one would undo the "self-hosted, works offline" promise.
  * What it does is render the message and hand it to the consumer's `onSendTest`
  * handler — the same shape as `onImageUpload`. Your app owns the transport.
@@ -9,12 +9,12 @@
  * The dialog surfaces lint errors before sending, because a test send is the last
  * moment where "no unsubscribe link" is cheap to fix.
  *
- * @module mailforge/react/panels/SendTestDialog
+ * @module mailkiln/react/panels/SendTestDialog
  */
 
 import { useMemo, useState } from 'react'
 import { renderToHtml, renderToText } from '../../core/index.js'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { IconAlert, IconCheckCircle, IconSend } from '../icons.jsx'
 
@@ -64,7 +64,7 @@ export function parseRecipients(value) {
  */
 export function SendTestDialog({ onClose }) {
   const t = useI18n()
-  const { store, onSendTest } = useMailForgeContext()
+  const { store, onSendTest } = useMailKilnContext()
   const [to, setTo] = useState('')
   const [subject, setSubject] = useState(
     () => `[Test] ${store.doc.settings.subject || 'Untitled email'}`,
@@ -96,24 +96,24 @@ export function SendTestDialog({ onClose }) {
   }
 
   return (
-    <div className="mf-overlay" role="presentation" onClick={onClose}>
+    <div className="mk-overlay" role="presentation" onClick={onClose}>
       <div
-        className="mf-dialog"
+        className="mk-dialog"
         role="dialog"
         aria-modal="true"
         aria-label={t('sendTest.title')}
         onClick={(event) => event.stopPropagation()}
       >
         <h2>{t('sendTest.title')}</h2>
-        <p className="mf-help">{t('sendTest.hint')}</p>
+        <p className="mk-help">{t('sendTest.hint')}</p>
 
-        <div className="mf-field">
-          <label className="mf-label" htmlFor="mf-send-to">
+        <div className="mk-field">
+          <label className="mk-label" htmlFor="mk-send-to">
             {t('sendTest.to')}
           </label>
           <input
-            id="mf-send-to"
-            className="mf-input"
+            id="mk-send-to"
+            className="mk-input"
             type="text"
             autoFocus
             value={to}
@@ -124,19 +124,19 @@ export function SendTestDialog({ onClose }) {
             }}
           />
           {recipients.invalid.length ? (
-            <span className="mf-help" style={{ color: 'var(--mf-danger)' }}>
+            <span className="mk-help" style={{ color: 'var(--mk-danger)' }}>
               {t('sendTest.invalid', { list: recipients.invalid.join(', ') })}
             </span>
           ) : null}
         </div>
 
-        <div className="mf-field">
-          <label className="mf-label" htmlFor="mf-send-subject">
+        <div className="mk-field">
+          <label className="mk-label" htmlFor="mk-send-subject">
             {t('sendTest.subject')}
           </label>
           <input
-            id="mf-send-subject"
-            className="mf-input"
+            id="mk-send-subject"
+            className="mk-input"
             type="text"
             value={subject}
             onChange={(event) => setSubject(event.target.value)}
@@ -144,33 +144,33 @@ export function SendTestDialog({ onClose }) {
         </div>
 
         {errors > 0 ? (
-          <p className="mf-note" data-level="error">
+          <p className="mk-note" data-level="error">
             <IconAlert />
             {t('sendTest.lintWarning', { count: errors })}
           </p>
         ) : null}
 
         {status === 'sent' ? (
-          <p className="mf-note" data-level="ok">
+          <p className="mk-note" data-level="ok">
             <IconCheckCircle />
             {t('sendTest.sent', { count: recipients.valid.length })}
           </p>
         ) : null}
 
         {status === 'error' ? (
-          <p className="mf-note" data-level="error">
+          <p className="mk-note" data-level="error">
             <IconAlert />
             {t('sendTest.failed', { message: error })}
           </p>
         ) : null}
 
-        <div className="mf-dialog-actions">
-          <button type="button" className="mf-btn" onClick={onClose}>
+        <div className="mk-dialog-actions">
+          <button type="button" className="mk-btn" onClick={onClose}>
             {status === 'sent' ? t('sendTest.done') : t('import.cancel')}
           </button>
           <button
             type="button"
-            className="mf-btn mf-btn-primary"
+            className="mk-btn mk-btn-primary"
             disabled={!canSend}
             onClick={send}
           >

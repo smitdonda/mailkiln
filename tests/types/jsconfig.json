@@ -11,11 +11,11 @@
     "noEmit": true,
     "skipLibCheck": false,
     "types": [],
-    // Resolve `mailforge` to the built package, exactly as a consumer would.
+    // Resolve `mailkiln` to the built package, exactly as a consumer would.
     "baseUrl": ".",
     "paths": {
-      "mailforge": ["../../dist/index.d.ts"],
-      "mailforge/core": ["../../dist/core/index.d.ts"]
+      "mailkiln": ["../../dist/index.d.ts"],
+      "mailkiln/core": ["../../dist/core/index.d.ts"]
     }
   },
   "include": ["check.js"]

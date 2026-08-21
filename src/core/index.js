@@ -1,12 +1,12 @@
 /**
- * `mailforge/core` — the headless half.
+ * `mailkiln/core` — the headless half.
  *
  * Zero React, zero DOM assumptions (the importer asks for a parser rather than
  * requiring one), so this runs in Node, a CLI, a CI job or a Lambda. An ESLint
  * rule fails the build if anything under `src/core/` imports React, which is what
  * keeps a future Vue or Svelte port cheap.
  *
- * @module mailforge/core
+ * @module mailkiln/core
  */
 
 // --- document model --------------------------------------------------------
@@ -123,7 +123,7 @@ export {
   tsTypeForRoot,
   emitPropsInterface,
   emitPropsJsdoc,
-  foreignVarsToMailforge,
+  foreignVarsToMailkiln,
   FOREIGN_VAR_SYNTAXES,
   VAR_PATTERN,
 } from './vars.js'
@@ -153,7 +153,12 @@ export {
 export { themeToCssVars, unknownThemeKeys, THEME_VARS } from './theme.js'
 
 // --- renderers (pillar 1) --------------------------------------------------
-export { renderToHtml, renderSectionsHtml, renderBlockHtml, renderBlockContent } from './render/html.js'
+export {
+  renderToHtml,
+  renderSectionsHtml,
+  renderBlockHtml,
+  renderBlockContent,
+} from './render/html.js'
 export {
   renderToJsx,
   renderToTsx,

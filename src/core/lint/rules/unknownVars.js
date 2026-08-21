@@ -6,7 +6,7 @@
  * recipient's inbox, and is the single most embarrassing email bug there is. One
  * declared sample object makes it a lint error instead.
  *
- * @module mailforge/core/lint/rules/unknownVars
+ * @module mailkiln/core/lint/rules/unknownVars
  */
 
 import { SPECIAL_LINK_PATHS } from '../../links.js'

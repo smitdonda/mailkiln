@@ -7,7 +7,7 @@
  * what to do. We never import it ourselves; a headless dependency that most
  * consumers don't need has no business in the install.
  *
- * @module mailforge/core/import/parseAdapter
+ * @module mailkiln/core/import/parseAdapter
  */
 
 /**
@@ -22,20 +22,20 @@ export function getParser(options = {}) {
   if (typeof DomParser === 'function') {
     return (html) => {
       const doc = new DomParser().parseFromString(html, 'text/html')
-      if (!doc) throw new Error('mailforge: DOMParser returned no document.')
+      if (!doc) throw new Error('mailkiln: DOMParser returned no document.')
       return doc
     }
   }
 
   throw new Error(
     [
-      'mailforge: no DOM parser available.',
+      'mailkiln: no DOM parser available.',
       'In a browser this uses the built-in DOMParser. In Node, install linkedom and pass it in:',
       '',
       "  import { parseHTML } from 'linkedom'",
       "  importFromHtml(html, { parseHtml: (h) => parseHTML(h).document })",
       '',
-      'linkedom is an optional peer dependency — mailforge never imports it for you.',
+      'linkedom is an optional peer dependency — mailkiln never imports it for you.',
     ].join('\n'),
   )
 }

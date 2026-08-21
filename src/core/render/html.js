@@ -6,7 +6,7 @@
  * which one. That is the difference between "generated HTML" and "HTML that
  * lands in Outlook 2016 looking like the design".
  *
- * @module mailforge/core/render/html
+ * @module mailkiln/core/render/html
  */
 
 import { getBlockDef } from '../registry.js'
@@ -33,7 +33,7 @@ import { evaluateCondition, repeatScopes } from '../conditions.js'
 /** @typedef {import('../types.js').Section} Section */
 
 /** Class applied to columns that should stack on narrow screens. */
-const STACK_CLASS = 'mf-stack'
+const STACK_CLASS = 'mk-stack'
 
 /**
  * Does a display condition remove this node from the output?
@@ -213,7 +213,7 @@ function renderSection(section, ctx) {
     tableOpen({
       width: '100%',
       align: 'center',
-      className: 'mf-container',
+      className: 'mk-container',
       style: {
         maxWidth: width,
         // A section's own background wins over the document's content colour.
@@ -291,7 +291,7 @@ function headStyles(ctx) {
     "a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;font-size:inherit !important;font-family:inherit !important;font-weight:inherit !important;line-height:inherit !important}",
     `@media only screen and (max-width:${mobileBreakpoint(width)}px){`,
     `.${STACK_CLASS}{display:block !important;width:100% !important;max-width:100% !important;padding-left:0 !important;padding-right:0 !important}`,
-    '.mf-container{width:100% !important}',
+    '.mk-container{width:100% !important}',
     `.${HIDE_CLASS}{display:none !important}`,
     ...mobileRules(ctx.doc),
     '}',
@@ -299,8 +299,8 @@ function headStyles(ctx) {
   if (ctx.settings.darkModeAware) {
     rules.push(
       '@media (prefers-color-scheme:dark){',
-      '.mf-dark-bg{background-color:#111827 !important}',
-      '.mf-dark-text{color:#f3f4f6 !important}',
+      '.mk-dark-bg{background-color:#111827 !important}',
+      '.mk-dark-text{color:#f3f4f6 !important}',
       '}',
     )
   }

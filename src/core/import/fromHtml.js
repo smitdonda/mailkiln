@@ -6,7 +6,7 @@
  * feature; silently dropping the 2 is how other tools produce a template that
  * looks right until you scroll.
  *
- * @module mailforge/core/import/fromHtml
+ * @module mailkiln/core/import/fromHtml
  */
 
 import { DEFAULT_SETTINGS, createBlock, createColumn, createDocument, createRow, createSection, spacing } from '../schema.js'
@@ -34,13 +34,13 @@ import {
  */
 export function importFromHtml(html, options = {}) {
   if (typeof html !== 'string' || html.trim() === '') {
-    throw new Error('mailforge: importFromHtml(html) needs a non-empty HTML string.')
+    throw new Error('mailkiln: importFromHtml(html) needs a non-empty HTML string.')
   }
 
   const parse = getParser(options)
   const dom = parse(html)
   const body = dom.body ?? dom.documentElement
-  if (!body) throw new Error('mailforge: parsed document has no body.')
+  if (!body) throw new Error('mailkiln: parsed document has no body.')
 
   /** @type {ImportWarning[]} */
   const warnings = []
@@ -231,8 +231,8 @@ function collectWarnings(dom, body, warnings) {
     warnings.push({
       code: 'style-block-dropped',
       message: hasMedia
-        ? 'The source <style> block (including its media queries) was not imported. mailforge regenerates responsive CSS on export.'
-        : 'The source <style> block was not imported — mailforge writes styles inline instead.',
+        ? 'The source <style> block (including its media queries) was not imported. mailkiln regenerates responsive CSS on export.'
+        : 'The source <style> block was not imported — mailkiln writes styles inline instead.',
     })
   }
 
@@ -261,7 +261,7 @@ function collectWarnings(dom, body, warnings) {
     warnings.push({
       code: 'mso-conditionals-dropped',
       message:
-        'Outlook conditional comments were dropped. mailforge emits its own on export, so the result should still render in Outlook — verify before sending.',
+        'Outlook conditional comments were dropped. mailkiln emits its own on export, so the result should still render in Outlook — verify before sending.',
     })
   }
 

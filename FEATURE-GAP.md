@@ -1,4 +1,4 @@
-# mailforge vs. react-email-editor (Unlayer) — gap analysis & roadmap
+# mailkiln vs. react-email-editor (Unlayer) — gap analysis & roadmap
 
 _Compared 31 July 2026 against Unlayer's live documentation, not from memory._
 
@@ -20,11 +20,11 @@ an exhaustive tool list, so two rows below are marked unverified.
 
 ---
 
-## 1. Where mailforge already wins
+## 1. Where mailkiln already wins
 
 Listing these so we don't accidentally "fix" them:
 
-| | mailforge | Unlayer |
+| | mailkiln | Unlayer |
 |---|---|---|
 | Ejects editable code | react-email JSX **and** TSX, deterministic | HTML only |
 | Imports existing HTML | yes, with a confidence report | no |
@@ -40,7 +40,7 @@ Listing these so we don't accidentally "fix" them:
 
 ## 2. What's missing
 
-| Capability | Unlayer | mailforge today | Verdict |
+| Capability | Unlayer | mailkiln today | Verdict |
 |---|---|---|---|
 | **Rich-text toolbar** (bold, italic, link, lists) | yes | **none** — you must type raw HTML | **Build — biggest gap** |
 | **Per-tool config** (enable/disable, order, usage limit, icon) | yes | no | **Build** |
@@ -92,26 +92,24 @@ whitelisted style set; unwrap everything else; drop empty nodes. Putting it in `
 headlessly testable and lets the HTML importer reuse it. Setting `styleWithCSS(false)` and
 `defaultParagraphSeparator = 'br'` gets `<b>` rather than styled spans.
 
-Hooks into the existing `data-mf-edit` mechanism in `SortableBlock.jsx` — no new editing model.
+Hooks into the existing `data-mk-edit` mechanism in `SortableBlock.jsx` — no new editing model.
 
-#### 2. Tool configuration
-**Modified:** `MailForge.jsx`, `panels/BlockPalette.jsx`, `panels/QuickInsert.jsx`
+## 4. Prioritised roadmap
 
-Mirror Unlayer's shape so their users can migrate without relearning:
+Based on what drives adoption, ordered by effort/impact:
 
-```jsx
-<MailForge tools={{ image: { enabled: false }, button: { position: 1, usageLimit: 1 } }} />
-```
+### Phase 1 — Quick wins (high impact, low risk)
 
-Filters and orders the palette; disables a tile with a reason tooltip once `usageLimit` is reached.
-Enforced in the UI, not in core — core stays policy-free.
+1. **Rich-text inline editing**
+   - When a text block is selected, render a minimal inline toolbar (Bold, Italic, Underline, Link, Unlink, Clear Formatting) positioned above it.
+   - Use `contentEditable` on the block's editable element only while selected, serialising back to the block's `text` property on blur / change.
+   - Preserves HTML formatting while typing.
 
-#### 3. Mobile controls
-**Modified:** `blocks/text.js`, `blocks/heading.js`, `render/html.js`, `panels/Inspector.jsx`
-
-`.mf-hide-sm` is **already emitted** by the HTML renderer and nothing ever applies it. Wire a
-`hideOnMobile` toggle to the block wrapper, add `mobileFontSize`, and emit per-block media-query rules
-in the `<style>` head keyed on a stable `mf-b-<id>` class. Adds a "Mobile" group to the Inspector.
+2. **Mobile visibility & font sizing**
+   - `.mk-hide-sm` is **already emitted** by the HTML renderer and nothing ever applies it. Wire a
+     `hideOnMobile: true` toggle to any block, section, or row.
+   - Add a `mobileFontSize` field to text/heading blocks that emits a `@media (max-width: 599px)` rule
+     in the `<style>` head keyed on a stable `mk-b-<id>` class. Adds a "Mobile" group to the Inspector.
 
 #### 4. Special links
 **New:** `src/react/fields/LinkField.jsx`

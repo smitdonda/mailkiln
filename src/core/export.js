@@ -2,10 +2,10 @@
  * One call that produces every output format.
  *
  * The JSON member matters as much as the code members: the document is plain
- * JSON that mailforge can always read back, so "export" here never means "the
+ * JSON that mailkiln can always read back, so "export" here never means "the
  * only copy is now in a format we control".
  *
- * @module mailforge/core/export
+ * @module mailkiln/core/export
  */
 
 import { settleDrafts } from './document.js'
@@ -60,6 +60,6 @@ export function exportFilenames(componentName) {
     html: `${kebab}.html`,
     mjml: `${kebab}.mjml`,
     text: `${kebab}.txt`,
-    json: `${kebab}.mailforge.json`,
+    json: `${kebab}.mailkiln.json`,
   }
 }

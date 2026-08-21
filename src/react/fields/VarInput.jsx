@@ -6,11 +6,11 @@
  * emitter turns into props. One declaration, four features; this is the part the
  * author actually touches.
  *
- * @module mailforge/react/fields/VarInput
+ * @module mailkiln/react/fields/VarInput
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 
 /** Matches an in-progress `{{partial` immediately before the caret. */
@@ -28,7 +28,7 @@ const OPEN_TAG = /\{\{\s*([A-Za-z0-9_$.[\]]*)$/
  */
 export function VarInput({ value, onChange, multiline, placeholder, id, vars = true }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const inputRef = useRef(/** @type {any} */ (null))
   const [query, setQuery] = useState(/** @type {string | null} */ (null))
   const [activeIndex, setActiveIndex] = useState(0)
@@ -124,20 +124,20 @@ export function VarInput({ value, onChange, multiline, placeholder, id, vars = t
   }
 
   return (
-    <div className="mf-var-wrap">
+    <div className="mk-var-wrap">
       {multiline ? (
-        <textarea className="mf-textarea" rows={4} {...shared} />
+        <textarea className="mk-textarea" rows={4} {...shared} />
       ) : (
-        <input className="mf-input" type="text" {...shared} />
+        <input className="mk-input" type="text" {...shared} />
       )}
       {open ? (
-        <ul className="mf-var-menu" role="listbox" aria-label={t('field.vars')}>
+        <ul className="mk-var-menu" role="listbox" aria-label={t('field.vars')}>
           {matches.map((path, index) => (
             <li
               key={path.path}
               role="option"
               aria-selected={index === activeIndex}
-              className="mf-var-item"
+              className="mk-var-item"
               data-active={index === activeIndex || undefined}
               onMouseEnter={() => setActiveIndex(index)}
               onMouseDown={(event) => {
@@ -147,7 +147,7 @@ export function VarInput({ value, onChange, multiline, placeholder, id, vars = t
               }}
             >
               <span>{path.path}</span>
-              <span className="mf-var-sample">{formatSample(path.sample)}</span>
+              <span className="mk-var-sample">{formatSample(path.sample)}</span>
             </li>
           ))}
         </ul>

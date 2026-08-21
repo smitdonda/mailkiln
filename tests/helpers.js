@@ -27,7 +27,7 @@ export const parseHtml = (/** @type {string} */ html) => parseHTML(html).documen
 export const sampleVars = defineVars({
   sample: {
     user: { name: 'Smit', email: 'smit@example.com' },
-    order: { id: 'MF-2291', total: 4200, eta: 'Thursday', items: [{ title: 'Keyboard' }] },
+    order: { id: 'MK-2291', total: 4200, eta: 'Thursday', items: [{ title: 'Keyboard' }] },
     unsubscribe_url: 'https://example.com/unsub',
   },
 })

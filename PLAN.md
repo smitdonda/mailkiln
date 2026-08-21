@@ -1,4 +1,4 @@
-# mailforge — a drag & drop email builder that ejects to code
+# mailkiln — a drag & drop email builder that ejects to code
 
 > **Language: plain JavaScript (ESM).** No `.ts`/`.tsx` source files anywhere in `src/`.
 > Types for consumers come from JSDoc, not from TypeScript source. See [Language decisions](#language-decisions).
@@ -22,14 +22,14 @@ The first draft of this plan was a competent but generic block builder — effec
 | `@maily-to/core` | 18k | Tiptap slash-command composer | not a drag-drop block canvas |
 | `easy-email-editor` | 14k | MJML visual editor | locked to AntD/Arco, heavy, stalling |
 
-### The gap mailforge fills
+### The gap mailkiln fills
 
 Two separate worlds that nobody has connected:
 
 - **The code world** (`react-email`, ~4M dl/wk) is where developers actually are — but it has **no visual editor**, so non-technical teammates can't touch it.
 - **The visual world** (Unlayer, Stripo, easy-email) locks every template into a **proprietary JSON blob**, ties you to a UI framework, and is **one-way only** — no builder on npm can import an existing email back into editable blocks.
 
-**mailforge is the bridge.** Design visually, eject to real `react-email` code you own forever. Import the templates you already have. It is the only email builder where the visual editor is an *authoring convenience*, not a *lock-in*.
+**mailkiln is the bridge.** Design visually, eject to real `react-email` code you own forever. Import the templates you already have. It is the only email builder where the visual editor is an *authoring convenience*, not a *lock-in*.
 
 ### The four pillars
 
@@ -49,10 +49,10 @@ The pillars are unchanged. Five things move:
 | 1 | Source files | `.ts` / `.tsx`, `strict: true` | `.js` / `.jsx`, ESM only. **JSDoc** (`@typedef`, `@param`, `@returns`) on every exported function and on the schema types. |
 | 2 | Editor experience | tsc | `jsconfig.json` with `"checkJs": true` + `"strict": true`. VS Code type-checks our JSDoc in-editor and `npm run typecheck` runs the same check in CI — we get most of TS's safety net with zero TS source. |
 | 3 | Types shipped to consumers | `vite-plugin-dts` | `vite-plugin-dts` needs TS, so it's dropped. `npm run types` runs `tsc -p jsconfig.dts.json` (`allowJs` + `emitDeclarationOnly`) to generate `dist/*.d.ts` **from the JSDoc**. tsc is a build-time devDependency only — no TypeScript enters the repo's source or its published dep tree. If a generated `.d.ts` is ever wrong, we hand-write that one file instead; correctness of the shipped types is non-negotiable, the generator is not. |
-| 4 | Runtime safety we no longer get for free | compiler | Compensate deliberately, and treat it as a feature rather than a patch: <br>• `defineBlock()` **validates its argument at registration** and throws a named, actionable error (`mailforge: block "countdown" is missing render.html`). Plugin authors in JS get a better failure mode than a silent TS-only error. <br>• `assertDocument(doc)` — a dev-only schema check behind `process.env.NODE_ENV !== 'production'`, so bad documents fail loudly at the seam instead of producing broken HTML. <br>• `normalize()` coerces and clamps defensively (already planned; now load-bearing). |
+| 4 | Runtime safety we no longer get for free | compiler | Compensate deliberately, and treat it as a feature rather than a patch: <br>• `defineBlock()` **validates its argument at registration** and throws a named, actionable error (`mailkiln: block "countdown" is missing render.html`). Plugin authors in JS get a better failure mode than a silent TS-only error. <br>• `assertDocument(doc)` — a dev-only schema check behind `process.env.NODE_ENV !== 'production'`, so bad documents fail loudly at the seam instead of producing broken HTML. <br>• `normalize()` coerces and clamps defensively (already planned; now load-bearing). |
 | 5 | Pillar 4, "type-safe merge vars" | `defineVars<T>({ sample })` — generic supplies the shape | **`defineVars({ sample })` — the sample object *is* the shape.** Paths are walked out of it at runtime, so autocomplete, lint and preview all work with no generic and no declaration step. This is genuinely simpler than the TS version. For the typed export we add an optional `types` map (`{ 'order.total': 'number' }`); when absent, types are inferred from the sample's `typeof`. |
 
-**Export language is a separate question from source language.** mailforge is written in JS, but a `react-email` consumer may well be on TS. So `renderToJsx(doc, { lang })` takes `'jsx' | 'tsx'`:
+**Export language is a separate question from source language.** mailkiln is written in JS, but a `react-email` consumer may well be on TS. So `renderToJsx(doc, { lang })` takes `'jsx' | 'tsx'`:
 
 - `lang: 'jsx'` (**default**) — plain `.jsx`, props destructured, no annotations, a JSDoc `@param` block carrying the merge-var shape so TS-less editors still autocomplete.
 - `lang: 'tsx'` — same tree plus the `Props` interface from `defineVars`. Costs us ~30 lines in the emitter and makes the eject pillar land for the whole `react-email` audience.
@@ -64,8 +64,8 @@ The Export menu shows both. Nothing about this puts TS in our source.
 ## Target public API
 
 ```jsx
-import { MailForge } from 'mailforge'
-import 'mailforge/style.css'
+import { MailKiln } from 'mailkiln'
+import 'mailkiln/style.css'
 
 const vars = defineVars({
   sample: { user: { name: 'Smit' }, order: { total: 4200 } },
@@ -73,7 +73,7 @@ const vars = defineVars({
   types: { 'order.total': 'number' },
 })
 
-<MailForge
+<MailKiln
   value={doc} onChange={setDoc}
   vars={vars}                        // powers autocomplete + lint + preview + typed export
   blocks={[countdownBlock]}          // custom blocks via defineBlock()
@@ -92,18 +92,18 @@ import {
   importFromHtml,                                          // round-trip
   lintDocument,                                            // deliverability
   defineBlock, defineVars, createDocument, assertDocument,
-} from 'mailforge/core'   // zero React, runs in Node/CLI/CI
+} from 'mailkiln/core'   // zero React, runs in Node/CLI/CI
 ```
 
 ### Locked-in decisions
 
 | Decision | Choice |
 |---|---|
-| npm name | **`mailforge`** — verified available (404). `@mailforge/core` also reserved for later. |
+| npm name | **`mailkiln`** — verified available (404). `@mailkiln/core` also reserved for later. |
 | Language | **Plain JavaScript, ESM**, JSDoc-documented, `.d.ts` generated for consumers |
-| Shape | Single React package + a React-free `mailforge/core` subpath |
+| Shape | Single React package + a React-free `mailkiln/core` subpath |
 | Drag & drop | `@dnd-kit/core@6.3.1` + `@dnd-kit/sortable@10.0.0` |
-| Styling | Tailwind v4.3, **`mf-` prefixed**, single `dist/style.css`, **no** UI framework dependency |
+| Styling | Tailwind v4.3, **`mk-` prefixed**, single `dist/style.css`, **no** UI framework dependency |
 | Exports | React Email JSX (+ optional TSX) · HTML+inline CSS · MJML · JSON · plain text |
 | Scope | Full-featured v1: nested sections, plugin API, theming, i18n, upload hook, undo/redo, merge tags |
 | License | MIT, no telemetry, no account, works offline |
@@ -113,7 +113,7 @@ import {
 1. **MJML export emits MJML *markup only*** — it does not bundle the `mjml` compiler (~30MB, Node-only, would wreck bundle size). Consumers run `mjml`/`mjml-browser` themselves. Documented prominently.
 2. **No CSS inliner dependency** (no `juice`). We own the schema, so the HTML renderer writes `style=""` inline at emit time. Zero deps, deterministic.
 3. **HTML import needs a DOM parser.** In the browser we use built-in `DOMParser` (zero deps). For Node, `linkedom@0.18` is an **optional** peer dep, injectable via a `parseHtml` adapter. The importer is browser-first.
-4. **`@react-email/components` is a peer dep of the *consumer's output*, not of mailforge.** We emit JSX text; we never import react-email ourselves. Keeps our dep tree tiny.
+4. **`@react-email/components` is a peer dep of the *consumer's output*, not of mailkiln.** We emit JSX text; we never import react-email ourselves. Keeps our dep tree tiny.
 5. **Node 20+, React 18/19**, ESM-first with a CJS fallback.
 6. **`typescript` is a devDependency** (declaration generation + `checkJs`). It never appears in `dependencies` or `peerDependencies`.
 
@@ -130,7 +130,7 @@ Email Template/
 ├─ .github/workflows/{ci,release}.yml
 ├─ src/
 │  ├─ index.js                      # React entry (public barrel)
-│  ├─ styles.css                    # Tailwind entry, mf- prefix, no preflight
+│  ├─ styles.css                    # Tailwind entry, mk- prefix, no preflight
 │  ├─ core/
 │  │  ├─ index.js                   # React-FREE entry — enforced by lint rule
 │  │  ├─ types.js                   # JSDoc @typedef hub: EmailDocument, Section, Row,
@@ -159,7 +159,7 @@ Email Template/
 │  │  └─ blocks/                    # text heading image button divider spacer
 │  │                                # social html videoThumb section row
 │  └─ react/
-│     ├─ MailForge.jsx  useMailForge.js  context.jsx
+│     ├─ MailKiln.jsx  useMailKiln.js  context.jsx
 │     ├─ dnd/                       # DndRoot PaletteDraggable SortableBlock
 │     │                             # DropIndicator DragOverlayPreview
 │     ├─ panels/                    # BlockPalette Canvas Inspector Toolbar
@@ -193,11 +193,11 @@ Email Template/
 5. `src/styles.css` — **critical:** do *not* import full Tailwind; its preflight would reset the consumer's page. Tailwind v4 layered + prefixed:
    ```css
    @layer theme, components, utilities;
-   @import "tailwindcss/theme.css"     layer(theme)     prefix(mf);
-   @import "tailwindcss/utilities.css" layer(utilities) prefix(mf);
-   @theme { --color-mf-accent: #6366f1; }
+   @import "tailwindcss/theme.css"     layer(theme)     prefix(mk);
+   @import "tailwindcss/utilities.css" layer(utilities) prefix(mk);
+   @theme { --color-mk-accent: #6366f1; }
    ```
-   All chrome lives under one `.mf-root` wrapper carrying theme vars + `data-mf-theme="light|dark"`.
+   All chrome lives under one `.mk-root` wrapper carrying theme vars + `data-mk-theme="light|dark"`.
 6. `eslint.config.js` (flat) — `eslint-plugin-react`, `react-hooks`, `eslint-plugin-jsdoc` (require JSDoc on exported functions), and the two rules that keep the architecture honest:
    - `no-restricted-imports` banning `react`/`react-dom` inside `src/core/`
    - `import/extensions: always` — ESM in Node needs the `.js` in relative specifiers, and without TS's rewriting nothing else catches a missing one
@@ -264,7 +264,7 @@ The hardest and most valuable piece. Build it as a scored inference pass, not a 
   | `<table>` → `<tr>` → N×`<td>` | Section / Row / Columns |
   | run of `<a>` wrapping icon images | Social |
 - **Lossless fallback is the core guarantee:** anything unmatched becomes a **raw `html` block** with its markup preserved. Import can degrade in editability but must **never lose content**. This is what makes it trustworthy where competitors don't even try.
-- Reverse-detect `{{tags}}` / `*|MERGE|*` / `%recipient:x%` into mailforge vars.
+- Reverse-detect `{{tags}}` / `*|MERGE|*` / `%recipient:x%` into mailkiln vars.
 - Return an **import report**: `{ document, confidence, unrecognized[], warnings[] }` so the UI can say "9 of 11 blocks fully editable, 2 kept as raw HTML."
 - `ImportDialog` in the UI: paste HTML or drop a `.html` file → preview → confirm.
 
@@ -299,7 +299,7 @@ The hardest and most valuable piece. Build it as a scored inference pass, not a 
 
 Panels: `BlockPalette` (grouped, searchable, includes custom blocks) · `Canvas` (selection outline, hover toolbar: drag/duplicate/delete) · `Inspector` (**auto-generated from each block's `schema`**, so custom blocks get a property panel free) · `Toolbar` (undo/redo ⌘Z/⇧⌘Z, desktop/mobile/text preview, import, export menu) · **`CodePanel`** (live JSX with a JSX/TSX toggle, copy and download — the pillar made visible) · `LintPanel` · `PreviewFrame` (`<iframe srcDoc>` at 600/375px — an iframe is **mandatory**, unsandboxed email HTML would leak styles into the host app).
 
-Also: `onImageUpload` wired to the image field with progress and a URL-input fallback; every string via `useI18n()` (ship `en` + `hi`); `theme` prop → CSS vars on `.mf-root`, plus `prefers-color-scheme` dark mode.
+Also: `onImageUpload` wired to the image field with progress and a URL-input fallback; every string via `useI18n()` (ship `en` + `hi`); `theme` prop → CSS vars on `.mk-root`, plus `prefers-color-scheme` dark mode.
 
 ### M6 — Tests, docs, release
 

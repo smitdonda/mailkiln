@@ -5,7 +5,7 @@
  * Run: node examples/showcase/build.mjs
  *
  * This is an example, not library code — it uses the same public API a consumer
- * would (`mailforge/core`), imported here from source.
+ * would (`mailkiln/core`), imported here from source.
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -44,7 +44,7 @@ const LINE = '#e6e8f0'
  * A tiny inline mark, so this file renders standalone with no network.
  *
  * Real templates should use a hosted PNG or JPEG: Gmail strips data URIs, and
- * mailforge's own linter flags SVG as unsupported. This is a showcase artefact,
+ * mailkiln's own linter flags SVG as unsupported. This is a showcase artefact,
  * not a pattern to copy.
  *
  * @type {string}

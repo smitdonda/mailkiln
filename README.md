@@ -1,14 +1,14 @@
-# mailforge
+# mailkiln
 
 **A drag & drop email builder that ejects to real React Email code.**
 
 Design visually. Export a component you own. Import the templates you already have.
 
-[![npm](https://img.shields.io/npm/v/mailforge.svg)](https://www.npmjs.com/package/mailforge)
-[![license](https://img.shields.io/npm/l/mailforge.svg)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/mailkiln.svg)](https://www.npmjs.com/package/mailkiln)
+[![license](https://img.shields.io/npm/l/mailkiln.svg)](./LICENSE)
 
 ```bash
-npm install mailforge
+npm install mailkiln
 ```
 
 ---
@@ -20,7 +20,7 @@ Email tooling is split in two, and nothing connects the halves.
 - **The code world** — [`react-email`](https://react.email) has ~4M downloads/week and is where developers already are. It has **no visual editor**, so a marketer or designer can't touch a template without a pull request.
 - **The visual world** — Unlayer, Stripo, easy-email. Every one of them stores your template as a **proprietary JSON blob**, requires a specific UI framework, and is **export-only**. None of them can read an email back in.
 
-mailforge is the bridge. The visual editor is an *authoring convenience*; the code is the artefact you keep. Delete mailforge from your `package.json` tomorrow and your templates still build.
+mailkiln is the bridge. The visual editor is an *authoring convenience*; the code is the artefact you keep. Delete mailkiln from your `package.json` tomorrow and your templates still build.
 
 ## The four pillars
 
@@ -56,7 +56,7 @@ export function OrderShipped({ user, order }) {
   )
 }
 
-OrderShipped.PreviewProps = { user: { name: 'Smit' }, order: { id: 'MF-2291', total: 4200 } }
+OrderShipped.PreviewProps = { user: { name: 'Smit' }, order: { id: 'MK-2291', total: 4200 } }
 ```
 
 Output is **deterministic** — same document in, byte-identical file out, with stable prop order — so it diffs cleanly in your git history. Ask for `lang: 'tsx'` and you get the same tree plus a generated `Props` interface.
@@ -66,7 +66,7 @@ Output is **deterministic** — same document in, byte-identical file out, with 
 Paste any email HTML and get editable blocks back:
 
 ```js
-import { importFromHtml } from 'mailforge/core'
+import { importFromHtml } from 'mailkiln/core'
 
 const report = importFromHtml(html)
 // {
@@ -84,7 +84,7 @@ The guarantee is narrow and absolute:
 
 > **Import may degrade in editability. It never loses content.**
 
-Anything unrecognised becomes a raw `html` block holding its original markup. Mailchimp `*|FNAME|*`, Mailgun `%recipient:name%` and `%%NAME%%` tags are converted to mailforge variables on the way in. No other builder on npm attempts this.
+Anything unrecognised becomes a raw `html` block holding its original markup. Mailchimp `*|FNAME|*`, Mailgun `%recipient:name%` and `%%NAME%%` tags are converted to mailkiln variables on the way in. No other builder on npm attempts this.
 
 ### 3. Built-in deliverability linter
 
@@ -117,7 +117,7 @@ Declare your data once. The sample object *is* the schema:
 const vars = defineVars({
   sample: {
     user: { name: 'Smit', email: 'smit@example.com' },
-    order: { id: 'MF-2291', total: 4200 },
+    order: { id: 'MK-2291', total: 4200 },
   },
 })
 ```
@@ -130,9 +130,9 @@ That one object drives four things: `{{` autocomplete in every text field, the `
 
 ```jsx
 import { useState } from 'react'
-import { MailForge } from 'mailforge'
-import { createDocument, defineVars } from 'mailforge/core'
-import 'mailforge/style.css'
+import { MailKiln } from 'mailkiln'
+import { createDocument, defineVars } from 'mailkiln/core'
+import 'mailkiln/style.css'
 
 const vars = defineVars({
   sample: { user: { name: 'Smit' }, order: { total: 4200 } },
@@ -142,7 +142,7 @@ export function Editor() {
   const [doc, setDoc] = useState(() => createDocument())
 
   return (
-    <MailForge
+    <MailKiln
       value={doc}
       onChange={setDoc}
       vars={vars}
@@ -154,7 +154,7 @@ export function Editor() {
 }
 ```
 
-`<MailForge>` fills its container — give it a parent with a height.
+`<MailKiln>` fills its container — give it a parent with a height.
 
 ## Headless usage
 
@@ -166,7 +166,7 @@ import {
   importFromHtml,                                        // round-trip
   lintDocument,                                          // deliverability
   defineBlock, defineVars, createDocument, exportDocument,
-} from 'mailforge/core'
+} from 'mailkiln/core'
 ```
 
 An ESLint rule fails our build if anything under `src/core/` imports React, so this stays true.
@@ -181,7 +181,7 @@ importFromHtml(html, { parseHtml: (h) => parseHTML(h).document })
 Fail deliverability checks in CI:
 
 ```js
-const { errors, issues } = lintDocument(JSON.parse(await readFile('welcome.mailforge.json')), { vars })
+const { errors, issues } = lintDocument(JSON.parse(await readFile('welcome.mailkiln.json')), { vars })
 if (errors > 0) {
   console.error(issues.filter((i) => i.level === 'error'))
   process.exit(1)
@@ -200,7 +200,7 @@ if (errors > 0) {
 | `tools` | `Record<string, ToolConfig>` | Per-tool palette config — `enabled`, `position`, `usageLimit`. See below. |
 | `specialLinks` | `Array<{ label, value }>` | Replaces the built-in unsubscribe / preferences / view-in-browser entries. |
 | `theme` | `Theme` | Editor chrome colours. Applied as CSS variables on this instance only. |
-| `appearance` | `'light' \| 'dark' \| 'auto'` | Chrome appearance. Default `'auto'`. |
+| `appearance` | `'light' \| 'dark' \| 'auto'` | Chrome appearance. Default `'light'`; `'auto'` follows `prefers-color-scheme`. There is no in-editor toggle — your app owns the setting. |
 | `locale` | `string` | `'en'` or `'hi'` ship built in. |
 | `messages` | `Record<string, string>` | Per-key string overrides. |
 | `onImageUpload` | `(file: File) => Promise<string>` | Enables the upload button. A URL field is always available regardless. |
@@ -214,7 +214,7 @@ if (errors > 0) {
 Four ready-made documents ship with the headless core — Welcome, Receipt, Newsletter, Password reset. There is no template gallery in the editor UI; these are a **headless API** you can use as a starting `value`:
 
 ```js
-import { builtinTemplates, getTemplate } from 'mailforge/core'
+import { builtinTemplates, getTemplate } from 'mailkiln/core'
 
 const doc = getTemplate('welcome').create() // fresh node ids on every call
 ```
@@ -228,11 +228,11 @@ underline, link, bulleted list, numbered list, clear formatting**. The link butt
 popover that takes a URL *or* a merge variable — `{{unsubscribe_url}}` is a valid answer.
 List buttons are hidden on headings, because a `<ul>` inside an `<h2>` is invalid HTML.
 
-Editing happens in the element the block marked `data-mf-edit`, never the rendered block
+Editing happens in the element the block marked `data-mk-edit`, never the rendered block
 as a whole, and nothing reaches your document unfiltered:
 
 ```js
-import { normalizeRichText } from 'mailforge/core'
+import { normalizeRichText } from 'mailkiln/core'
 
 normalizeRichText('<div class="MsoNormal"><span style="font-weight:700">Hi</span></div>')
 // → '<b>Hi</b>'
@@ -250,7 +250,7 @@ the rest, both chosen so editing can never cost you content:
 
 It runs on every commit *and* on every paste, so pasting from Word or Google Docs — the
 main way `mso-` properties and nested tables get into an email template — lands as clean
-inline markup. It is idempotent, and it is in `mailforge/core`, so you can run it in Node
+inline markup. It is idempotent, and it is in `mailkiln/core`, so you can run it in Node
 over content that never went near the editor.
 
 It is built on `document.execCommand`. That API is deprecated but universally implemented,
@@ -265,7 +265,7 @@ The part where ejecting to *code* pays for itself.
 
 Every builder can hide a block conditionally. Unlayer does it by baking its customer's ESP
 template syntax into the exported HTML — `{% if user.isPro %}` — which welds the output to
-one platform. Because mailforge ejects a component, a condition can be a real expression
+one platform. Because mailkiln ejects a component, a condition can be a real expression
 instead:
 
 ```jsx
@@ -283,7 +283,7 @@ Your bundler type-checks it. Your ESP never sees it.
 a merge path, an operator, and a value when the operator needs one.
 
 ```js
-import { setCondition } from 'mailforge/core'
+import { setCondition } from 'mailkiln/core'
 doc = setCondition(doc, block.id, { path: 'order.total', op: 'gt', value: 100 })
 ```
 
@@ -295,7 +295,7 @@ cart. That bug earned its own operator.
 **Repeats** live on a row:
 
 ```js
-import { setRepeat } from 'mailforge/core'
+import { setRepeat } from 'mailkiln/core'
 doc = setRepeat(doc, row.id, { path: 'order.items', as: 'item' })
 ```
 
@@ -322,7 +322,7 @@ never reaches a saved template.
 ## Configuring the palette
 
 ```jsx
-<MailForge
+<MailKiln
   tools={{
     image: { enabled: false },        // gone from the palette
     button: { position: 0, usageLimit: 1 },
@@ -342,7 +342,7 @@ The shape is react-email-editor's, deliberately — a config from there works he
   that many. Quick insert drops the entry instead of greying it, because that list is
   arrow-key driven and a dead entry you can land on is worse than one that is absent.
 
-All of this is UI policy, so it lives in the React layer. `mailforge/core` stays
+All of this is UI policy, so it lives in the React layer. `mailkiln/core` stays
 policy-free: `insertBlock` always inserts, and a headless script is never bound by a palette
 rule someone set for their editor.
 
@@ -354,7 +354,7 @@ Every block has a **Mobile** group in the Inspector:
   Outlook and every desktop client still show it. On the design canvas it is *dimmed* rather
   than hidden, because a block you cannot select is a block whose setting you cannot undo.
 - **Mobile font size** — text, heading and button blocks only, scoped to that one block via a
-  stable `mf-b-<id>` class. Empty means "same as desktop".
+  stable `mk-b-<id>` class. Empty means "same as desktop".
 
 Both reach the ejected component too: `renderToJsx` writes the matching media query into
 `<Head>`, so a setting you turned on in the editor does not quietly stop working the moment
@@ -377,11 +377,11 @@ your data:
 This closes a genuinely silly gap: the `unsubscribe` lint rule told you the link was
 missing, and the editor gave you no way to add one short of knowing your ESP's merge-tag
 spelling. The picker and the unknown-variable rule read the same list from
-`mailforge/core`, so anything you can insert from the UI is guaranteed not to be reported as
+`mailkiln/core`, so anything you can insert from the UI is guaranteed not to be reported as
 undeclared.
 
 ```jsx
-<MailForge specialLinks={[{ label: 'Refer a friend', value: '{{referral_url}}' }]} />
+<MailKiln specialLinks={[{ label: 'Refer a friend', value: '{{referral_url}}' }]} />
 ```
 
 The list you pass replaces the defaults — pass `[]` to remove the picker.
@@ -400,10 +400,10 @@ Edit it inline in the toolbar, or in the Settings tab. With no name, `documentNa
 
 ## Sending a test
 
-mailforge does not send email. It has no backend, no account and no ESP integration — adding one would undo the "self-hosted, works offline" promise. What it does is render the message and hand it to you:
+mailkiln does not send email. It has no backend, no account and no ESP integration — adding one would undo the "self-hosted, works offline" promise. What it does is render the message and hand it to you:
 
 ```jsx
-<MailForge
+<MailKiln
   onSendTest={async ({ to, subject, html, text, document }) => {
     await fetch('/api/send-test', {
       method: 'POST',
@@ -420,7 +420,7 @@ The button only appears when the handler is provided. The dialog validates recip
 `defineBlock` is the same API the nine built-in blocks use — there is no privileged path. One definition gives you a palette entry, a generated Inspector, four render targets, a lint rule and HTML-import support:
 
 ```js
-import { defineBlock, spacing } from 'mailforge/core'
+import { defineBlock, spacing } from 'mailkiln/core'
 
 export const countdown = defineBlock({
   type: 'countdown',
@@ -460,13 +460,13 @@ Only `render.html` is required. Missing `jsx`, `mjml` or `text` renderers degrad
 Definitions are validated at registration with actionable errors:
 
 ```
-mailforge: block "countdown" schema[1] ("endsAt") edits "endsAt" but
+mailkiln: block "countdown" schema[1] ("endsAt") edits "endsAt" but
 `defaultProps.endsAt` does not exist. Add it so the field has a value to edit.
 ```
 
 ## Honest comparison
 
-| | mailforge | Unlayer (`react-email-editor`) | `easy-email-editor` | `@usewaypoint/email-builder` | `react-email` |
+| | mailkiln | Unlayer (`react-email-editor`) | `easy-email-editor` | `@usewaypoint/email-builder` | `react-email` |
 |---|---|---|---|---|---|
 | Visual drag & drop editor | ✅ nested, free-form | ✅ | ✅ | insert menus only | ❌ |
 | **Exports editable code** | ✅ react-email JSX/TSX | ❌ HTML only | ❌ HTML only | ❌ | n/a |
@@ -480,18 +480,18 @@ mailforge: block "countdown" schema[1] ("endsAt") edits "endsAt" but
 | Document format | plain JSON you own | proprietary | MJML JSON | proprietary | n/a |
 | Licence | MIT | proprietary tiers | MIT | MIT | MIT |
 
-Where the others are genuinely ahead: Unlayer has a template marketplace, AI copy tools and ESP integrations; easy-email has a mature MJML pipeline. mailforge has none of those, on purpose (see [Not in v1](#not-in-v1)).
+Where the others are genuinely ahead: Unlayer has a template marketplace, AI copy tools and ESP integrations; easy-email has a mature MJML pipeline. mailkiln has none of those, on purpose (see [Not in v1](#not-in-v1)).
 
 ## Known limitations
 
 Read these before adopting.
 
-**MJML export emits markup only.** mailforge does not bundle the MJML compiler — it is ~30MB and Node-only, and bundling it would wreck the install size of a browser library for a feature most consumers never use. Run `mjml` or `mjml-browser` on the output yourself.
+**MJML export emits markup only.** mailkiln does not bundle the MJML compiler — it is ~30MB and Node-only, and bundling it would wreck the install size of a browser library for a feature most consumers never use. Run `mjml` or `mjml-browser` on the output yourself.
 
 **HTML import is inference, not parsing.** There is no grammar for "an email"; every ESP nests tables differently and none of them label what a `<td>` means. So:
 
-- Source `<style>` blocks (including media queries) are **not** imported. mailforge writes styles inline and regenerates responsive CSS on export.
-- Outlook conditional comments are dropped; mailforge emits its own.
+- Source `<style>` blocks (including media queries) are **not** imported. mailkiln writes styles inline and regenerates responsive CSS on export.
+- Outlook conditional comments are dropped; mailkiln emits its own.
 - A layout table nested inside a column has no schema equivalent and is kept as a raw HTML block.
 - Everything unrecognised is preserved verbatim, never dropped. The report tells you exactly how much.
 
@@ -519,7 +519,7 @@ Every client-specific hack in the renderer has a comment saying which client it 
 
 ## Written in JavaScript
 
-mailforge is plain JavaScript (ESM) — there are no `.ts` files in `src/`. That is deliberate, and it does not mean untyped:
+mailkiln is plain JavaScript (ESM) — there are no `.ts` files in `src/`. That is deliberate, and it does not mean untyped:
 
 - Every export is documented with JSDoc, checked by `tsc --checkJs --strict` in CI.
 - Published `.d.ts` files are generated from that JSDoc, and a strict consumer-style fixture (`tests/types/check.js`) fails the build if they degrade into `any`.
@@ -531,7 +531,7 @@ TypeScript consumers are first-class: the shipped types are real, and `renderToJ
 
 Real-time collaboration, AI copy generation, a hosted template marketplace, Vue/Svelte ports.
 
-**ESP integrations specifically**: there are none and there will be none. mailforge never talks to SendGrid, Mailchimp, Resend or anyone else — `onSendTest` hands you a rendered message and your app owns the transport. That is the difference between a hook and an integration, and it is why this still works offline with no account.
+**ESP integrations specifically**: there are none and there will be none. mailkiln never talks to SendGrid, Mailchimp, Resend or anyone else — `onSendTest` hands you a rendered message and your app owns the transport. That is the difference between a hook and an integration, and it is why this still works offline with no account.
 
 `core/` is React-free so a port stays cheap later.
 

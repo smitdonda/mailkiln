@@ -1,5 +1,5 @@
 {
-  "name": "mailforge",
+  "name": "mailkiln",
   "version": "0.1.0",
   "description": "Drag & drop email builder that ejects to real React Email code. Visual editor, HTML import/round-trip, deliverability linter, typed merge variables. No lock-in.",
   "keywords": [
@@ -118,10 +118,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/smitdonda/mailforge.git"
+    "url": "git+https://github.com/smitdonda/mailkiln.git"
   },
   "bugs": {
-    "url": "https://github.com/smitdonda/mailforge/issues"
+    "url": "https://github.com/smitdonda/mailkiln/issues"
   },
-  "homepage": "https://github.com/smitdonda/mailforge#readme"
+  "homepage": "https://github.com/smitdonda/mailkiln#readme"
 }

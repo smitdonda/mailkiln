@@ -9,7 +9,7 @@
  *
  * Built-in blocks go through this exact function. There is no privileged path.
  *
- * @module mailforge/core/registry
+ * @module mailkiln/core/registry
  */
 
 import { isDev } from './env.js'
@@ -42,7 +42,7 @@ const registry = new Map()
  * @returns {Error}
  */
 function err(message) {
-  return new Error(`mailforge: ${message}`)
+  return new Error(`mailkiln: ${message}`)
 }
 
 /**
@@ -152,7 +152,7 @@ export function defineBlock(def) {
   // enough to notice, quietly enough not to brick the app.
   if (existing && existing !== frozen && isDev()) {
     console.warn(
-      `mailforge: block "${frozen.type}" was already registered — replacing it. If two different blocks share this type, rename one.`,
+      `mailkiln: block "${frozen.type}" was already registered — replacing it. If two different blocks share this type, rename one.`,
     )
   }
 

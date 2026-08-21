@@ -3,7 +3,7 @@
  * end for keyboard and touch users — also activatable with Enter/click, which
  * appends the block to the selected column.
  *
- * @module mailforge/react/dnd/PaletteDraggable
+ * @module mailkiln/react/dnd/PaletteDraggable
  */
 
 import { useDraggable } from '@dnd-kit/core'
@@ -30,7 +30,7 @@ export function PaletteDraggable({ def, onActivate, disabled, disabledReason }) 
     <button
       type="button"
       ref={setNodeRef}
-      className="mf-tile"
+      className="mk-tile"
       data-dragging={isDragging || undefined}
       // Not `data-block-type`: canvas blocks use that, and a shared attribute
       // makes every "find the block" selector ambiguous.
@@ -41,7 +41,7 @@ export function PaletteDraggable({ def, onActivate, disabled, disabledReason }) 
       {...attributes}
       {...listeners}
     >
-      <span className="mf-tile-icon">
+      <span className="mk-tile-icon">
         <Icon />
       </span>
       <span>{def.label}</span>

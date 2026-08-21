@@ -3,12 +3,12 @@
  * right — the arrangement every builder converges on, because it maps to
  * undo → look → ship.
  *
- * @module mailforge/react/panels/Toolbar
+ * @module mailkiln/react/panels/Toolbar
  */
 
 import { documentName, exportDocument, toComponentName } from '../../core/index.js'
 import { useI18n } from '../i18n/index.jsx'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import {
   IconCode,
   IconDesktop,
@@ -35,7 +35,10 @@ import {
  * @param {(bundle: import('../../core/types.js').ExportBundle) => void} [props.onExport]
  * @param {() => void} [props.onSendTest]
  * @param {'light' | 'dark'} props.appearance
- * @param {() => void} props.onToggleAppearance
+ * @param {() => void} [props.onToggleAppearance] Renders a dark-mode toggle.
+ *   `<MailKiln>` does not pass one — it takes its appearance from the `appearance`
+ *   prop, so the surrounding app stays in charge of light vs dark. Pass a handler
+ *   here if you are assembling your own layout and want the button back.
  * @returns {import('react').ReactElement}
  */
 export function Toolbar({
@@ -50,7 +53,7 @@ export function Toolbar({
   onToggleAppearance,
 }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const { errors, warnings } = store.lint
   const issues = errors + warnings
 
@@ -68,11 +71,11 @@ export function Toolbar({
   ])
 
   return (
-    <div className="mf-toolbar">
+    <div className="mk-toolbar">
       {/* The template's own name, edited in place. Tagged for history coalescing
           so typing a title is one undo step, not one per keystroke. */}
       <input
-        className="mf-title"
+        className="mk-title"
         type="text"
         value={store.doc.settings.name ?? ''}
         placeholder={t('toolbar.untitled')}
@@ -81,12 +84,12 @@ export function Toolbar({
         onChange={(event) => store.patchSettings({ name: event.target.value }, 'name')}
       />
 
-      <span className="mf-toolbar-sep" />
+      <span className="mk-toolbar-sep" />
 
-      <div className="mf-toolbar-group">
+      <div className="mk-toolbar-group">
         <button
           type="button"
-          className="mf-btn mf-btn-icon"
+          className="mk-btn mk-btn-icon"
           disabled={!store.canUndo}
           aria-label={t('toolbar.undo')}
           title={`${t('toolbar.undo')} (Ctrl+Z)`}
@@ -96,7 +99,7 @@ export function Toolbar({
         </button>
         <button
           type="button"
-          className="mf-btn mf-btn-icon"
+          className="mk-btn mk-btn-icon"
           disabled={!store.canRedo}
           aria-label={t('toolbar.redo')}
           title={`${t('toolbar.redo')} (Ctrl+Shift+Z)`}
@@ -106,9 +109,9 @@ export function Toolbar({
         </button>
       </div>
 
-      <span className="mf-toolbar-sep" />
+      <span className="mk-toolbar-sep" />
 
-      <div className="mf-segmented" role="tablist" aria-label="View">
+      <div className="mk-segmented" role="tablist" aria-label="View">
         {views.map(([id, label, Icon]) => (
           <button
             key={id}
@@ -120,7 +123,7 @@ export function Toolbar({
             <Icon />
             {t(label)}
             {id === 'checks' && issues > 0 ? (
-              <span className="mf-badge" data-level={errors ? 'error' : 'warn'}>
+              <span className="mk-badge" data-level={errors ? 'error' : 'warn'}>
                 {issues}
               </span>
             ) : null}
@@ -129,7 +132,7 @@ export function Toolbar({
       </div>
 
       {view === 'design' || view === 'preview' ? (
-        <div className="mf-segmented" role="group" aria-label="Preview width">
+        <div className="mk-segmented" role="group" aria-label="Preview width">
           {devices
             // The text view is a preview-only thing; there is nothing to design.
             .filter(([id]) => view === 'preview' || id !== 'text')
@@ -148,28 +151,30 @@ export function Toolbar({
         </div>
       ) : null}
 
-      <span className="mf-spacer-flex" />
+      <span className="mk-spacer-flex" />
 
-      <button
-        type="button"
-        className="mf-btn mf-btn-icon"
-        aria-label={t('toolbar.theme')}
-        title={t('toolbar.theme')}
-        aria-pressed={appearance === 'dark'}
-        onClick={onToggleAppearance}
-      >
-        <IconMoon />
-      </button>
+      {onToggleAppearance ? (
+        <button
+          type="button"
+          className="mk-btn mk-btn-icon"
+          aria-label={t('toolbar.theme')}
+          title={t('toolbar.theme')}
+          aria-pressed={appearance === 'dark'}
+          onClick={onToggleAppearance}
+        >
+          <IconMoon />
+        </button>
+      ) : null}
 
-      <button type="button" className="mf-btn" onClick={onImport}>
+      <button type="button" className="mk-btn" onClick={onImport}>
         <IconUpload />
         {t('toolbar.import')}
       </button>
 
-      {/* Only when the consumer wired a handler — mailforge cannot send email
+      {/* Only when the consumer wired a handler — mailkiln cannot send email
           itself, and a button that always fails is worse than no button. */}
       {onSendTest ? (
-        <button type="button" className="mf-btn" onClick={onSendTest}>
+        <button type="button" className="mk-btn" onClick={onSendTest}>
           <IconSend />
           {t('toolbar.sendTest')}
         </button>
@@ -178,7 +183,7 @@ export function Toolbar({
       {onExport ? (
         <button
           type="button"
-          className="mf-btn mf-btn-primary"
+          className="mk-btn mk-btn-primary"
           onClick={() =>
             onExport(
               exportDocument(store.doc, {

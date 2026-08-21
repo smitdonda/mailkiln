@@ -1,17 +1,17 @@
 /**
- * `mailforge` — a drag & drop email builder that ejects to React Email code.
+ * `mailkiln` — a drag & drop email builder that ejects to React Email code.
  *
  * The React entry point. Everything headless is also re-exported here for
- * convenience, but `mailforge/core` is the import to use in Node, a CLI or CI: it
+ * convenience, but `mailkiln/core` is the import to use in Node, a CLI or CI: it
  * carries no React and no DOM assumptions.
  *
- * @module mailforge
+ * @module mailkiln
  */
 
 // --- the editor ------------------------------------------------------------
-export { MailForge } from './react/MailForge.jsx'
-export { useMailForge } from './react/useMailForge.js'
-export { MailForgeProvider, useMailForgeContext, useStore } from './react/context.jsx'
+export { MailKiln } from './react/MailKiln.jsx'
+export { useMailKiln } from './react/useMailKiln.js'
+export { MailKilnProvider, useMailKilnContext, useStore } from './react/context.jsx'
 
 // --- panels, for consumers assembling their own layout ---------------------
 export { Toolbar } from './react/panels/Toolbar.jsx'

@@ -7,7 +7,7 @@
  * background images, with a linked caption underneath as the fallback everyone
  * sees, including Outlook.
  *
- * @module mailforge/core/blocks/videoThumb
+ * @module mailkiln/core/blocks/videoThumb
  */
 
 import { defineBlock } from '../registry.js'

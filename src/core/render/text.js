@@ -5,7 +5,7 @@
  * signal, which is why the linter has a rule for it and why every block has a
  * text target (falling back to stripped HTML when it doesn't).
  *
- * @module mailforge/core/render/text
+ * @module mailkiln/core/render/text
  */
 
 import { getBlockDef } from '../registry.js'

@@ -3,14 +3,14 @@
  * environment concerns (upload hook, available blocks, drag state) that every
  * panel needs.
  *
- * @module mailforge/react/context
+ * @module mailkiln/react/context
  */
 
 import { createContext, useContext } from 'react'
 
 /**
- * @typedef {object} MailForgeContextValue
- * @property {import('./useMailForge.js').EditorStore} store
+ * @typedef {object} MailKilnContextValue
+ * @property {import('./useMailKiln.js').EditorStore} store
  * @property {import('../core/types.js').BlockDef[]} blocks Palette contents, in order.
  * @property {(file: File) => Promise<string>} [onImageUpload]
  * @property {(payload: import('./panels/SendTestDialog.jsx').SendTestPayload) => Promise<void> | void} [onSendTest]
@@ -23,18 +23,18 @@ import { createContext, useContext } from 'react'
  * @property {{ activeDrag: any, dropTarget: any }} drag
  */
 
-const MailForgeContext = createContext(/** @type {MailForgeContextValue | null} */ (null))
+const MailKilnContext = createContext(/** @type {MailKilnContextValue | null} */ (null))
 
-export const MailForgeProvider = MailForgeContext.Provider
+export const MailKilnProvider = MailKilnContext.Provider
 
 /**
- * @returns {MailForgeContextValue}
+ * @returns {MailKilnContextValue}
  */
-export function useMailForgeContext() {
-  const value = useContext(MailForgeContext)
+export function useMailKilnContext() {
+  const value = useContext(MailKilnContext)
   if (!value) {
     throw new Error(
-      'mailforge: this component must be rendered inside <MailForge>. If you are composing your own layout, wrap it in <MailForgeProvider>.',
+      'mailkiln: this component must be rendered inside <MailKiln>. If you are composing your own layout, wrap it in <MailKilnProvider>.',
     )
   }
   return value
@@ -43,8 +43,8 @@ export function useMailForgeContext() {
 /**
  * Shorthand — every panel wants the store and nothing else.
  *
- * @returns {import('./useMailForge.js').EditorStore}
+ * @returns {import('./useMailKiln.js').EditorStore}
  */
 export function useStore() {
-  return useMailForgeContext().store
+  return useMailKilnContext().store
 }

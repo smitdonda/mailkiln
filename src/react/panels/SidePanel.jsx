@@ -10,12 +10,12 @@
  * Selecting a block therefore replaces the tabs with a titled header and a back
  * button; deselecting returns to whichever tab you were on.
  *
- * @module mailforge/react/panels/SidePanel
+ * @module mailkiln/react/panels/SidePanel
  */
 
 import { useEffect, useState } from 'react'
 import { getBlockDef } from '../../core/index.js'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { BlockPalette } from './BlockPalette.jsx'
 import { RowLayouts } from './RowLayouts.jsx'
@@ -29,7 +29,7 @@ import { IconArrowLeft, IconCopy, IconGrid, IconRows, IconSliders, IconTrash } f
  */
 export function SidePanel() {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const [tab, setTab] = useState(/** @type {PanelTab} */ ('content'))
   const { selection } = store
 
@@ -47,24 +47,24 @@ export function SidePanel() {
         : t(`inspector.${selection.kind}`)
 
     return (
-      <aside className="mf-panel" aria-label={t('inspector.title')}>
-        <div className="mf-panel-head">
+      <aside className="mk-panel" aria-label={t('inspector.title')}>
+        <div className="mk-panel-head">
           <button
             type="button"
-            className="mf-btn mf-btn-icon"
+            className="mk-btn mk-btn-icon"
             aria-label={t('panel.back')}
             title={t('panel.back')}
             onClick={() => store.select(null)}
           >
             <IconArrowLeft />
           </button>
-          <span className="mf-panel-title">{label}</span>
+          <span className="mk-panel-title">{label}</span>
           {/* A second, always-visible route to duplicate/delete. The canvas strip
               is easy to miss on a short node, and "I added a row I don't want"
               must never be a dead end. */}
           <button
             type="button"
-            className="mf-btn mf-btn-icon"
+            className="mk-btn mk-btn-icon"
             aria-label={`${t('canvas.duplicate')} ${label}`}
             title={t('canvas.duplicate')}
             onClick={() => store.duplicate(selection.node.id)}
@@ -73,7 +73,7 @@ export function SidePanel() {
           </button>
           <button
             type="button"
-            className="mf-btn mf-btn-icon"
+            className="mk-btn mk-btn-icon"
             aria-label={`${t('canvas.delete')} ${label}`}
             title={t('canvas.delete')}
             onClick={() => store.remove(selection.node.id)}
@@ -81,7 +81,7 @@ export function SidePanel() {
             <IconTrash />
           </button>
         </div>
-        <div className="mf-panel-body">
+        <div className="mk-panel-body">
           <NodeFields location={selection} />
         </div>
       </aside>
@@ -96,16 +96,16 @@ export function SidePanel() {
 
   return (
     <aside
-      className="mf-panel"
+      className="mk-panel"
       aria-label={tab === 'content' ? t('palette.title') : t(`panel.${tab}`)}
     >
-      <div className="mf-panel-tabs" role="tablist" aria-label={t('inspector.title')}>
+      <div className="mk-panel-tabs" role="tablist" aria-label={t('inspector.title')}>
         {tabs.map(([id, key, Icon]) => (
           <button
             key={id}
             type="button"
             role="tab"
-            className="mf-panel-tab"
+            className="mk-panel-tab"
             aria-selected={tab === id}
             onClick={() => setTab(id)}
           >
@@ -115,7 +115,7 @@ export function SidePanel() {
         ))}
       </div>
 
-      <div className="mf-panel-body">
+      <div className="mk-panel-body">
         {tab === 'content' ? <BlockPalette /> : null}
         {tab === 'rows' ? <RowLayouts /> : null}
         {tab === 'settings' ? <DocumentFields /> : null}

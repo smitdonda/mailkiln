@@ -246,7 +246,7 @@ describe('outlook-unsafe-css', () => {
     expect(messages.join(' ')).toMatch(/gap/)
   })
 
-  it('says nothing about the table output mailforge produces itself', () => {
+  it('says nothing about the table output mailkiln produces itself', () => {
     expect(issuesFor(lintDocument(kitchenSinkDocument()), 'outlook-unsafe-css')).toHaveLength(0)
   })
 })

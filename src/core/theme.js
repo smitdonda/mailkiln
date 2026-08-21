@@ -3,10 +3,10 @@
  *
  * Deliberately not a design-system dependency. The consumer passes six colours
  * at most; everything else is derived in CSS with `color-mix`. Tokens are applied
- * as inline custom properties on `.mf-root`, so two mailforge instances on one
+ * as inline custom properties on `.mk-root`, so two mailkiln instances on one
  * page can have different themes.
  *
- * @module mailforge/core/theme
+ * @module mailkiln/core/theme
  */
 
 /**
@@ -32,26 +32,26 @@
  * Theme key -> CSS custom property.
  *
  * These names deliberately avoid Tailwind's prefixed theme namespaces
- * (`--mf-color-*`, `--mf-font-*`, `--mf-text-*`): colliding with one makes
+ * (`--mk-color-*`, `--mk-font-*`, `--mk-text-*`): colliding with one makes
  * Tailwind emit its own default into `:root, :host`, which is a style leak into
  * the consumer's page.
  */
 export const THEME_VARS = {
-  accent: '--mf-accent',
-  accentContrast: '--mf-accent-contrast',
-  background: '--mf-bg',
-  backgroundSubtle: '--mf-bg-subtle',
-  backgroundSunken: '--mf-bg-sunken',
-  border: '--mf-border',
-  borderStrong: '--mf-border-strong',
-  foreground: '--mf-fg',
-  foregroundMuted: '--mf-fg-muted',
-  danger: '--mf-danger',
-  warn: '--mf-warn',
-  info: '--mf-info',
-  radius: '--mf-radius',
-  fontFamily: '--mf-ui-font',
-  fontMono: '--mf-ui-mono',
+  accent: '--mk-accent',
+  accentContrast: '--mk-accent-contrast',
+  background: '--mk-bg',
+  backgroundSubtle: '--mk-bg-subtle',
+  backgroundSunken: '--mk-bg-sunken',
+  border: '--mk-border',
+  borderStrong: '--mk-border-strong',
+  foreground: '--mk-fg',
+  foregroundMuted: '--mk-fg-muted',
+  danger: '--mk-danger',
+  warn: '--mk-warn',
+  info: '--mk-info',
+  radius: '--mk-radius',
+  fontFamily: '--mk-ui-font',
+  fontMono: '--mk-ui-mono',
 }
 
 /** Keys whose numeric values mean px. */

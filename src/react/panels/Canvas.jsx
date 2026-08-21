@@ -6,7 +6,7 @@
  * output. The surrounding chrome — hover outlines, drop zones, the mobile frame —
  * is editor-only and never reaches the export.
  *
- * @module mailforge/react/panels/Canvas
+ * @module mailkiln/react/panels/Canvas
  */
 
 import { Fragment, useMemo } from 'react'
@@ -23,7 +23,7 @@ import {
   spacingToCss,
   withScope,
 } from '../../core/index.js'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { SortableBlock } from '../dnd/SortableBlock.jsx'
 import { DropIndicator } from '../dnd/DropIndicator.jsx'
@@ -39,7 +39,7 @@ import { IconPlus } from '../icons.jsx'
  */
 export function Canvas({ device = 'desktop', onQuickInsert }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const { doc } = store
   const blank = isPristine(doc)
   // The mobile frame narrows the paper, so chrome sized to the document width
@@ -55,10 +55,10 @@ export function Canvas({ device = 'desktop', onQuickInsert }) {
   )
 
   return (
-    <div className="mf-scroll" onClick={() => store.select(null)} role="presentation">
-      <div className="mf-canvas-wrap">
+    <div className="mk-scroll" onClick={() => store.select(null)} role="presentation">
+      <div className="mk-canvas-wrap">
         <div
-          className="mf-canvas"
+          className="mk-canvas"
           data-device={device}
           style={{
             maxWidth: width,
@@ -80,13 +80,13 @@ export function Canvas({ device = 'desktop', onQuickInsert }) {
           )}
         </div>
 
-        {/* Outside `.mf-canvas` on purpose: the canvas carries the *email's*
+        {/* Outside `.mk-canvas` on purpose: the canvas carries the *email's*
             background, so a chrome button placed on it ends up with editor text
             colour on email paper — invisible in dark mode. */}
         {blank ? null : (
           <button
             type="button"
-            className="mf-btn mf-btn-outline mf-add-section"
+            className="mk-btn mk-btn-outline mk-add-section"
             style={{ maxWidth: width }}
             onClick={(event) => {
               event.stopPropagation()
@@ -129,7 +129,7 @@ export function conditionState(node, ctx) {
  */
 export function ConditionBadge({ label, hidden }) {
   return (
-    <span className="mf-cond-badge" data-off={hidden || undefined} title={label}>
+    <span className="mk-cond-badge" data-off={hidden || undefined} title={label}>
       {label}
     </span>
   )
@@ -145,14 +145,14 @@ export function ConditionBadge({ label, hidden }) {
  */
 function SectionView({ section, ctx, index, count }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const selected = store.selectedId === section.id
   const props = section.props ?? {}
   const condition = conditionState(section, ctx)
 
   return (
     <div
-      className="mf-section"
+      className="mk-section"
       data-selected={selected || undefined}
       data-conditional={condition ? '' : undefined}
       data-cond-off={condition?.hidden || undefined}
@@ -210,7 +210,7 @@ function SectionView({ section, ctx, index, count }) {
  */
 function RowView({ row, ctx, sectionId, index, count }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const selected = store.selectedId === row.id
   const props = row.props ?? {}
   const condition = conditionState(row, ctx)
@@ -224,7 +224,7 @@ function RowView({ row, ctx, sectionId, index, count }) {
 
   return (
     <div
-      className="mf-row"
+      className="mk-row"
       data-selected={selected || undefined}
       data-conditional={condition || repeat ? '' : undefined}
       data-cond-off={condition?.hidden || undefined}
@@ -278,7 +278,7 @@ function RowView({ row, ctx, sectionId, index, count }) {
  */
 function ColumnView({ column, ctx }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const props = column.props ?? {}
 
   const { setNodeRef, isOver } = useDroppable({
@@ -292,7 +292,7 @@ function ColumnView({ column, ctx }) {
   return (
     <div
       ref={setNodeRef}
-      className="mf-col"
+      className="mk-col"
       data-over={isOver || undefined}
       data-column-id={column.id}
       style={{
@@ -325,7 +325,7 @@ function ColumnView({ column, ctx }) {
       </SortableContext>
 
       {blocks.length === 0 ? (
-        <div className="mf-col-empty">
+        <div className="mk-col-empty">
           <IconPlus />
           {t('canvas.empty')}
         </div>

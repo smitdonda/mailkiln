@@ -3,7 +3,7 @@
  * message" link. Everything after the cut — including the unsubscribe footer and
  * any tracking pixel — is simply not there for most recipients.
  *
- * @module mailforge/core/lint/rules/gmailClipping
+ * @module mailkiln/core/lint/rules/gmailClipping
  */
 
 /** Gmail's documented clipping threshold, in bytes. */

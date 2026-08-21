@@ -17,7 +17,7 @@
  * A full expression language would need a parser, a sandbox and an editor UI
  * nobody would enjoy, and it would still not survive being emitted as JSX.
  *
- * @module mailforge/core/conditions
+ * @module mailkiln/core/conditions
  */
 
 import { getPath } from './vars.js'

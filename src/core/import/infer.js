@@ -12,13 +12,13 @@
  * markup. That is why this can be trusted to migrate a real template, and it is
  * the thing no other builder on npm even attempts.
  *
- * @module mailforge/core/import/infer
+ * @module mailkiln/core/import/infer
  */
 
 import { parsableBlocks } from '../registry.js'
 import { createBlock, createColumn, createRow, createSection, evenWidths, spacing } from '../schema.js'
 import { hasBlockLevelChildren } from '../blocks/shared.js'
-import { foreignVarsToMailforge } from '../vars.js'
+import { foreignVarsToMailkiln } from '../vars.js'
 import { collapsedText, parseStyleAttribute } from './parseAdapter.js'
 
 /** @typedef {import('../types.js').Block} Block */
@@ -45,7 +45,7 @@ export function createParseContext(document, options = {}) {
     style: (element) => parseStyleAttribute(element),
     text: (element) => collapsedText(element),
     detectVars: (html) => {
-      const { text, found } = foreignVarsToMailforge(html ?? '', { only: options.varSyntaxes })
+      const { text, found } = foreignVarsToMailkiln(html ?? '', { only: options.varSyntaxes })
       for (const path of found) if (!sink.includes(path)) sink.push(path)
       return text
     },

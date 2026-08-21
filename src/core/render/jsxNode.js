@@ -6,7 +6,7 @@
  * makes it diffable in the consumer's git history — a real requirement of
  * "eject to code you own", not a nicety.
  *
- * @module mailforge/core/render/jsxNode
+ * @module mailkiln/core/render/jsxNode
  */
 
 import { VAR_PATTERN } from '../vars.js'

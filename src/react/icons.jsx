@@ -5,7 +5,7 @@
  * on someone's icon package is a real cost for consumers (duplicate icon sets,
  * version conflicts) in exchange for nothing.
  *
- * @module mailforge/react/icons
+ * @module mailkiln/react/icons
  */
 
 /** @typedef {import('react').SVGProps<SVGSVGElement>} IconProps */

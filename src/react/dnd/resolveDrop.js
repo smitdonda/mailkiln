@@ -6,7 +6,7 @@
  * jsdom, which is exactly the kind of test that passes while the feature is
  * broken.
  *
- * @module mailforge/react/dnd/resolveDrop
+ * @module mailkiln/react/dnd/resolveDrop
  */
 
 /**

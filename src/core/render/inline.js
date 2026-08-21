@@ -1,11 +1,11 @@
 /**
  * Style and markup serialization primitives.
  *
- * This is why mailforge has no `juice` dependency: we own the schema, so styles
+ * This is why mailkiln has no `juice` dependency: we own the schema, so styles
  * are written inline at emit time rather than parsed back out of a stylesheet.
  * Deterministic, zero deps, and no CSS parser to be wrong about specificity.
  *
- * @module mailforge/core/render/inline
+ * @module mailkiln/core/render/inline
  */
 
 /** @typedef {import('./../types.js').StyleObject} StyleObject */

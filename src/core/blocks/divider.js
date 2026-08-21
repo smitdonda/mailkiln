@@ -2,7 +2,7 @@
  * Divider block. A 1px `<td>` with a background colour rather than an `<hr>`,
  * because Outlook renders `<hr>` at its own thickness and colour.
  *
- * @module mailforge/core/blocks/divider
+ * @module mailkiln/core/blocks/divider
  */
 
 import { defineBlock } from '../registry.js'

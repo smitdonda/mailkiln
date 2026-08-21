@@ -1,15 +1,15 @@
 /**
  * Image field: upload through the consumer's `onImageUpload` hook, or paste a URL.
  *
- * mailforge never uploads anything itself — there is no storage story it could
+ * mailkiln never uploads anything itself — there is no storage story it could
  * pick that would be right for everyone. The URL input is always available, so the
  * field is fully usable even with no upload hook wired up.
  *
- * @module mailforge/react/fields/ImageField
+ * @module mailkiln/react/fields/ImageField
  */
 
 import { useRef, useState } from 'react'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { IconUpload } from '../icons.jsx'
 
@@ -22,7 +22,7 @@ import { IconUpload } from '../icons.jsx'
  */
 export function ImageField({ value, onChange, id }) {
   const t = useI18n()
-  const { onImageUpload } = useMailForgeContext()
+  const { onImageUpload } = useMailKilnContext()
   const fileRef = useRef(/** @type {HTMLInputElement | null} */ (null))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(/** @type {string | null} */ (null))
@@ -46,7 +46,7 @@ export function ImageField({ value, onChange, id }) {
   }
 
   return (
-    <div className="mf-field">
+    <div className="mk-field">
       {value ? (
         <img
           src={value}
@@ -56,9 +56,9 @@ export function ImageField({ value, onChange, id }) {
             width: '100%',
             maxHeight: 120,
             objectFit: 'contain',
-            border: '1px solid var(--mf-border)',
+            border: '1px solid var(--mk-border)',
             borderRadius: 6,
-            background: 'var(--mf-bg-sunken)',
+            background: 'var(--mk-bg-sunken)',
           }}
         />
       ) : null}
@@ -69,12 +69,12 @@ export function ImageField({ value, onChange, id }) {
             ref={fileRef}
             type="file"
             accept="image/*"
-            className="mf-sr-only"
+            className="mk-sr-only"
             onChange={(event) => upload(event.target.files?.[0])}
           />
           <button
             type="button"
-            className="mf-btn mf-btn-outline"
+            className="mk-btn mk-btn-outline"
             disabled={busy}
             onClick={() => fileRef.current?.click()}
           >
@@ -86,13 +86,13 @@ export function ImageField({ value, onChange, id }) {
 
       <input
         id={id}
-        className="mf-input"
+        className="mk-input"
         type="url"
         value={value ?? ''}
         placeholder={t('field.url')}
         onChange={(event) => onChange(event.target.value)}
       />
-      {error ? <span className="mf-help" style={{ color: 'var(--mf-danger)' }}>{error}</span> : null}
+      {error ? <span className="mk-help" style={{ color: 'var(--mk-danger)' }}>{error}</span> : null}
     </div>
   )
 }

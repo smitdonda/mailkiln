@@ -5,7 +5,7 @@
  * The shape deliberately mirrors react-email-editor's `tools` option, so someone
  * migrating from it can paste their config across and have it work:
  *
- *     <MailForge tools={{ image: { enabled: false }, button: { position: 1, usageLimit: 1 } }} />
+ *     <MailKiln tools={{ image: { enabled: false }, button: { position: 1, usageLimit: 1 } }} />
  *
  * This is a **UI policy**, so it lives in `react/` and not in core. Core stays
  * policy-free: `insertBlock` will always insert, `registerBlock` will always
@@ -13,7 +13,7 @@
  * for their editor. Nothing here can corrupt a document either — the worst a bad
  * config does is hide a tile.
  *
- * @module mailforge/react/tools
+ * @module mailkiln/react/tools
  */
 
 /**

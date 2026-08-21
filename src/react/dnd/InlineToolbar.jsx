@@ -4,7 +4,7 @@
  * Bold, italic, underline, link, lists, clear formatting — issued through
  * `document.execCommand`. That API is deprecated but universally implemented,
  * and every alternative (Slate, ProseMirror, Lexical) is larger than the whole
- * of mailforge and would blow the two-runtime-dependency budget. The risk is
+ * of mailkiln and would blow the two-runtime-dependency budget. The risk is
  * contained on purpose: commands are issued from this one file, and
  * `normalizeRichText` runs on every commit, so we only depend on the browser
  * producing *something* reasonable — never something exact.
@@ -17,7 +17,7 @@
  *   - The link popover cannot avoid taking focus, so it stores the `Range`
  *     first and restores it before running the command.
  *
- * @module mailforge/react/dnd/InlineToolbar
+ * @module mailkiln/react/dnd/InlineToolbar
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -72,7 +72,7 @@ function anchorAtCaret(target) {
 
 /**
  * @param {object} props
- * @param {HTMLElement} props.target The element carrying `data-mf-edit`.
+ * @param {HTMLElement} props.target The element carrying `data-mk-edit`.
  * @param {() => void} props.onCommit Write the edited markup back to the document.
  * @returns {import('react').ReactElement}
  */
@@ -209,7 +209,7 @@ export function InlineToolbar({ target, onCommit }) {
   const button = ({ command, label, children }) => (
     <button
       type="button"
-      className="mf-rt-button"
+      className="mk-rt-button"
       data-active={active[command] || undefined}
       aria-label={label}
       aria-pressed={Boolean(active[command])}
@@ -227,7 +227,7 @@ export function InlineToolbar({ target, onCommit }) {
 
   return (
     <div
-      className="mf-inline-toolbar"
+      className="mk-inline-toolbar"
       role="toolbar"
       aria-label={t('richtext.toolbar')}
       onMouseDown={(event) => event.stopPropagation()}
@@ -237,11 +237,11 @@ export function InlineToolbar({ target, onCommit }) {
       {button({ command: 'italic', label: t('richtext.italic'), children: <IconItalic /> })}
       {button({ command: 'underline', label: t('richtext.underline'), children: <IconUnderline /> })}
 
-      <span className="mf-rt-sep" />
+      <span className="mk-rt-sep" />
 
       <button
         type="button"
-        className="mf-rt-button"
+        className="mk-rt-button"
         data-active={active.link || undefined}
         aria-label={t('richtext.link')}
         aria-expanded={linkOpen}
@@ -272,7 +272,7 @@ export function InlineToolbar({ target, onCommit }) {
         </>
       ) : null}
 
-      <span className="mf-rt-sep" />
+      <span className="mk-rt-sep" />
 
       {button({
         command: 'removeFormat',
@@ -281,22 +281,22 @@ export function InlineToolbar({ target, onCommit }) {
       })}
 
       {linkOpen ? (
-        <div className="mf-rt-popover">
-          <label className="mf-rt-field">
-            <span className="mf-label">{t('richtext.linkUrl')}</span>
+        <div className="mk-rt-popover">
+          <label className="mk-rt-field">
+            <span className="mk-label">{t('richtext.linkUrl')}</span>
             <VarInput
               value={linkHref}
               onChange={setLinkHref}
               placeholder="https://example.com"
             />
           </label>
-          <label className="mf-rt-field">
-            <span className="mf-label">{t('richtext.linkText')}</span>
+          <label className="mk-rt-field">
+            <span className="mk-label">{t('richtext.linkText')}</span>
             <VarInput value={linkText} onChange={setLinkText} placeholder={t('richtext.linkText')} />
           </label>
-          <div className="mf-rt-popover-actions">
+          <div className="mk-rt-popover-actions">
             {existingAnchor.current ? (
-              <button type="button" className="mf-btn mf-btn-sm" onClick={removeLink}>
+              <button type="button" className="mk-btn mk-btn-sm" onClick={removeLink}>
                 <IconUnlink />
                 {t('richtext.unlink')}
               </button>
@@ -305,7 +305,7 @@ export function InlineToolbar({ target, onCommit }) {
             )}
             <button
               type="button"
-              className="mf-btn mf-btn-sm mf-btn-primary"
+              className="mk-btn mk-btn-sm mk-btn-primary"
               onClick={applyLink}
             >
               {t('richtext.apply')}

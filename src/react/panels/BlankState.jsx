@@ -6,10 +6,10 @@
  * gives a new template a starting point instead: one obvious action per common
  * first move.
  *
- * @module mailforge/react/panels/BlankState
+ * @module mailkiln/react/panels/BlankState
  */
 
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { targetColumnId } from './BlockPalette.jsx'
 import { IconButton as IconButtonGlyph, IconMail, IconRows, IconText } from '../icons.jsx'
@@ -44,7 +44,7 @@ export function isPristine(doc) {
  */
 export function BlankState({ onQuickInsert }) {
   const t = useI18n()
-  const { store, blocks } = useMailForgeContext()
+  const { store, blocks } = useMailKilnContext()
 
   // A shortcut to a tool the consumer turned off would be a dead button. The
   // palette is already filtered by `tools`, so asking it is enough.
@@ -73,36 +73,36 @@ export function BlankState({ onQuickInsert }) {
   }
 
   return (
-    <div className="mf-blank">
-      <span className="mf-blank-icon" aria-hidden="true">
+    <div className="mk-blank">
+      <span className="mk-blank-icon" aria-hidden="true">
         <IconMail />
       </span>
-      <h2 className="mf-blank-title">{t('blank.title')}</h2>
-      <p className="mf-blank-body">
+      <h2 className="mk-blank-title">{t('blank.title')}</h2>
+      <p className="mk-blank-body">
         {t('blank.body')}{' '}
         {onQuickInsert ? (
           <>
-            {t('blank.press')} <kbd className="mf-kbd">/</kbd> {t('blank.toQuickInsert')}
+            {t('blank.press')} <kbd className="mk-kbd">/</kbd> {t('blank.toQuickInsert')}
           </>
         ) : null}
       </p>
-      <div className="mf-blank-actions">
+      <div className="mk-blank-actions">
         <button
           type="button"
-          className="mf-btn mf-btn-outline"
+          className="mk-btn mk-btn-outline"
           onClick={run(() => store.addRow(store.doc.sections[0]?.id, 2))}
         >
           <IconRows />
           {t('blank.addSection')}
         </button>
         {offers('text') ? (
-          <button type="button" className="mf-btn mf-btn-outline" onClick={run(() => add('text'))}>
+          <button type="button" className="mk-btn mk-btn-outline" onClick={run(() => add('text'))}>
             <IconText />
             {t('blank.addText')}
           </button>
         ) : null}
         {offers('button') ? (
-          <button type="button" className="mf-btn mf-btn-outline" onClick={run(() => add('button'))}>
+          <button type="button" className="mk-btn mk-btn-outline" onClick={run(() => add('button'))}>
             <IconButtonGlyph />
             {t('blank.addButton')}
           </button>

@@ -6,8 +6,15 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 // previous test's unmounted markup, and `document.querySelector` starts handing
 // back detached nodes whose React handlers are gone.
 afterEach(() => cleanup())
-import { MailForge, parseRecipients, useMailForge } from '../src/index.js'
 import {
+  MailKiln,
+  MailKilnProvider,
+  Toolbar,
+  parseRecipients,
+  useMailKiln,
+} from '../src/index.js'
+import {
+  builtinBlocks,
   createDocument,
   defineBlock,
   listBlocks,
@@ -27,9 +34,9 @@ function renderEditor(props = {}) {
   const onChange = vi.fn((/** @type {any} */ next) => {
     current = next
   })
-  const utils = render(<MailForge value={current} onChange={onChange} {...props} />)
+  const utils = render(<MailKiln value={current} onChange={onChange} {...props} />)
   const rerender = (/** @type {any} */ extra = {}) =>
-    utils.rerender(<MailForge value={current} onChange={onChange} {...props} {...extra} />)
+    utils.rerender(<MailKiln value={current} onChange={onChange} {...props} {...extra} />)
   return { get: () => current, rerender, utils, onChange }
 }
 
@@ -42,12 +49,12 @@ function renderEditor(props = {}) {
  * @returns {HTMLElement}
  */
 function strip(selector) {
-  const found = document.querySelector(`${selector} .mf-node-tools`)
+  const found = document.querySelector(`${selector} .mk-node-tools`)
   if (!found) throw new Error(`no action strip found for ${selector}`)
   return /** @type {HTMLElement} */ (found)
 }
 
-describe('MailForge', () => {
+describe('MailKiln', () => {
   it('renders the toolbar, palette, canvas and inspector', () => {
     renderEditor()
     expect(screen.getByLabelText('Blocks')).toBeTruthy()
@@ -63,7 +70,7 @@ describe('MailForge', () => {
     }
     // Group headings, scoped to the section labels — "Content" is also the name
     // of the tab that contains them.
-    const groups = [...palette.querySelectorAll('.mf-section-label')].map((el) => el.textContent)
+    const groups = [...palette.querySelectorAll('.mk-section-label')].map((el) => el.textContent)
     expect(groups).toContain('Content')
     expect(groups).toContain('Layout')
     expect(groups).toContain('Advanced')
@@ -131,7 +138,7 @@ describe('MailForge', () => {
     renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
     // Merge variables resolved with sample data, and real table markup.
     expect(document.body.innerHTML).toContain('Thanks, Smit!')
-    expect(document.querySelector('.mf-node table')).toBeTruthy()
+    expect(document.querySelector('.mk-node table')).toBeTruthy()
   })
 
   it('selects a block on click and shows its generated Inspector fields', () => {
@@ -185,7 +192,7 @@ describe('MailForge', () => {
       fireEvent.click(node)
       editor.rerender()
 
-      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mf-edit]'))
+      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mk-edit]'))
       expect(editable).toBeTruthy()
       expect(editable.tagName).toBe('DIV')
       expect(editable.getAttribute('contenteditable')).toBe('true')
@@ -205,7 +212,7 @@ describe('MailForge', () => {
       fireEvent.click(node)
       editor.rerender()
 
-      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mf-edit]'))
+      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mk-edit]'))
       editable.innerHTML = 'Edited on the canvas'
       fireEvent.blur(editable)
 
@@ -224,9 +231,9 @@ describe('MailForge', () => {
       fireEvent.click(node)
       editor.rerender()
 
-      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mf-edit]'))
+      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mk-edit]'))
       expect(editable.tagName).toBe('H2')
-      expect(editable.getAttribute('data-mf-edit')).toBe('text')
+      expect(editable.getAttribute('data-mk-edit')).toBe('text')
     })
 
     it('keeps typing out of the editor shortcut handler', () => {
@@ -239,7 +246,7 @@ describe('MailForge', () => {
       fireEvent.click(node)
       editor.rerender()
 
-      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mf-edit]'))
+      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mk-edit]'))
       editable.focus()
       fireEvent.keyDown(editable, { key: 'Delete' })
       fireEvent.keyDown(editable, { key: 'd', ctrlKey: true })
@@ -269,13 +276,13 @@ describe('MailForge', () => {
       const editor = renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
 
       const text = selectBlock(editor, 'text')
-      expect(text.querySelector('.mf-inline-toolbar')).toBeTruthy()
+      expect(text.querySelector('.mk-inline-toolbar')).toBeTruthy()
       // The toolbar takes the label's corner, so the label steps aside.
-      expect(text.querySelector('.mf-node-label')).toBeNull()
+      expect(text.querySelector('.mk-node-label')).toBeNull()
 
       const image = selectBlock(editor, 'image')
-      expect(image.querySelector('.mf-inline-toolbar')).toBeNull()
-      expect(image.querySelector('.mf-node-label')).toBeTruthy()
+      expect(image.querySelector('.mk-inline-toolbar')).toBeNull()
+      expect(image.querySelector('.mk-node-label')).toBeTruthy()
     })
 
     it('hides the list buttons on a heading — <ul> inside <h2> is invalid', () => {
@@ -295,7 +302,7 @@ describe('MailForge', () => {
       // class names and mso- properties. None of it may reach props.text.
       const editor = renderEditor()
       const node = selectBlock(editor, 'text')
-      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mf-edit]'))
+      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mk-edit]'))
 
       editable.innerHTML =
         '<div class="MsoNormal" style="mso-x:1">' +
@@ -312,7 +319,7 @@ describe('MailForge', () => {
 
       const editor = renderEditor()
       const node = selectBlock(editor, 'text')
-      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mf-edit]'))
+      const editable = /** @type {HTMLElement} */ (node.querySelector('[data-mk-edit]'))
 
       fireEvent.paste(editable, {
         clipboardData: {
@@ -393,7 +400,7 @@ describe('MailForge', () => {
     editor.rerender()
 
     const header = /** @type {HTMLElement} */ (
-      screen.getByLabelText('Properties').querySelector('.mf-panel-head')
+      screen.getByLabelText('Properties').querySelector('.mk-panel-head')
     )
     expect(within(header).getByLabelText(/^Duplicate /)).toBeTruthy()
 
@@ -456,7 +463,7 @@ describe('MailForge', () => {
     const editor = renderEditor({ value: normalize(createDocument()) })
     expect(screen.getByText('Start building your email')).toBeTruthy()
     // The blank state replaces the section scaffolding, not the other way round.
-    expect(document.querySelector('.mf-col-empty')).toBeNull()
+    expect(document.querySelector('.mk-col-empty')).toBeNull()
 
     fireEvent.click(screen.getByText('Add text'))
     expect(listBlocks(editor.get()).map((b) => b.type)).toEqual(['text'])
@@ -478,7 +485,7 @@ describe('MailForge', () => {
     editor.rerender()
 
     expect(screen.queryByText('Start building your email')).toBeNull()
-    expect(document.querySelectorAll('.mf-col-empty').length).toBeGreaterThan(0)
+    expect(document.querySelectorAll('.mk-col-empty').length).toBeGreaterThan(0)
   })
 
   describe('visibility panel', () => {
@@ -547,13 +554,13 @@ describe('MailForge', () => {
 
       const node = document.querySelector('[data-block-type="button"]')
       expect(node?.hasAttribute('data-cond-off')).toBe(true)
-      expect(node?.querySelector('.mf-cond-badge')?.textContent).toBe('user.missing is set')
+      expect(node?.querySelector('.mk-cond-badge')?.textContent).toBe('user.missing is set')
       expect(screen.getByText('With your sample data: hidden.')).toBeTruthy()
     })
 
     it('offers repeat on a row and reports the sample length', () => {
       const editor = renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
-      const group = openVisibility(editor, '.mf-row')
+      const group = openVisibility(editor, '.mk-row')
       fireEvent.click(within(group).getByRole('switch', { name: 'Repeat for each item' }))
       editor.rerender()
 
@@ -566,7 +573,7 @@ describe('MailForge', () => {
         previewCount: 3,
       })
       expect(screen.getByText('Your sample data has 1 item(s).')).toBeTruthy()
-      expect(document.querySelector('.mf-row .mf-cond-badge')?.textContent).toContain(
+      expect(document.querySelector('.mk-row .mk-cond-badge')?.textContent).toContain(
         'each order.items',
       )
     })
@@ -575,13 +582,13 @@ describe('MailForge', () => {
       // Three copies would be three DOM nodes sharing one set of ids, and
       // drag-and-drop could not tell them apart. The Preview tab shows them all.
       const editor = renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
-      const group = openVisibility(editor, '.mf-row')
+      const group = openVisibility(editor, '.mk-row')
       fireEvent.click(within(group).getByRole('switch', { name: 'Repeat for each item' }))
       editor.rerender()
       fireEvent.change(screen.getByLabelText('Repeat over'), { target: { value: 'order.items' } })
       editor.rerender()
 
-      expect(document.querySelectorAll('.mf-row')).toHaveLength(1)
+      expect(document.querySelectorAll('.mk-row')).toHaveLength(1)
       expect(document.querySelectorAll('[data-block-id]')).toHaveLength(
         listBlocks(editor.get()).length,
       )
@@ -605,7 +612,7 @@ describe('MailForge', () => {
       expect(paletteOrder(editor)).not.toContain('image')
       expect(paletteOrder(editor)).toContain('text')
 
-      fireEvent.keyDown(document.querySelector('.mf-root') ?? document.body, { key: '/' })
+      fireEvent.keyDown(document.querySelector('.mk-root') ?? document.body, { key: '/' })
       expect(screen.queryByText('Image')).toBeNull()
     })
 
@@ -661,7 +668,7 @@ describe('MailForge', () => {
       )
       editor.rerender()
 
-      fireEvent.keyDown(document.querySelector('.mf-root') ?? document.body, { key: '/' })
+      fireEvent.keyDown(document.querySelector('.mk-root') ?? document.body, { key: '/' })
       const list = screen.getByRole('listbox', { name: 'Quick insert' })
       expect(within(list).queryByText('Button')).toBeNull()
       expect(within(list).getByText('Text')).toBeTruthy()
@@ -704,7 +711,7 @@ describe('MailForge', () => {
       fireEvent.click(/** @type {HTMLElement} */ (openButtonBlock(editor)))
 
       const menu = screen.getByRole('listbox', { name: 'Special links' })
-      expect([...menu.querySelectorAll('.mf-var-sample')].map((n) => n.textContent)).toEqual([
+      expect([...menu.querySelectorAll('.mk-var-sample')].map((n) => n.textContent)).toEqual([
         '{{unsubscribe_url}}',
         '{{preferences_url}}',
         '{{view_in_browser_url}}',
@@ -751,7 +758,7 @@ describe('MailForge', () => {
       expect(editor.get().settings.name).toBe('Welc')
 
       editor.rerender()
-      fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mf-root')), {
+      fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mk-root')), {
         key: 'z',
         ctrlKey: true,
       })
@@ -773,7 +780,7 @@ describe('MailForge', () => {
       renderEditor({ value: doc, vars: sampleVars, onExport })
 
       fireEvent.click(screen.getByRole('tab', { name: /Code/ }))
-      expect(/** @type {Element} */ (document.querySelector('.mf-code')).textContent).toContain(
+      expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
         'export function OrderShipped(',
       )
 
@@ -784,7 +791,7 @@ describe('MailForge', () => {
     it('falls back to the subject when unnamed', () => {
       renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
       fireEvent.click(screen.getByRole('tab', { name: /Code/ }))
-      expect(/** @type {Element} */ (document.querySelector('.mf-code')).textContent).toContain(
+      expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
         'export function YourOrderIsOnItsWay(',
       )
     })
@@ -879,13 +886,13 @@ describe('MailForge', () => {
   it('opens quick insert with / after clicking the canvas', () => {
     // Reproduces the real focus path: clicking a <div> canvas leaves focus on
     // <body>, so the shortcut only works because the root pulls focus to itself.
-    // Dispatching keydown straight at `.mf-root` hid this bug entirely.
+    // Dispatching keydown straight at `.mk-root` hid this bug entirely.
     const editor = renderEditor()
-    const canvas = /** @type {Element} */ (document.querySelector('.mf-canvas'))
+    const canvas = /** @type {Element} */ (document.querySelector('.mk-canvas'))
     fireEvent.pointerDown(canvas)
     fireEvent.click(canvas)
 
-    expect(document.activeElement).toBe(document.querySelector('.mf-root'))
+    expect(document.activeElement).toBe(document.querySelector('.mk-root'))
 
     fireEvent.keyDown(/** @type {Element} */ (document.activeElement), { key: '/' })
     const dialog = screen.getByRole('dialog', { name: 'Quick insert' })
@@ -904,7 +911,7 @@ describe('MailForge', () => {
     expect(listBlocks(editor.get())).toHaveLength(3)
     editor.rerender()
 
-    const root = /** @type {Element} */ (document.querySelector('.mf-root'))
+    const root = /** @type {Element} */ (document.querySelector('.mk-root'))
     fireEvent.keyDown(root, { key: 'z', ctrlKey: true })
     expect(listBlocks(editor.get())).toHaveLength(2)
 
@@ -917,7 +924,7 @@ describe('MailForge', () => {
     const editor = renderEditor()
     fireEvent.click(/** @type {Element} */ (document.querySelector('[data-block-id][data-block-type="text"]')))
     editor.rerender()
-    fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mf-root')), { key: 'Delete' })
+    fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mk-root')), { key: 'Delete' })
     expect(listBlocks(editor.get())).toHaveLength(1)
   })
 
@@ -942,7 +949,7 @@ describe('MailForge', () => {
     expect(listBlocks(editor.get())[0].props.text).toBe('Hello')
 
     editor.rerender()
-    fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mf-root')), {
+    fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mk-root')), {
       key: 'z',
       ctrlKey: true,
     })
@@ -972,7 +979,7 @@ describe('MailForge', () => {
   it('switches to the code view and shows the emitted component', () => {
     renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
     fireEvent.click(screen.getByRole('tab', { name: /Code/ }))
-    const code = /** @type {Element} */ (document.querySelector('.mf-code'))
+    const code = /** @type {Element} */ (document.querySelector('.mk-code'))
     expect(code.textContent).toContain("from '@react-email/components'")
     expect(code.textContent).toContain('export function YourOrderIsOnItsWay')
     expect(code.textContent).toContain('{user.name}')
@@ -982,7 +989,7 @@ describe('MailForge', () => {
     renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
     fireEvent.click(screen.getByRole('tab', { name: /Code/ }))
     fireEvent.click(screen.getByRole('tab', { name: 'TSX' }))
-    expect(/** @type {Element} */ (document.querySelector('.mf-code')).textContent).toContain(
+    expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
       'export interface YourOrderIsOnItsWayProps',
     )
   })
@@ -1001,7 +1008,7 @@ describe('MailForge', () => {
     const items = screen.getAllByRole('listitem')
     expect(items.length).toBeGreaterThan(0)
 
-    const clickable = document.querySelector('.mf-lint-item:not([disabled])')
+    const clickable = document.querySelector('.mk-lint-item:not([disabled])')
     expect(clickable, 'expected at least one issue to link to a node').toBeTruthy()
     fireEvent.click(/** @type {Element} */ (clickable))
     editor.rerender()
@@ -1033,12 +1040,12 @@ describe('MailForge', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Preview/ }))
 
     fireEvent.click(screen.getByLabelText('Mobile'))
-    expect(/** @type {HTMLElement} */ (document.querySelector('.mf-preview-device')).style.width).toBe(
+    expect(/** @type {HTMLElement} */ (document.querySelector('.mk-preview-device')).style.width).toBe(
       '375px',
     )
 
     fireEvent.click(screen.getByLabelText('Text'))
-    expect(/** @type {Element} */ (document.querySelector('.mf-code')).textContent).toContain(
+    expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
       'Thanks, Smit!',
     )
   })
@@ -1075,7 +1082,7 @@ describe('MailForge', () => {
     fireEvent.click(within(dialog).getByText('Replace template'))
     editor.rerender()
 
-    fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mf-root')), {
+    fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mk-root')), {
       key: 'z',
       ctrlKey: true,
     })
@@ -1099,8 +1106,8 @@ describe('MailForge', () => {
 
   it('applies theme tokens as CSS variables on its own root only', () => {
     renderEditor({ theme: { accent: '#ff0055' } })
-    const root = /** @type {HTMLElement} */ (document.querySelector('.mf-root'))
-    expect(root.style.getPropertyValue('--mf-accent')).toBe('#ff0055')
+    const root = /** @type {HTMLElement} */ (document.querySelector('.mk-root'))
+    expect(root.style.getPropertyValue('--mk-accent')).toBe('#ff0055')
   })
 
   it('warns about a mistyped theme key instead of silently ignoring it', () => {
@@ -1121,12 +1128,49 @@ describe('MailForge', () => {
     expect(screen.getByLabelText('Widgets')).toBeTruthy()
   })
 
-  it('toggles dark mode on the root', () => {
+  it('takes dark mode from the appearance prop', () => {
     renderEditor()
-    const root = /** @type {HTMLElement} */ (document.querySelector('.mf-root'))
-    expect(root.dataset.mfTheme).toBe('light')
+    expect(
+      /** @type {HTMLElement} */ (document.querySelector('.mk-root')).dataset.mkTheme,
+    ).toBe('light')
+
+    cleanup()
+    renderEditor({ appearance: 'dark' })
+    expect(
+      /** @type {HTMLElement} */ (document.querySelector('.mk-root')).dataset.mkTheme,
+    ).toBe('dark')
+  })
+
+  it('ships no dark-mode toggle of its own — the host app owns the setting', () => {
+    renderEditor()
+    expect(screen.queryByLabelText('Toggle dark mode')).toBeNull()
+  })
+
+  it('still offers the toggle to a custom layout that wires one up', () => {
+    const onToggleAppearance = vi.fn()
+
+    function Harness() {
+      const store = useMailKiln({ defaultValue: twoColumnDocument() })
+      return (
+        <MailKilnProvider
+          value={{ store, blocks: builtinBlocks, instanceId: 't', drag: { activeDrag: null, dropTarget: null } }}
+        >
+          <Toolbar
+            view="design"
+            onView={() => {}}
+            device="desktop"
+            onDevice={() => {}}
+            onImport={() => {}}
+            appearance="light"
+            onToggleAppearance={onToggleAppearance}
+          />
+        </MailKilnProvider>
+      )
+    }
+    render(<Harness />)
+
     fireEvent.click(screen.getByLabelText('Toggle dark mode'))
-    expect(root.dataset.mfTheme).toBe('dark')
+    expect(onToggleAppearance).toHaveBeenCalledTimes(1)
   })
 
   it('can hide the palette and inspector for a custom layout', () => {
@@ -1136,7 +1180,7 @@ describe('MailForge', () => {
   })
 
   it('works uncontrolled', () => {
-    render(<MailForge defaultValue={twoColumnDocument()} />)
+    render(<MailKiln defaultValue={twoColumnDocument()} />)
     expect(document.querySelectorAll('[data-block-id][data-block-type="text"]')).toHaveLength(2)
   })
 
@@ -1200,7 +1244,7 @@ describe('MailForge', () => {
     /** @type {any} */
     let store = null
     function Harness() {
-      store = useMailForge({ defaultValue: twoColumnDocument() })
+      store = useMailKiln({ defaultValue: twoColumnDocument() })
       return <span data-testid="probe">{listBlocks(store.doc).length}</span>
     }
     render(<Harness />)

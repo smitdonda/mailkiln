@@ -5,11 +5,11 @@
  * other builder, and because an icon + short label is faster to scan than a row
  * of text when you already know what you want.
  *
- * @module mailforge/react/panels/BlockPalette
+ * @module mailkiln/react/panels/BlockPalette
  */
 
 import { useMemo, useState } from 'react'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { PaletteDraggable } from '../dnd/PaletteDraggable.jsx'
 import { findNode, listColumns } from '../../core/index.js'
@@ -21,7 +21,7 @@ import { IconSearch } from '../icons.jsx'
  */
 export function BlockPalette() {
   const t = useI18n()
-  const { blocks, store, tools } = useMailForgeContext()
+  const { blocks, store, tools } = useMailKilnContext()
   const [query, setQuery] = useState('')
 
   const exhausted = useMemo(() => exhaustedTools(store.doc, tools), [store.doc, tools])
@@ -60,11 +60,11 @@ export function BlockPalette() {
 
   return (
     <>
-      <div className="mf-search">
-        <div className="mf-search-wrap">
+      <div className="mk-search">
+        <div className="mk-search-wrap">
           <IconSearch />
           <input
-            className="mf-input"
+            className="mk-input"
             type="search"
             value={query}
             placeholder={t('palette.search')}
@@ -75,15 +75,15 @@ export function BlockPalette() {
       </div>
 
       {groups.length === 0 ? (
-        <p className="mf-empty">
+        <p className="mk-empty">
           <IconSearch />
           {t('palette.empty', { query })}
         </p>
       ) : (
         groups.map(([group, defs]) => (
           <div key={group}>
-            <div className="mf-section-label">{group}</div>
-            <div className="mf-tiles">
+            <div className="mk-section-label">{group}</div>
+            <div className="mk-tiles">
               {defs.map((def) => (
                 <PaletteDraggable
                   key={def.type}
@@ -101,7 +101,7 @@ export function BlockPalette() {
         ))
       )}
 
-      <p className="mf-help" style={{ padding: '0 14px 16px' }}>
+      <p className="mk-help" style={{ padding: '0 14px 16px' }}>
         {t('panel.contentHint')}
       </p>
     </>
@@ -112,7 +112,7 @@ export function BlockPalette() {
  * The column a keyboard-appended block should go into: the selected column, the
  * column holding the selected block, or the last column in the document.
  *
- * @param {import('../useMailForge.js').EditorStore} store
+ * @param {import('../useMailKiln.js').EditorStore} store
  * @returns {string | null}
  */
 export function targetColumnId(store) {

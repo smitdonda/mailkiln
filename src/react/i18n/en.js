@@ -2,7 +2,7 @@
  * English strings. Every user-visible string in the editor lives in a locale
  * file — none are inlined in components — so a new language is one file.
  *
- * @module mailforge/react/i18n/en
+ * @module mailkiln/react/i18n/en
  */
 
 /** @type {Record<string, string>} */
@@ -63,7 +63,7 @@ export const en = {
   // send test
   'sendTest.title': 'Send a test email',
   'sendTest.hint':
-    'mailforge renders the message and hands it to your app’s send handler — it does not send anything itself.',
+    'mailkiln renders the message and hands it to your app’s send handler — it does not send anything itself.',
   'sendTest.to': 'Send to',
   'sendTest.subject': 'Subject',
   'sendTest.send': 'Send test',
@@ -190,7 +190,7 @@ export const en = {
   'code.text': 'Text',
   'code.json': 'JSON',
   'code.mjmlNote':
-    'MJML markup only — mailforge does not bundle the MJML compiler. Run mjml or mjml-browser on this.',
+    'MJML markup only — mailkiln does not bundle the MJML compiler. Run mjml or mjml-browser on this.',
 
   // lint
   'lint.clean': 'No issues found.',

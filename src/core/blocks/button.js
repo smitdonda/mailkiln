@@ -6,7 +6,7 @@
  * on the cell (plus `mso-padding-alt`) is the shape that survives everywhere,
  * and it is why this can't just be a styled link.
  *
- * @module mailforge/core/blocks/button
+ * @module mailkiln/core/blocks/button
  */
 
 import { defineBlock } from '../registry.js'

@@ -10,15 +10,15 @@
  * The list is `SPECIAL_LINKS` from core — the same one the unknown-variable rule
  * treats as implicitly declared, so anything insertable here is guaranteed not to
  * be reported as an undeclared variable. Consumers can replace it wholesale with
- * the `specialLinks` prop on `<MailForge>`, because an ESP that spells it
+ * the `specialLinks` prop on `<MailKiln>`, because an ESP that spells it
  * `{{unsub}}` should not be stuck with ours.
  *
- * @module mailforge/react/fields/LinkField
+ * @module mailkiln/react/fields/LinkField
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { SPECIAL_LINK_PATHS } from '../../core/index.js'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { IconChevronRight } from '../icons.jsx'
 import { VarInput } from './VarInput.jsx'
@@ -41,7 +41,7 @@ const LABEL_KEYS = {
  */
 export function LinkField({ id, value, onChange, placeholder, vars = true }) {
   const t = useI18n()
-  const { specialLinks } = useMailForgeContext()
+  const { specialLinks } = useMailKilnContext()
   const [open, setOpen] = useState(false)
   const wrapRef = useRef(/** @type {HTMLDivElement | null} */ (null))
 
@@ -70,11 +70,11 @@ export function LinkField({ id, value, onChange, placeholder, vars = true }) {
   }
 
   return (
-    <div className="mf-link-field" ref={wrapRef}>
+    <div className="mk-link-field" ref={wrapRef}>
       <VarInput id={id} value={value} onChange={onChange} placeholder={placeholder} vars={vars} />
       <button
         type="button"
-        className="mf-btn mf-btn-icon mf-link-pick"
+        className="mk-btn mk-btn-icon mk-link-pick"
         aria-label={t('link.special')}
         aria-expanded={open}
         title={t('link.special')}
@@ -83,13 +83,13 @@ export function LinkField({ id, value, onChange, placeholder, vars = true }) {
         <IconChevronRight />
       </button>
       {open ? (
-        <ul className="mf-var-menu" role="listbox" aria-label={t('link.special')}>
+        <ul className="mk-var-menu" role="listbox" aria-label={t('link.special')}>
           {links.map((link) => (
             <li
               key={link.value}
               role="option"
               aria-selected={value === link.value}
-              className="mf-var-item"
+              className="mk-var-item"
               data-active={value === link.value || undefined}
               onMouseDown={(event) => {
                 event.preventDefault()
@@ -98,7 +98,7 @@ export function LinkField({ id, value, onChange, placeholder, vars = true }) {
               }}
             >
               <span>{link.label}</span>
-              <span className="mf-var-sample">{link.value}</span>
+              <span className="mk-var-sample">{link.value}</span>
             </li>
           ))}
         </ul>

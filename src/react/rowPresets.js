@@ -7,7 +7,7 @@
  * used to show bare numbers — `1 2 3 4` — which said nothing about the result and
  * could not express an uneven split at all.
  *
- * @module mailforge/react/rowPresets
+ * @module mailkiln/react/rowPresets
  */
 
 /**

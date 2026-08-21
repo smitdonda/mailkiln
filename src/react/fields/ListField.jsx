@@ -6,7 +6,7 @@
  * bespoke field per list-shaped block would have made the registry's `schema` a
  * half-truth.
  *
- * @module mailforge/react/fields/ListField
+ * @module mailkiln/react/fields/ListField
  */
 
 import { useI18n } from '../i18n/index.jsx'
@@ -33,7 +33,7 @@ export function ListField({ value, onChange, field, FieldComponent }) {
   }
 
   return (
-    <div className="mf-field">
+    <div className="mk-field">
       {items.map((item, index) => (
         <div
           key={index}
@@ -42,18 +42,18 @@ export function ListField({ value, onChange, field, FieldComponent }) {
             flexDirection: 'column',
             gap: 8,
             padding: 8,
-            border: '1px solid var(--mf-border)',
+            border: '1px solid var(--mk-border)',
             borderRadius: 6,
-            background: 'var(--mf-bg)',
+            background: 'var(--mk-bg)',
           }}
         >
-          <div className="mf-field-row mf-field">
-            <span className="mf-label">
+          <div className="mk-field-row mk-field">
+            <span className="mk-label">
               {String(item?.label || item?.network || `#${index + 1}`)}
             </span>
             <button
               type="button"
-              className="mf-btn mf-btn-icon"
+              className="mk-btn mk-btn-icon"
               aria-label={t('field.removeItem')}
               title={t('field.removeItem')}
               onClick={() => onChange(items.filter((_, i) => i !== index))}
@@ -74,7 +74,7 @@ export function ListField({ value, onChange, field, FieldComponent }) {
 
       <button
         type="button"
-        className="mf-btn mf-btn-outline"
+        className="mk-btn mk-btn-outline"
         onClick={() => onChange([...items, { ...(field.itemDefaults ?? {}) }])}
       >
         <IconPlus />

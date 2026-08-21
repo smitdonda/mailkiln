@@ -6,7 +6,7 @@
  * in *content* — that guarantee is what makes migrating off another builder safe,
  * and it lives in these ~60 lines.
  *
- * @module mailforge/core/blocks/html
+ * @module mailkiln/core/blocks/html
  */
 
 import { defineBlock } from '../registry.js'

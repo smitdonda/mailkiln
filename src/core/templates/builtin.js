@@ -7,7 +7,7 @@
  * consumer's inbox if they forgot to replace it, whereas an empty one shows a
  * "No image selected" prompt in the editor and nothing at all in the export.
  *
- * @module mailforge/core/templates/builtin
+ * @module mailkiln/core/templates/builtin
  */
 
 import { createBlock, spacing } from '../schema.js'

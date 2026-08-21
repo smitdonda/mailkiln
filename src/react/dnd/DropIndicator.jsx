@@ -5,7 +5,7 @@
  * document, so hovering never touches the document and a drag produces exactly
  * one undo entry.
  *
- * @module mailforge/react/dnd/DropIndicator
+ * @module mailkiln/react/dnd/DropIndicator
  */
 
 import { useDragState } from './DndRoot.jsx'
@@ -20,5 +20,5 @@ export function DropIndicator({ columnId, index }) {
   const { active, target } = useDragState()
   if (!active || !target) return null
   if (target.columnId !== columnId || target.index !== index) return null
-  return <div className="mf-drop-indicator" aria-hidden="true" />
+  return <div className="mk-drop-indicator" aria-hidden="true" />
 }

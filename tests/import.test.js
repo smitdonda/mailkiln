@@ -70,7 +70,7 @@ describe('importFromHtml', () => {
     expect(() => load(/** @type {any} */ (null))).toThrow(/non-empty HTML string/)
   })
 
-  it('recognises the output mailforge produced itself', () => {
+  it('recognises the output mailkiln produced itself', () => {
     const html = renderToHtml(kitchenSinkDocument(), { vars: sampleVars })
     const report = load(html)
     expect(report.confidence).toBe(1)

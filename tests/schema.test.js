@@ -122,9 +122,9 @@ describe('validateDocument', () => {
     expect(validateDocument(doc).join(' ')).toMatch(/widths sum to 60, expected 100/)
   })
 
-  it('flags a future schema version as "upgrade mailforge"', () => {
+  it('flags a future schema version as "upgrade mailkiln"', () => {
     expect(validateDocument({ version: 99, settings: { width: 600 }, sections: [] }).join(' ')).toMatch(
-      /Upgrade mailforge/,
+      /Upgrade mailkiln/,
     )
   })
 
@@ -146,7 +146,7 @@ describe('assertDocument', () => {
 
   it('throws one error listing the problems', () => {
     expect(() => assertDocument({ version: 1, settings: {}, sections: 'nope' })).toThrow(
-      /mailforge: invalid document/,
+      /mailkiln: invalid document/,
     )
   })
 

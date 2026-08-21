@@ -10,11 +10,11 @@
  * Shared by the HTML and JSX renderers so the ejected component behaves like the
  * sent email rather than merely resembling it.
  *
- * @module mailforge/core/render/mobile
+ * @module mailkiln/core/render/mobile
  */
 
 /** Applied to a block wrapper that should disappear below the breakpoint. */
-export const HIDE_CLASS = 'mf-hide-sm'
+export const HIDE_CLASS = 'mk-hide-sm'
 
 /**
  * The mobile breakpoint for a given content width: one pixel *below* it.
@@ -39,7 +39,7 @@ export function mobileBreakpoint(width) {
  * @returns {string}
  */
 export function blockClass(id) {
-  return `mf-b-${String(id).replace(/[^\w-]/g, '')}`
+  return `mk-b-${String(id).replace(/[^\w-]/g, '')}`
 }
 
 /**

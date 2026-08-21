@@ -2,7 +2,7 @@
  * A block on the canvas: sortable, selectable, and — for blocks that declare
  * `inlineEdit` — editable in place.
  *
- * Inline editing targets the element the block marked with `data-mf-edit`, never
+ * Inline editing targets the element the block marked with `data-mk-edit`, never
  * the rendered block as a whole. The rendered block is a wrapper table around
  * styled markup; making *that* editable and reading its first child's innerHTML
  * back on blur wrote `<tbody><tr><td …>` into the text prop and destroyed the
@@ -13,7 +13,7 @@
  * a handle makes dragging feel fiddly. So: the whole block drags while it is
  * *not* being edited, and once selected the handle in the action strip takes over.
  *
- * @module mailforge/react/dnd/SortableBlock
+ * @module mailkiln/react/dnd/SortableBlock
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -95,7 +95,7 @@ export function SortableBlock({
   const commit = useCallback(
     /** @param {HTMLElement} target */
     (target) => {
-      const key = target.getAttribute('data-mf-edit')
+      const key = target.getAttribute('data-mk-edit')
       if (!key) return
       // Nothing reaches the document without passing the normalizer. Whatever
       // the browser's contentEditable produced — styled spans, <font>, a Word
@@ -111,7 +111,7 @@ export function SortableBlock({
   /** Commit whatever is currently marked editable — used by the toolbar. */
   const commitEdit = useCallback(() => {
     const target = /** @type {HTMLElement | null} */ (
-      bodyRef.current?.querySelector('[data-mf-edit]') ?? null
+      bodyRef.current?.querySelector('[data-mk-edit]') ?? null
     )
     if (target) commit(target)
   }, [commit])
@@ -120,7 +120,7 @@ export function SortableBlock({
   // element is created by `innerHTML` above and React does not own it.
   useEffect(() => {
     const target = /** @type {HTMLElement | null} */ (
-      bodyRef.current?.querySelector('[data-mf-edit]') ?? null
+      bodyRef.current?.querySelector('[data-mk-edit]') ?? null
     )
     if (!target || !editing) {
       setEditTarget(null)
@@ -136,7 +136,7 @@ export function SortableBlock({
       // edit. Committing there would re-render the markup out from under the
       // Range the popover saved.
       const next = /** @type {HTMLElement | null} */ (event.relatedTarget)
-      if (next?.closest?.('.mf-inline-toolbar')) return
+      if (next?.closest?.('.mk-inline-toolbar')) return
       commit(target)
     }
 
@@ -192,7 +192,7 @@ export function SortableBlock({
   return (
     <div
       ref={setNodeRef}
-      className="mf-node"
+      className="mk-node"
       style={style}
       data-selected={selected || undefined}
       data-dragging={isDragging || undefined}
@@ -218,7 +218,7 @@ export function SortableBlock({
       ) : null}
 
       {condition ? (
-        <span className="mf-cond-badge" data-off={condition.hidden || undefined} title={condition.label}>
+        <span className="mk-cond-badge" data-off={condition.hidden || undefined} title={condition.label}>
           {condition.label}
         </span>
       ) : null}
@@ -227,15 +227,15 @@ export function SortableBlock({
         <>
           {/* The toolbar takes the top-left slot while editing, so the type
               label steps aside rather than stacking two chips on one corner. */}
-          {editing ? null : <span className="mf-node-label">{def?.label ?? block.type}</span>}
-          <div className="mf-node-tools">
+          {editing ? null : <span className="mk-node-label">{def?.label ?? block.type}</span>}
+          <div className="mk-node-tools">
             {/* The handle is always present while selected, not just while
                 editing: once a text block is selected its body becomes
                 contentEditable and loses its drag listeners, and a selected
                 block you cannot move is a dead end. */}
             <button
               type="button"
-              className="mf-node-tool"
+              className="mk-node-tool"
               data-handle="true"
               aria-label={t('canvas.drag')}
               title={t('canvas.drag')}
@@ -246,7 +246,7 @@ export function SortableBlock({
             </button>
             <button
               type="button"
-              className="mf-node-tool"
+              className="mk-node-tool"
               aria-label={t('canvas.duplicate')}
               title={t('canvas.duplicate')}
               onClick={(event) => {
@@ -258,7 +258,7 @@ export function SortableBlock({
             </button>
             <button
               type="button"
-              className="mf-node-tool"
+              className="mk-node-tool"
               aria-label={t('canvas.delete')}
               title={t('canvas.delete')}
               onClick={(event) => {
@@ -275,7 +275,7 @@ export function SortableBlock({
       {/* Classed, not bare: the "condition is false" dimming has to target the
           block's content without also dimming the chrome that lets you turn the
           condition back off. */}
-      <div className="mf-node-body" ref={bodyRef} />
+      <div className="mk-node-body" ref={bodyRef} />
     </div>
   )
 }

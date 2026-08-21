@@ -15,7 +15,7 @@
  *      Committing on every hover would make one drag produce a dozen undo
  *      entries and re-render the canvas continuously. `onDragEnd` commits once.
  *
- * @module mailforge/react/dnd/DndRoot
+ * @module mailkiln/react/dnd/DndRoot
  */
 
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
@@ -33,7 +33,7 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { findNode, getBlockDef } from '../../core/index.js'
 import { useI18n } from '../i18n/index.jsx'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { DragOverlayPreview } from './DragOverlayPreview.jsx'
 import { activeCenterY, isNoopDrop, resolveDropTarget } from './resolveDrop.js'
 
@@ -58,7 +58,7 @@ export function useDragState() {
  * @returns {import('react').ReactElement}
  */
 export function DndRoot({ children }) {
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const t = useI18n()
   const [active, setActive] = useState(/** @type {any} */ (null))
   const [target, setTarget] = useState(/** @type {any} */ (null))

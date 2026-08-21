@@ -9,7 +9,7 @@
  * becomes forty undo steps. Commits that share a `tag` within `coalesceMs`
  * replace the present instead of pushing a new entry.
  *
- * @module mailforge/core/history
+ * @module mailkiln/core/history
  */
 
 /** @typedef {import('./types.js').EmailDocument} EmailDocument */

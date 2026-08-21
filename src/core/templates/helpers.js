@@ -4,7 +4,7 @@
  * The templates are functions, not constants: each call mints fresh ids, so
  * picking the same template twice cannot produce a document with duplicate ids.
  *
- * @module mailforge/core/templates/helpers
+ * @module mailkiln/core/templates/helpers
  */
 
 import { createBlock, createColumn, createDocument, createRow, createSection, spacing } from '../schema.js'

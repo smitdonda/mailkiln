@@ -11,7 +11,7 @@
  * Labels are deliberately absent. Core is locale-free; the editor supplies
  * translated names from `richtext`/`link` i18n keys.
  *
- * @module mailforge/core/links
+ * @module mailkiln/core/links
  */
 
 /** Path names, without the `{{ }}`. */

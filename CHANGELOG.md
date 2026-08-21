@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to mailforge are documented here. This project follows
+All notable changes to mailkiln are documented here. This project follows
 [semantic versioning](https://semver.org/); versions are managed with
 [changesets](https://github.com/changesets/changesets).
 
@@ -51,12 +51,12 @@ are settling, and a breaking change to either is likely before 1.0.
 - **Special links.** Every `url` field — button, image, social, video, and the inline
   toolbar's link popover — offers `{{unsubscribe_url}}`, `{{preferences_url}}` and
   `{{view_in_browser_url}}`, replaceable via the `specialLinks` prop. The picker and the
-  unknown-variable lint rule read one list from `mailforge/core`, so a link you insert from
+  unknown-variable lint rule read one list from `mailkiln/core`, so a link you insert from
   the UI can never be reported as undeclared. Previously the linter told you the
   unsubscribe link was missing and offered no way to add it.
 - **Mobile controls.** A "Mobile" group on every block: `hideOnMobile` (the renderer already
-  emitted a `.mf-hide-sm` rule that nothing could ever set) and `mobileFontSize` on text,
-  heading and button blocks, scoped by a stable `mf-b-<id>` class. Honoured by the HTML
+  emitted a `.mk-hide-sm` rule that nothing could ever set) and `mobileFontSize` on text,
+  heading and button blocks, scoped by a stable `mk-b-<id>` class. Honoured by the HTML
   export, the preview *and* the ejected JSX, whose `<Head>` now carries the matching media
   query. Dimmed rather than hidden on the design canvas, so the setting stays undoable.
 - **Per-tool configuration.** `tools={{ image: { enabled: false }, button: { position: 0,
@@ -67,7 +67,7 @@ are settling, and a breaking change to either is likely before 1.0.
 - **Display conditions.** `showIf` on any section, row or block — a merge path, an operator
   (`truthy`, `falsy`, `empty`, `notEmpty`, `eq`, `ne`, `gt`, `lt`) and a value. Unlayer bakes
   its customer's ESP template syntax into the exported HTML, which welds the output to one
-  platform; because mailforge ejects a component, a condition becomes a **real JSX
+  platform; because mailkiln ejects a component, a condition becomes a **real JSX
   expression** — `{user.isPro && (…)}` — that the consumer's own bundler type-checks. HTML,
   MJML and the plain-text alternative all resolve it against the sample data, so the text
   part can never disagree with the HTML one.
@@ -88,7 +88,7 @@ are settling, and a breaking change to either is likely before 1.0.
 - **Four starter documents** (Welcome, Receipt, Newsletter, Password reset) in the
   headless core, each passing the built-in linter with zero errors — enforced by a
   test. There is no template gallery in the editor UI; use them as a starting `value`.
-- **Send a test email** via an `onSendTest` hook: mailforge renders the HTML and text
+- **Send a test email** via an `onSendTest` hook: mailkiln renders the HTML and text
   and hands them over — it has no transport of its own. The dialog validates
   recipients and shows lint errors before sending.
 - Section and row action strips (move up/down, duplicate, delete), plus the same
@@ -121,11 +121,11 @@ all nine declared through the public `defineBlock` API.
 
 ### Packaging
 
-- ESM + CJS, `mailforge` and `mailforge/core` subpath exports, one shared registry
+- ESM + CJS, `mailkiln` and `mailkiln/core` subpath exports, one shared registry
   across both entries and both formats.
 - Written in plain JavaScript; `.d.ts` generated from JSDoc and guarded by a strict
   consumer-style fixture.
 - Two runtime dependencies: `@dnd-kit/core` and `@dnd-kit/sortable`. `linkedom` is
   an optional peer dependency, needed only for HTML import in Node.
-- Tailwind v4 utilities are `mf:`-prefixed with no preflight, and every chrome class
-  is scoped under `.mf-root` — zero style bleed in either direction.
+- Tailwind v4 utilities are `mk:`-prefixed with no preflight, and every chrome class
+  is scoped under `.mk-root` — zero style bleed in either direction.

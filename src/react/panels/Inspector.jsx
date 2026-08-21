@@ -9,12 +9,12 @@
  * Fields are grouped into collapsible sections so the common controls stay above
  * the fold; a text block otherwise opens with fourteen inputs.
  *
- * @module mailforge/react/panels/Inspector
+ * @module mailkiln/react/panels/Inspector
  */
 
 import { useMemo, useState } from 'react'
 import { FONT_OPTIONS, getBlockDef } from '../../core/index.js'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { Field, getIn } from '../fields/index.jsx'
 import { LayoutPicker } from './LayoutPicker.jsx'
@@ -23,24 +23,24 @@ import { matchPreset } from '../rowPresets.js'
 import { IconChevronRight, IconPlus } from '../icons.jsx'
 
 /**
- * Standalone inspector, for consumers assembling their own layout. `<MailForge>`
+ * Standalone inspector, for consumers assembling their own layout. `<MailKiln>`
  * itself renders these fields inside {@link import('./SidePanel.jsx').SidePanel}.
  *
  * @returns {import('react').ReactElement}
  */
 export function Inspector() {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const { selection } = store
 
   return (
-    <aside className="mf-panel" aria-label={t('inspector.title')}>
-      <div className="mf-panel-head">
-        <span className="mf-panel-title">
+    <aside className="mk-panel" aria-label={t('inspector.title')}>
+      <div className="mk-panel-head">
+        <span className="mk-panel-title">
           {selection ? titleFor(selection, t) : t('inspector.document')}
         </span>
       </div>
-      <div className="mf-panel-body">
+      <div className="mk-panel-body">
         {selection ? <NodeFields location={selection} /> : <DocumentFields />}
       </div>
     </aside>
@@ -128,7 +128,7 @@ function FieldGroups({ groups, values, onChange }) {
             {body}
           </CollapsibleGroup>
         ) : (
-          <div className="mf-fields" key="main">
+          <div className="mk-fields" key="main">
             {body}
           </div>
         )
@@ -147,17 +147,17 @@ function FieldGroups({ groups, values, onChange }) {
 function CollapsibleGroup({ label, defaultOpen = false, children }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className="mf-group">
+    <div className="mk-group">
       <button
         type="button"
-        className="mf-group-head"
+        className="mk-group-head"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
         <IconChevronRight />
         {label}
       </button>
-      {open ? <div className="mf-group-body">{children}</div> : null}
+      {open ? <div className="mk-group-body">{children}</div> : null}
     </div>
   )
 }
@@ -169,7 +169,7 @@ function CollapsibleGroup({ label, defaultOpen = false, children }) {
  */
 function BlockFields({ location }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const block = location.node
   const def = getBlockDef(block.type)
 
@@ -177,7 +177,7 @@ function BlockFields({ location }) {
 
   if (!def) {
     return (
-      <p className="mf-empty">
+      <p className="mk-empty">
         Block type “{block.type}” is not registered, so it has no editor. Its content is preserved.
       </p>
     )
@@ -193,7 +193,7 @@ function BlockFields({ location }) {
       ) : (
         // A block with no fields of its own still gets a visibility group —
         // `showIf` is not a block property, so it does not depend on the schema.
-        <p className="mf-empty">{t('inspector.none')}</p>
+        <p className="mk-empty">{t('inspector.none')}</p>
       )}
       <CollapsibleGroup label={t('visibility.group')} defaultOpen={Boolean(block.showIf)}>
         <VisibilityFields node={block} />
@@ -209,7 +209,7 @@ function BlockFields({ location }) {
  */
 function ColumnFields({ location }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const column = location.node
 
   /** @type {import('../../core/types.js').FieldDef[]} */
@@ -245,7 +245,7 @@ function ColumnFields({ location }) {
  */
 function RowFields({ location }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const row = location.node
   const widths = row.columns.map((column) => Number(column.props?.width) || 0)
 
@@ -259,8 +259,8 @@ function RowFields({ location }) {
 
   return (
     <>
-      <div className="mf-fields" style={{ paddingBottom: 4 }}>
-        <span className="mf-label">{t('inspector.layout')}</span>
+      <div className="mk-fields" style={{ paddingBottom: 4 }}>
+        <span className="mk-label">{t('inspector.layout')}</span>
       </div>
       {/* Thumbnails, not a `1 2 3 4` segmented control: the numbers said nothing
           about the result and could not express an uneven split, which is why
@@ -294,7 +294,7 @@ function RowFields({ location }) {
  */
 function SectionFields({ location }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const section = location.node
 
   /** @type {import('../../core/types.js').FieldDef[]} */
@@ -331,10 +331,10 @@ function SectionFields({ location }) {
       <CollapsibleGroup label={t('visibility.group')} defaultOpen={Boolean(section.showIf)}>
         <VisibilityFields node={section} />
       </CollapsibleGroup>
-      <div className="mf-fields">
+      <div className="mk-fields">
         <button
           type="button"
-          className="mf-btn mf-btn-outline"
+          className="mk-btn mk-btn-outline"
           onClick={() => store.addRow(section.id, 1)}
         >
           <IconPlus />
@@ -352,7 +352,7 @@ function SectionFields({ location }) {
  */
 export function DocumentFields() {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
 
   /** @type {import('../../core/types.js').FieldDef[]} */
   const schema = [
@@ -387,7 +387,7 @@ export function DocumentFields() {
 
   return (
     <>
-      <div className="mf-section-label">{t('inspector.document')}</div>
+      <div className="mk-section-label">{t('inspector.document')}</div>
       <FieldGroups
         groups={groupFields(schema)}
         values={store.doc.settings}

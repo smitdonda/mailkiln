@@ -1,7 +1,7 @@
 /**
  * Starter templates.
  *
- * @module mailforge/core/templates
+ * @module mailkiln/core/templates
  */
 
 import {

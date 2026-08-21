@@ -1,7 +1,7 @@
 /**
  * Guard for the *published* types.
  *
- * mailforge ships `.d.ts` files generated from JSDoc. Those declarations are the
+ * mailkiln ships `.d.ts` files generated from JSDoc. Those declarations are the
  * only thing a consumer's editor ever sees, so they get their own check: this
  * file imports the built package the way a consumer does and is type-checked
  * under `strict` against `dist/`. If the generated declarations degrade into
@@ -14,7 +14,7 @@
  */
 
 import {
-  MailForge,
+  MailKiln,
   createBlock,
   createDocument,
   defineBlock,
@@ -25,8 +25,8 @@ import {
   moveBlock,
   normalize,
   spacing,
-} from 'mailforge'
-import { lintDocument, renderToJsx, renderToTsx, importFromHtml } from 'mailforge/core'
+} from 'mailkiln'
+import { lintDocument, renderToJsx, renderToTsx, importFromHtml } from 'mailkiln/core'
 
 // --- documents -------------------------------------------------------------
 
@@ -148,8 +148,8 @@ void [width, badSections, badWidth, hasPath, jsxSource, tsxSource, alsoJsx, erro
 // --- the React entry ------------------------------------------------------
 
 /** @type {import('react').ReactElement} */
-const editor = MailForge({ defaultValue: doc, vars, theme: { accent: '#6366f1' } })
+const editor = MailKiln({ defaultValue: doc, vars, theme: { accent: '#6366f1' } })
 void editor
 
 // @ts-expect-error - `appearance` only accepts 'light' | 'dark' | 'auto'
-MailForge({ appearance: 'sepia' })
+MailKiln({ appearance: 'sepia' })

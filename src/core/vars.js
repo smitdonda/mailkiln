@@ -8,7 +8,7 @@
  * unknown-path lint rule, the preview render, and the `Props` interface on the
  * exported component. No declaration step, nothing to keep in sync.
  *
- * @module mailforge/core/vars
+ * @module mailkiln/core/vars
  */
 
 /** @typedef {import('./types.js').VarsDef} VarsDef */
@@ -106,7 +106,7 @@ export function getPath(obj, path) {
 export function defineVars(init = {}) {
   const sample = init.sample ?? {}
   if (typeof sample !== 'object' || Array.isArray(sample)) {
-    throw new Error('mailforge: defineVars({ sample }) expects `sample` to be a plain object.')
+    throw new Error('mailkiln: defineVars({ sample }) expects `sample` to be a plain object.')
   }
   const types = init.types ?? {}
   const paths = walkSample(sample)
@@ -403,7 +403,7 @@ export const FOREIGN_VAR_SYNTAXES = [
 ]
 
 /**
- * Rewrite foreign merge tags to mailforge's `{{path}}` form. This is what turns
+ * Rewrite foreign merge tags to mailkiln's `{{path}}` form. This is what turns
  * "we can import your HTML" into "we can import your Mailchimp template".
  *
  * @param {string} text
@@ -411,7 +411,7 @@ export const FOREIGN_VAR_SYNTAXES = [
  * @param {string[]} [options.only] Run exactly these syntax ids (enables opt-in ones).
  * @returns {{ text: string, found: string[] }}
  */
-export function foreignVarsToMailforge(text, options = {}) {
+export function foreignVarsToMailkiln(text, options = {}) {
   if (typeof text !== 'string' || !text) return { text: text ?? '', found: [] }
   /** @type {string[]} */
   const found = []

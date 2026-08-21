@@ -8,7 +8,7 @@
  * function also means there is exactly one place to change if the day comes
  * when this has to be reimplemented with `Range`.
  *
- * @module mailforge/react/dnd/exec
+ * @module mailkiln/react/dnd/exec
  */
 
 /**

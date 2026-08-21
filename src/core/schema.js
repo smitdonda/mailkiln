@@ -6,7 +6,7 @@
  * `value` prop) instead of letting a malformed document produce broken email
  * HTML three layers later.
  *
- * @module mailforge/core/schema
+ * @module mailkiln/core/schema
  */
 
 import { getBlockDef } from './registry.js'
@@ -318,7 +318,7 @@ export function validateDocument(doc, options = {}) {
   if (typeof doc.version !== 'number') problems.push('document.version must be a number.')
   else if (doc.version > SCHEMA_VERSION) {
     problems.push(
-      `document.version is ${doc.version} but this build of mailforge understands ${SCHEMA_VERSION}. Upgrade mailforge.`,
+      `document.version is ${doc.version} but this build of mailkiln understands ${SCHEMA_VERSION}. Upgrade mailkiln.`,
     )
   }
   if (!isPlainObject(doc.settings)) problems.push('document.settings must be an object.')
@@ -418,7 +418,7 @@ export function assertDocument(doc, options = {}) {
     const shown = problems.slice(0, 12)
     const more = problems.length - shown.length
     throw new Error(
-      `mailforge: invalid document.\n  - ${shown.join('\n  - ')}${more > 0 ? `\n  … and ${more} more` : ''}`,
+      `mailkiln: invalid document.\n  - ${shown.join('\n  - ')}${more > 0 ? `\n  … and ${more} more` : ''}`,
     )
   }
   return doc

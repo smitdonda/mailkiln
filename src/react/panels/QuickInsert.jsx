@@ -5,11 +5,11 @@
  * a key that does nothing is worse than one that says nothing, so the hint and
  * the feature ship together.
  *
- * @module mailforge/react/panels/QuickInsert
+ * @module mailkiln/react/panels/QuickInsert
  */
 
 import { useMemo, useRef, useState } from 'react'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { targetColumnId } from './BlockPalette.jsx'
 import { exhaustedTools } from '../tools.js'
@@ -22,7 +22,7 @@ import { BLOCK_ICONS, IconCode, IconSearch } from '../icons.jsx'
  */
 export function QuickInsert({ onClose }) {
   const t = useI18n()
-  const { blocks, store, tools } = useMailForgeContext()
+  const { blocks, store, tools } = useMailKilnContext()
   const [query, setQuery] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
   const inputRef = useRef(/** @type {HTMLInputElement | null} */ (null))
@@ -73,19 +73,19 @@ export function QuickInsert({ onClose }) {
   }
 
   return (
-    <div className="mf-overlay mf-overlay-top" role="presentation" onClick={onClose}>
+    <div className="mk-overlay mk-overlay-top" role="presentation" onClick={onClose}>
       <div
-        className="mf-quick"
+        className="mk-quick"
         role="dialog"
         aria-modal="true"
         aria-label={t('quick.title')}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mf-quick-search">
+        <div className="mk-quick-search">
           <IconSearch />
           <input
             ref={inputRef}
-            className="mf-input"
+            className="mk-input"
             type="text"
             autoFocus
             value={query}
@@ -100,9 +100,9 @@ export function QuickInsert({ onClose }) {
         </div>
 
         {matches.length === 0 ? (
-          <p className="mf-empty">{t('quick.empty', { query })}</p>
+          <p className="mk-empty">{t('quick.empty', { query })}</p>
         ) : (
-          <ul className="mf-quick-list" role="listbox" aria-label={t('quick.title')}>
+          <ul className="mk-quick-list" role="listbox" aria-label={t('quick.title')}>
             {matches.map((def, index) => {
               const Icon = BLOCK_ICONS[String(def.icon ?? '')] ?? IconCode
               return (
@@ -110,7 +110,7 @@ export function QuickInsert({ onClose }) {
                   key={def.type}
                   role="option"
                   aria-selected={index === activeIndex}
-                  className="mf-quick-item"
+                  className="mk-quick-item"
                   data-active={index === activeIndex || undefined}
                   onMouseEnter={() => setActiveIndex(index)}
                   onMouseDown={(event) => {
@@ -118,11 +118,11 @@ export function QuickInsert({ onClose }) {
                     insert(def)
                   }}
                 >
-                  <span className="mf-quick-icon">
+                  <span className="mk-quick-icon">
                     <Icon />
                   </span>
-                  <span className="mf-quick-label">{def.label}</span>
-                  <span className="mf-quick-group">{def.group}</span>
+                  <span className="mk-quick-label">{def.label}</span>
+                  <span className="mk-quick-group">{def.group}</span>
                 </li>
               )
             })}

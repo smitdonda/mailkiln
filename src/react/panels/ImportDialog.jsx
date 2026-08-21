@@ -5,13 +5,13 @@
  * because "9 of 11 blocks are editable, 2 kept as raw HTML" is a decision the user
  * should get to make rather than discover.
  *
- * @module mailforge/react/panels/ImportDialog
+ * @module mailkiln/react/panels/ImportDialog
  */
 
 import { useRef, useState } from 'react'
 import { importFromHtml } from '../../core/index.js'
 import { useI18n } from '../i18n/index.jsx'
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 
 /**
  * @param {object} props
@@ -20,7 +20,7 @@ import { useMailForgeContext } from '../context.jsx'
  */
 export function ImportDialog({ onClose }) {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
   const [html, setHtml] = useState('')
   const [report, setReport] = useState(/** @type {import('../../core/types.js').ImportReport | null} */ (null))
   const [error, setError] = useState(/** @type {string | null} */ (null))
@@ -63,20 +63,20 @@ export function ImportDialog({ onClose }) {
   }
 
   return (
-    <div className="mf-overlay" role="presentation" onClick={onClose}>
+    <div className="mk-overlay" role="presentation" onClick={onClose}>
       <div
-        className="mf-dialog"
+        className="mk-dialog"
         role="dialog"
         aria-modal="true"
         aria-label={t('import.title')}
         onClick={(event) => event.stopPropagation()}
       >
         <h2>{t('import.title')}</h2>
-        <p className="mf-help">{t('import.hint')}</p>
+        <p className="mk-help">{t('import.hint')}</p>
 
         <textarea
           ref={dropRef}
-          className="mf-textarea"
+          className="mk-textarea"
           style={{ minHeight: 200 }}
           value={html}
           placeholder={t('import.placeholder')}
@@ -90,23 +90,23 @@ export function ImportDialog({ onClose }) {
           onDrop={onDrop}
         />
 
-        <div className="mf-dropzone" data-over={dragging || undefined}>
+        <div className="mk-dropzone" data-over={dragging || undefined}>
           {t('import.drop')}
         </div>
 
         {error ? (
-          <p className="mf-help" style={{ color: 'var(--mf-danger)' }}>
+          <p className="mk-help" style={{ color: 'var(--mk-danger)' }}>
             {error}
           </p>
         ) : null}
 
         {report ? (
-          <div className="mf-report">
-            <span className="mf-report-stat">
+          <div className="mk-report">
+            <span className="mk-report-stat">
               {Math.round(report.confidence * 100)}%
-              <span className="mf-help">{t('import.editable')}</span>
+              <span className="mk-help">{t('import.editable')}</span>
             </span>
-            <div className="mf-meter">
+            <div className="mk-meter">
               <span style={{ width: `${Math.round(report.confidence * 100)}%` }} />
             </div>
             <strong>
@@ -122,27 +122,27 @@ export function ImportDialog({ onClose }) {
             ) : null}
             {report.warnings.length ? (
               <>
-                <span className="mf-label">{t('import.warnings')}</span>
+                <span className="mk-label">{t('import.warnings')}</span>
                 <ul style={{ margin: 0, paddingLeft: 18 }}>
                   {report.warnings.map((warning) => (
-                    <li key={warning.code} className="mf-help">
+                    <li key={warning.code} className="mk-help">
                       {warning.message}
                     </li>
                   ))}
                 </ul>
               </>
             ) : null}
-            <span className="mf-help">{t('import.replaceWarning')}</span>
+            <span className="mk-help">{t('import.replaceWarning')}</span>
           </div>
         ) : null}
 
-        <div className="mf-dialog-actions">
-          <button type="button" className="mf-btn" onClick={onClose}>
+        <div className="mk-dialog-actions">
+          <button type="button" className="mk-btn" onClick={onClose}>
             {t('import.cancel')}
           </button>
           <button
             type="button"
-            className="mf-btn mf-btn-outline"
+            className="mk-btn mk-btn-outline"
             disabled={!html.trim()}
             onClick={analyse}
           >
@@ -150,7 +150,7 @@ export function ImportDialog({ onClose }) {
           </button>
           <button
             type="button"
-            className="mf-btn mf-btn-primary"
+            className="mk-btn mk-btn-primary"
             disabled={!report}
             onClick={confirm}
           >

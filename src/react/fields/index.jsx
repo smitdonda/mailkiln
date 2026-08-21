@@ -5,7 +5,7 @@
  * Inspector builds itself, for built-in and third-party blocks alike. There is no
  * per-block Inspector component anywhere in this package.
  *
- * @module mailforge/react/fields
+ * @module mailkiln/react/fields
  */
 
 import { useId } from 'react'
@@ -40,16 +40,16 @@ export function Field({ field, value, onChange }) {
   const id = useId()
 
   const label = (
-    <label className="mf-label" htmlFor={id}>
+    <label className="mk-label" htmlFor={id}>
       {field.label}
     </label>
   )
-  const help = field.help ? <span className="mf-help">{field.help}</span> : null
+  const help = field.help ? <span className="mk-help">{field.help}</span> : null
 
   switch (field.type) {
     case 'text':
       return (
-        <div className="mf-field">
+        <div className="mk-field">
           {label}
           <VarInput
             id={id}
@@ -68,7 +68,7 @@ export function Field({ field, value, onChange }) {
     case 'url':
     case 'link':
       return (
-        <div className="mf-field">
+        <div className="mk-field">
           {label}
           <LinkField
             id={id}
@@ -84,7 +84,7 @@ export function Field({ field, value, onChange }) {
     case 'textarea':
     case 'richtext':
       return (
-        <div className="mf-field">
+        <div className="mk-field">
           {label}
           <VarInput
             id={id}
@@ -100,11 +100,11 @@ export function Field({ field, value, onChange }) {
 
     case 'number':
       return (
-        <div className="mf-field">
+        <div className="mk-field">
           {label}
           <input
             id={id}
-            className="mf-input"
+            className="mk-input"
             type="number"
             value={value ?? ''}
             min={field.min}
@@ -120,14 +120,14 @@ export function Field({ field, value, onChange }) {
 
     case 'range':
       return (
-        <div className="mf-field">
-          <div className="mf-field-row mf-field">
+        <div className="mk-field">
+          <div className="mk-field-row mk-field">
             {label}
-            <span className="mf-value">{value}px</span>
+            <span className="mk-value">{value}px</span>
           </div>
           <input
             id={id}
-            className="mf-range"
+            className="mk-range"
             type="range"
             value={Number(value) || 0}
             min={field.min ?? 0}
@@ -141,18 +141,18 @@ export function Field({ field, value, onChange }) {
 
     case 'color':
       return (
-        <div className="mf-field">
+        <div className="mk-field">
           {label}
-          <div className="mf-color">
+          <div className="mk-color">
             {/* The swatch is the native picker, made invisible and stretched over
                 a styled button — `input[type=color]` cannot be styled itself, and
                 its default chrome looks nothing like the rest of the panel. */}
             <span
-              className="mf-color-swatch"
+              className="mk-color-swatch"
               data-empty={String(!value)}
               // React's CSSProperties type has no index signature for custom
               // properties, so a cast is the only way to pass one.
-              style={/** @type {any} */ ({ '--mf-swatch': String(value || 'transparent') })}
+              style={/** @type {any} */ ({ '--mk-swatch': String(value || 'transparent') })}
             >
               <input
                 id={id}
@@ -163,7 +163,7 @@ export function Field({ field, value, onChange }) {
               />
             </span>
             <input
-              className="mf-input"
+              className="mk-input"
               type="text"
               value={value ?? ''}
               placeholder="inherit"
@@ -178,11 +178,11 @@ export function Field({ field, value, onChange }) {
     case 'select':
     case 'font':
       return (
-        <div className="mf-field">
+        <div className="mk-field">
           {label}
           <select
             id={id}
-            className="mf-select"
+            className="mk-select"
             value={value ?? ''}
             onChange={(event) => {
               const raw = event.target.value
@@ -202,13 +202,13 @@ export function Field({ field, value, onChange }) {
 
     case 'toggle':
       return (
-        <div className="mf-field mf-field-row">
-          <span className="mf-label" id={id}>
+        <div className="mk-field mk-field-row">
+          <span className="mk-label" id={id}>
             {field.label}
           </span>
           <button
             type="button"
-            className="mf-toggle"
+            className="mk-toggle"
             role="switch"
             aria-checked={!!value}
             aria-labelledby={id}
@@ -219,11 +219,11 @@ export function Field({ field, value, onChange }) {
 
     case 'align':
       return (
-        <div className="mf-field">
-          <span className="mf-label" id={id}>
+        <div className="mk-field">
+          <span className="mk-label" id={id}>
             {field.label}
           </span>
-          <div className="mf-seg" role="group" aria-labelledby={id}>
+          <div className="mk-seg" role="group" aria-labelledby={id}>
             {[
               ['left', t('field.alignLeft'), IconAlignLeft],
               ['center', t('field.alignCenter'), IconAlignCenter],
@@ -249,18 +249,18 @@ export function Field({ field, value, onChange }) {
 
     case 'spacing':
       return (
-        <div className="mf-field">
+        <div className="mk-field">
           {label}
-          <div className="mf-spacing">
+          <div className="mk-spacing">
             {[
               ['top', t('field.top')],
               ['right', t('field.right')],
               ['bottom', t('field.bottom')],
               ['left', t('field.left')],
             ].map(([side, sideLabel]) => (
-              <div className="mf-spacing-cell" key={side}>
+              <div className="mk-spacing-cell" key={side}>
                 <input
-                  className="mf-input"
+                  className="mk-input"
                   type="number"
                   min={0}
                   aria-label={`${field.label} ${sideLabel}`}
@@ -282,7 +282,7 @@ export function Field({ field, value, onChange }) {
 
     case 'image':
       return (
-        <div className="mf-field">
+        <div className="mk-field">
           {label}
           <ImageField id={id} value={value ?? ''} onChange={(next) => onChange(next, field.key)} />
           {help}
@@ -291,7 +291,7 @@ export function Field({ field, value, onChange }) {
 
     case 'list':
       return (
-        <div className="mf-field">
+        <div className="mk-field">
           {label}
           <ListField
             field={field}

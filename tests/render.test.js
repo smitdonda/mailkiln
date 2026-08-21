@@ -98,7 +98,7 @@ describe('renderToHtml', () => {
 
   it('interpolates merge variables with sample data', () => {
     expect(html).toContain('Thanks, Smit!')
-    expect(html).toContain('MF-2291')
+    expect(html).toContain('MK-2291')
   })
 
   it('renders the preheader hidden, with zero-width padding', () => {
@@ -109,7 +109,7 @@ describe('renderToHtml', () => {
 
   it('stacks columns on mobile via a media query', () => {
     expect(html).toContain('@media only screen and (max-width:599px)')
-    expect(html).toContain('.mf-stack{display:block !important')
+    expect(html).toContain('.mk-stack{display:block !important')
   })
 
   it('gives every column both a px width attribute and a percentage style', () => {
@@ -136,7 +136,7 @@ describe('renderToHtml', () => {
     doc.sections[0].props.backgroundColor = '#eef2f7'
     const html = renderToHtml(doc)
 
-    const container = html.slice(html.indexOf('class="mf-container"'))
+    const container = html.slice(html.indexOf('class="mk-container"'))
     expect(container.slice(0, 220)).toContain('background-color:#eef2f7')
     expect(container.slice(0, 220)).not.toContain('#ffffff')
 
@@ -150,7 +150,7 @@ describe('renderToHtml', () => {
     doc.sections[0].props.backgroundColor = '#eef2f7'
     doc.sections[0].props.fullWidth = true
     const html = renderToHtml(doc)
-    const container = html.slice(html.indexOf('class="mf-container"'), html.indexOf('<tr>', html.indexOf('class="mf-container"')))
+    const container = html.slice(html.indexOf('class="mk-container"'), html.indexOf('<tr>', html.indexOf('class="mk-container"')))
     expect(container).not.toContain('background-color')
   })
 
@@ -222,17 +222,17 @@ describe('block HTML', () => {
       vars: sampleVars,
       options: { editable: true },
     })
-    expect(renderBlockHtml(createBlock('text'), editableCtx)).toContain('data-mf-edit="text"')
-    expect(renderBlockHtml(createBlock('heading'), editableCtx)).toContain('data-mf-edit="text"')
+    expect(renderBlockHtml(createBlock('text'), editableCtx)).toContain('data-mk-edit="text"')
+    expect(renderBlockHtml(createBlock('heading'), editableCtx)).toContain('data-mk-edit="text"')
     // Default context — every export path — leaves it out.
-    expect(renderBlockHtml(createBlock('text'), ctx)).not.toContain('data-mf-edit')
+    expect(renderBlockHtml(createBlock('text'), ctx)).not.toContain('data-mk-edit')
   })
 
   it('never leaks the editing marker into any export', () => {
     const doc = kitchenSinkDocument()
     const bundle = exportDocument(doc, { vars: sampleVars })
     for (const [format, source] of Object.entries(bundle)) {
-      expect(source, `${format} contains the editor-only marker`).not.toContain('data-mf-edit')
+      expect(source, `${format} contains the editor-only marker`).not.toContain('data-mk-edit')
     }
   })
 
@@ -379,7 +379,7 @@ describe('documentName', () => {
     const files = exportFilenames(documentName(doc))
     expect(files.jsx).toBe('OrderShipped.jsx')
     expect(files.html).toBe('order-shipped.html')
-    expect(files.json).toBe('order-shipped.mailforge.json')
+    expect(files.json).toBe('order-shipped.mailkiln.json')
   })
 
   it('lets an explicit name option still win', () => {
@@ -403,7 +403,7 @@ describe('renderToMjml', () => {
     expect(mjml.trimEnd().endsWith('</mjml>')).toBe(true)
   })
 
-  it('maps each mailforge row to its own mj-section', () => {
+  it('maps each mailkiln row to its own mj-section', () => {
     expect(mjml).toContain('<mj-section')
     expect(mjml).toContain('<mj-column')
   })
@@ -427,7 +427,7 @@ describe('renderToText', () => {
 
   it('strips markup and keeps the copy', () => {
     expect(text).toContain('Thanks, Smit!')
-    expect(text).toContain('Order MF-2291 is packed.')
+    expect(text).toContain('Order MK-2291 is packed.')
     expect(text).not.toContain('<')
   })
 
@@ -486,15 +486,15 @@ describe('mobile controls', () => {
   it('emits nothing at all when no block opts in', () => {
     // The common case must stay byte-identical — mobile controls are opt-in.
     const html = renderToHtml(docWithText({ text: 'Hi' }))
-    expect(html).not.toMatch(/class="mf-hide-sm/)
-    expect(html).not.toMatch(/mf-b-/)
+    expect(html).not.toMatch(/class="mk-hide-sm/)
+    expect(html).not.toMatch(/mk-b-/)
     expect(renderToJsx(docWithText({ text: 'Hi' }))).toContain('<Head />')
   })
 
   it('marks a hidden block and hides it below the breakpoint', () => {
     const html = renderToHtml(docWithText({ text: 'Hi', hideOnMobile: true }))
-    expect(html).toContain('class="mf-hide-sm"')
-    expect(html).toContain('.mf-hide-sm{display:none !important}')
+    expect(html).toContain('class="mk-hide-sm"')
+    expect(html).toContain('.mk-hide-sm{display:none !important}')
     // Still present in the markup — desktop and Outlook must show it.
     expect(html).toContain('Hi')
   })
@@ -503,15 +503,15 @@ describe('mobile controls', () => {
     const doc = docWithText({ text: 'Hi', mobileFontSize: 13 })
     const id = doc.sections[0].rows[0].columns[0].blocks[0].id
     const html = renderToHtml(doc)
-    expect(html).toContain(`class="mf-b-${id}"`)
-    expect(html).toContain(`.mf-b-${id} td,.mf-b-${id} td *{font-size:13px !important}`)
+    expect(html).toContain(`class="mk-b-${id}"`)
+    expect(html).toContain(`.mk-b-${id} td,.mk-b-${id} td *{font-size:13px !important}`)
     // Inside the media query, not at the top level.
-    expect(html.indexOf('@media only screen')).toBeLessThan(html.indexOf(`.mf-b-${id} td`))
+    expect(html.indexOf('@media only screen')).toBeLessThan(html.indexOf(`.mk-b-${id} td`))
   })
 
   it('ignores a font size that is not a usable number', () => {
     for (const bad of ['', 0, -4, 'big', null]) {
-      expect(renderToHtml(docWithText({ text: 'Hi', mobileFontSize: bad }))).not.toMatch(/mf-b-/)
+      expect(renderToHtml(docWithText({ text: 'Hi', mobileFontSize: bad }))).not.toMatch(/mk-b-/)
     }
   })
 
@@ -520,11 +520,11 @@ describe('mobile controls', () => {
     const doc = docWithText({ text: 'Hi', hideOnMobile: true, mobileFontSize: 13 })
     const id = doc.sections[0].rows[0].columns[0].blocks[0].id
     const jsx = renderToJsx(doc)
-    expect(jsx).toContain(`className="mf-hide-sm mf-b-${id}"`)
+    expect(jsx).toContain(`className="mk-hide-sm mk-b-${id}"`)
     expect(jsx).toContain('<style>')
     expect(jsx).toContain('@media only screen and (max-width:599px){')
-    expect(jsx).toContain('.mf-hide-sm{display:none !important}')
-    expect(jsx).toContain(`.mf-b-${id} td,.mf-b-${id} td *{font-size:13px !important}`)
+    expect(jsx).toContain('.mk-hide-sm{display:none !important}')
+    expect(jsx).toContain(`.mk-b-${id} td,.mk-b-${id} td *{font-size:13px !important}`)
   })
 
   it('keeps the plain-text version complete', () => {

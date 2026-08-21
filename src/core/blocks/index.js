@@ -6,7 +6,7 @@
  * tree-shaking target for Rollup, and the blocks would vanish from the published
  * bundle. Referencing them keeps that impossible.
  *
- * @module mailforge/core/blocks
+ * @module mailkiln/core/blocks
  */
 
 import { textBlock } from './text.js'

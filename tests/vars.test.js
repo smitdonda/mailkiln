@@ -5,7 +5,7 @@ import {
   emitPropsInterface,
   emitPropsJsdoc,
   findVarPaths,
-  foreignVarsToMailforge,
+  foreignVarsToMailkiln,
   getPath,
   interpolate,
   kindOf,
@@ -181,30 +181,30 @@ describe('TypeScript emission', () => {
 
 describe('foreign merge syntaxes', () => {
   it('converts Mailchimp tags', () => {
-    const { text, found } = foreignVarsToMailforge('Hi *|FNAME|*, spend *|USER:SPEND|*')
+    const { text, found } = foreignVarsToMailkiln('Hi *|FNAME|*, spend *|USER:SPEND|*')
     expect(text).toBe('Hi {{fname}}, spend {{user.spend}}')
     expect(found).toEqual(['fname', 'user.spend'])
   })
 
   it('converts Mailgun recipient variables', () => {
-    expect(foreignVarsToMailforge('Hi %recipient:name%').text).toBe('Hi {{name}}')
-    expect(foreignVarsToMailforge('Hi %recipient.first_name%').text).toBe('Hi {{first_name}}')
+    expect(foreignVarsToMailkiln('Hi %recipient:name%').text).toBe('Hi {{name}}')
+    expect(foreignVarsToMailkiln('Hi %recipient.first_name%').text).toBe('Hi {{first_name}}')
   })
 
   it('converts generic %%NAME%% tags', () => {
-    expect(foreignVarsToMailforge('Hi %%FIRST_NAME%%').text).toBe('Hi {{first_name}}')
+    expect(foreignVarsToMailkiln('Hi %%FIRST_NAME%%').text).toBe('Hi {{first_name}}')
   })
 
   it('leaves hyphenated prose alone by keeping the SendGrid syntax opt-in', () => {
     // `-name-` is too ambiguous to run unasked: it would rewrite "cutting-edge".
-    expect(foreignVarsToMailforge('a cutting-edge design').text).toBe('a cutting-edge design')
-    expect(foreignVarsToMailforge('hi -name- there', { only: ['sendgrid'] }).text).toBe(
+    expect(foreignVarsToMailkiln('a cutting-edge design').text).toBe('a cutting-edge design')
+    expect(foreignVarsToMailkiln('hi -name- there', { only: ['sendgrid'] }).text).toBe(
       'hi {{name}} there',
     )
   })
 
   it('passes through text with no merge tags', () => {
-    expect(foreignVarsToMailforge('nothing here')).toEqual({ text: 'nothing here', found: [] })
-    expect(foreignVarsToMailforge(/** @type {any} */ (null)).text).toBe('')
+    expect(foreignVarsToMailkiln('nothing here')).toEqual({ text: 'nothing here', found: [] })
+    expect(foreignVarsToMailkiln(/** @type {any} */ (null)).text).toBe('')
   })
 })

@@ -5,7 +5,7 @@
  * inline-element descender gap under the image and the classic 1–4px seam
  * appears between stacked images.
  *
- * @module mailforge/core/blocks/image
+ * @module mailkiln/core/blocks/image
  */
 
 import { defineBlock } from '../registry.js'

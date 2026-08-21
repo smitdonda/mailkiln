@@ -3,7 +3,7 @@
  * "quoted text" collapsing both behave, with margins zeroed because email
  * clients disagree about default heading margins.
  *
- * @module mailforge/core/blocks/heading
+ * @module mailkiln/core/blocks/heading
  */
 
 import { defineBlock } from '../registry.js'

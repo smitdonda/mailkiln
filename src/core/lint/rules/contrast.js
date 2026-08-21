@@ -6,7 +6,7 @@
  * A design that only declares a text colour and leaves the background white
  * becomes dark-grey-on-dark. Declaring both is what makes the inversion safe.
  *
- * @module mailforge/core/lint/rules/contrast
+ * @module mailkiln/core/lint/rules/contrast
  */
 
 import { eachBlock, effectiveBackground } from '../walk.js'

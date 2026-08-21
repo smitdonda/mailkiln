@@ -5,7 +5,7 @@
  * alt text is not an accessibility nicety here — it is the copy a large share of
  * your recipients read first.
  *
- * @module mailforge/core/lint/rules/images
+ * @module mailkiln/core/lint/rules/images
  */
 
 import { eachBlock } from '../walk.js'

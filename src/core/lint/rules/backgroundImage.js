@@ -2,10 +2,10 @@
  * Background images need a VML fallback for Outlook, and a background *colour*
  * behind them so the text stays readable when the image is blocked or fails.
  *
- * mailforge's section renderer emits the VML itself, so the VML half of this rule
+ * mailkiln's section renderer emits the VML itself, so the VML half of this rule
  * only fires on raw HTML blocks. The colour half applies everywhere.
  *
- * @module mailforge/core/lint/rules/backgroundImage
+ * @module mailkiln/core/lint/rules/backgroundImage
  */
 
 import { eachBlock } from '../walk.js'
@@ -63,7 +63,7 @@ export const backgroundImageRule = {
         id: 'background-image',
         level: 'warn',
         message: 'Raw HTML sets a background image with no VML fallback.',
-        hint: 'Outlook on Windows shows nothing. Wrap it in <!--[if gte mso 9]><v:rect>…, or move it to a section background where mailforge writes the VML for you.',
+        hint: 'Outlook on Windows shows nothing. Wrap it in <!--[if gte mso 9]><v:rect>…, or move it to a section background where mailkiln writes the VML for you.',
         nodeId: block.id,
       })
     }

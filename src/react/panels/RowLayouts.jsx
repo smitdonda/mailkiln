@@ -6,10 +6,10 @@
  * common thing a person wants and hunting for a column-count field in a property
  * panel is a bad way to find it.
  *
- * @module mailforge/react/panels/RowLayouts
+ * @module mailkiln/react/panels/RowLayouts
  */
 
-import { useMailForgeContext } from '../context.jsx'
+import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { findNode } from '../../core/index.js'
 import { LayoutPicker } from './LayoutPicker.jsx'
@@ -21,7 +21,7 @@ export { ROW_PRESETS } from '../rowPresets.js'
  */
 export function RowLayouts() {
   const t = useI18n()
-  const { store } = useMailForgeContext()
+  const { store } = useMailKilnContext()
 
   /**
    * Add the row to the selected section when there is one, else to the last
@@ -37,9 +37,9 @@ export function RowLayouts() {
 
   return (
     <>
-      <div className="mf-section-label">{t('panel.rows')}</div>
+      <div className="mk-section-label">{t('panel.rows')}</div>
       <LayoutPicker onPick={addRow} />
-      <p className="mf-help" style={{ padding: '0 14px 16px' }}>
+      <p className="mk-help" style={{ padding: '0 14px 16px' }}>
         {t('panel.rowsHint')}
       </p>
     </>
@@ -47,7 +47,7 @@ export function RowLayouts() {
 }
 
 /**
- * @param {import('../useMailForge.js').EditorStore} store
+ * @param {import('../useMailKiln.js').EditorStore} store
  * @returns {string | null}
  */
 export function targetSectionId(store) {

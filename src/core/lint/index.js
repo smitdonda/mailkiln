@@ -6,7 +6,7 @@
  * hooks run in the same pass, which is how third-party blocks contribute their own
  * warnings.
  *
- * @module mailforge/core/lint
+ * @module mailkiln/core/lint
  */
 
 import { findNode } from '../document.js'

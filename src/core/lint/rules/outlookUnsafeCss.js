@@ -3,10 +3,10 @@
  * Word's HTML engine. It has no flexbox, no grid, no `position`, and ignores most
  * of `float`. A layout built on those does not degrade — it collapses.
  *
- * mailforge's own renderers only ever emit tables, so anything this rule finds
+ * mailkiln's own renderers only ever emit tables, so anything this rule finds
  * came from a raw HTML block.
  *
- * @module mailforge/core/lint/rules/outlookUnsafeCss
+ * @module mailkiln/core/lint/rules/outlookUnsafeCss
  */
 
 import { eachBlock } from '../walk.js'

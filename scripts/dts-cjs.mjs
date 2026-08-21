@@ -2,7 +2,7 @@
  * Emit `.d.cts` entry declarations alongside the `.d.ts` ones.
  *
  * Why this exists: a single `types` condition is interpreted as ESM, so a
- * consumer doing `require('mailforge')` in a CommonJS project gets types that
+ * consumer doing `require('mailkiln')` in a CommonJS project gets types that
  * only resolve under `import()`. publint flags it, `are-the-types-wrong` fails
  * on it, and the symptom for the consumer is "the package has no types" —
  * despite the types being right there.

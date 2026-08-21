@@ -3,7 +3,7 @@
  * parser would be a dependency, and email colours are hex, rgb() or one of a
  * handful of names in practice.
  *
- * @module mailforge/core/lint/color
+ * @module mailkiln/core/lint/color
  */
 
 /** The named colours that actually turn up in email templates. */

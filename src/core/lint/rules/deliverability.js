@@ -2,7 +2,7 @@
  * The rules that decide whether the message reaches the inbox at all: a plain
  * text alternative, a preheader, an unsubscribe link, and subject-line phrasing.
  *
- * @module mailforge/core/lint/rules/deliverability
+ * @module mailkiln/core/lint/rules/deliverability
  */
 
 import { eachBlock } from '../walk.js'

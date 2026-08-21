@@ -4,7 +4,7 @@
  * `dangerouslySetInnerHTML` when markup is present, so the output always
  * compiles no matter what the author typed.
  *
- * @module mailforge/core/blocks/text
+ * @module mailkiln/core/blocks/text
  */
 
 import { defineBlock } from '../registry.js'
