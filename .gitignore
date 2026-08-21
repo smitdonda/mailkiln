@@ -13,6 +13,3 @@ tests/types/dist/
 
 # Playwright MCP artefacts
 .playwright-mcp/
-
-# Showcase build output
-examples/showcase/out/

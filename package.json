@@ -58,7 +58,7 @@
     "build": "npm run build:js && npm run build:css && npm run build:types",
     "build:js": "vite build",
     "build:css": "tailwindcss -i ./src/styles.css -o ./dist/style.css",
-    "build:types": "tsc -p jsconfig.dts.json && node scripts/dts-cjs.mjs",
+    "build:types": "tsc -p jsconfig.dts.json && node -e \"const{copyFileSync}=require('fs');copyFileSync('dist/index.d.ts','dist/index.d.cts');copyFileSync('dist/core/index.d.ts','dist/core/index.d.cts')\"",
     "typecheck": "tsc -p jsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{js,jsx,css,json,md}\"",

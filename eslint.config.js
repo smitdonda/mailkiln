@@ -74,10 +74,4 @@ export default [
     files: ['tests/**/*.{js,jsx}'],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
-
-  // Build scripts and examples report progress on stdout; that is their job.
-  {
-    files: ['scripts/**/*.mjs', 'examples/**/*.mjs'],
-    rules: { 'no-console': 'off' },
-  },
 ]

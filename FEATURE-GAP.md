@@ -168,8 +168,7 @@ say so in the README than to half-ship them.
 3. Browser pass on `npm run dev`: bold a word, insert a merge-variable link, confirm `props.text`
    holds only whitelisted markup; toggle hide-on-mobile and find the media query in the Code panel;
    add a repeat over `order.items` and see three rows on canvas and a `.map()` in the JSX tab.
-4. `node examples/showcase/build.mjs` must still export with **0 lint errors**.
-5. Round-trip: new markup must survive `html → import → export → import` unchanged.
+4. Round-trip: new markup must survive `html → import → export → import` unchanged.
 
 ---
 
