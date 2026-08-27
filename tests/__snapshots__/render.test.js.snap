@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`block HTML > renders each built-in block to a snapshot > button 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="center" style="padding:16px 24px 16px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" style="border-collapse:separate"><tr><td align="center" bgcolor="#4f46e5" style="background-color:#4f46e5;border-radius:6px;padding:14px 28px;mso-padding-alt:0;text-align:center"><a href="https://example.com" target="_blank" style="display:inline-block;color:#ffffff;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:16px;font-weight:bold;line-height:1.15;text-decoration:none;white-space:nowrap;mso-line-height-rule:exactly">Get started</a></td></tr></table></td></tr></table>"`;
+exports[`block HTML > renders each built-in block to a snapshot > button 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="center" style="padding:16px 24px 16px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://example.com" style="height:46px;v-text-anchor:middle;width:165px;" arcsize="13%" stroke="f" fillcolor="#4f46e5"><w:anchorlock/><center style="color:#ffffff;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:16px;font-weight:bold">Get started</center></v:roundrect><![endif]--><!--[if !mso]><!--><table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" style="border-collapse:separate"><tr><td align="center" bgcolor="#4f46e5" style="background-color:#4f46e5;border-radius:6px;padding:14px 28px;mso-padding-alt:0;text-align:center"><a href="https://example.com" target="_blank" style="display:inline-block;color:#ffffff;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:16px;font-weight:bold;line-height:1.15;text-decoration:none;white-space:nowrap;mso-line-height-rule:exactly">Get started</a></td></tr></table><!--<![endif]--></td></tr></table>"`;
 
 exports[`block HTML > renders each built-in block to a snapshot > divider 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="center" style="padding:12px 24px 12px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><table role="presentation" width="100%" align="center" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;max-width:100%"><tr><td height="1" style="height:1px;line-height:1px;font-size:1px;background-color:#e5e7eb">&nbsp;</td></tr></table></td></tr></table>"`;
 
@@ -8,7 +8,9 @@ exports[`block HTML > renders each built-in block to a snapshot > heading 1`] = 
 
 exports[`block HTML > renders each built-in block to a snapshot > html 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="left" style="mso-table-lspace:0pt;mso-table-rspace:0pt"><p style="margin:0">Paste any HTML here.</p></td></tr></table>"`;
 
-exports[`block HTML > renders each built-in block to a snapshot > image 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="center" style="padding:12px 24px 12px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><div style="padding:24px;border:1px dashed #cbd5e1;color:#64748b;font-size:13px;text-align:center">No image selected</div></td></tr></table>"`;
+exports[`block HTML > renders each built-in block to a snapshot > image 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="center" style="padding:12px 24px 12px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><img src="https://example.com/hero.png" alt="Hero" style="display:block;width:100%;max-width:100%;height:auto;border:0px;outline:none;text-decoration:none;mso-line-height-rule:exactly" /></td></tr></table>"`;
+
+exports[`block HTML > renders each built-in block to a snapshot > menu 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="center" style="padding:12px 24px 12px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><div style="text-align:center"><!--[if mso]><table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="border-collapse:collapse"><tr><td style="padding:0 5px"><a href="https://example.com/shop" target="_blank" style="display:inline-block;padding:5px 5px;color:#2563eb;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:14px;text-decoration:none">Shop</a></td><td style="padding:0 5px"><span style="display:inline-block;padding:5px 5px;color:#9ca3af;font-size:14px">|</span></td><td style="padding:0 5px"><a href="https://example.com/about" target="_blank" style="display:inline-block;padding:5px 5px;color:#2563eb;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:14px;text-decoration:none">About</a></td><td style="padding:0 5px"><span style="display:inline-block;padding:5px 5px;color:#9ca3af;font-size:14px">|</span></td><td style="padding:0 5px"><a href="https://example.com/contact" target="_blank" style="display:inline-block;padding:5px 5px;color:#2563eb;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:14px;text-decoration:none">Contact</a></td></tr></table><![endif]--><!--[if !mso]><!--><a href="https://example.com/shop" target="_blank" style="display:inline-block;padding:5px 5px;color:#2563eb;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:14px;text-decoration:none">Shop</a><span style="display:inline-block;padding:5px 5px;color:#9ca3af;font-size:14px">|</span><a href="https://example.com/about" target="_blank" style="display:inline-block;padding:5px 5px;color:#2563eb;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:14px;text-decoration:none">About</a><span style="display:inline-block;padding:5px 5px;color:#9ca3af;font-size:14px">|</span><a href="https://example.com/contact" target="_blank" style="display:inline-block;padding:5px 5px;color:#2563eb;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:14px;text-decoration:none">Contact</a><!--<![endif]--></div></td></tr></table>"`;
 
 exports[`block HTML > renders each built-in block to a snapshot > social 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="center" style="padding:12px 24px 12px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" style="border-collapse:collapse"><tr><td style="padding:0 5px"><a href="https://twitter.com/" target="_blank" style="color:#64748b;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:13px;text-decoration:underline;display:inline-block">Twitter</a></td><td style="padding:0 5px"><a href="https://instagram.com/" target="_blank" style="color:#64748b;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:13px;text-decoration:underline;display:inline-block">Instagram</a></td><td style="padding:0 5px"><a href="https://linkedin.com/" target="_blank" style="color:#64748b;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:13px;text-decoration:underline;display:inline-block">LinkedIn</a></td></tr></table></td></tr></table>"`;
 
@@ -16,7 +18,7 @@ exports[`block HTML > renders each built-in block to a snapshot > spacer 1`] = `
 
 exports[`block HTML > renders each built-in block to a snapshot > text 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="left" style="padding:8px 24px 8px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><div style="margin:0px;padding:0px;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:16px;line-height:1.6;color:#1f2937;text-align:left;mso-line-height-rule:exactly">Write something worth reading.</div></td></tr></table>"`;
 
-exports[`block HTML > renders each built-in block to a snapshot > videoThumb 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="center" style="padding:12px 24px 12px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><div style="text-align:center"><a href="" target="_blank" style="text-decoration:none"><div style="padding:32px;background-color:#111827;color:#f9fafb;font-size:13px;text-align:center">No thumbnail selected</div></a><div style="padding-top:8px;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:14px;text-align:center"><a href="" target="_blank" style="color:#2563eb;text-decoration:none">▶ Watch the video</a></div></div></td></tr></table>"`;
+exports[`block HTML > renders each built-in block to a snapshot > videoThumb 1`] = `"<table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr><td align="center" style="padding:12px 24px 12px 24px;mso-table-lspace:0pt;mso-table-rspace:0pt"><div style="text-align:center"><a href="https://youtube.com/watch?v=abc" target="_blank" style="text-decoration:none"><img src="https://example.com/thumb.jpg" alt="Watch the video" style="display:block;width:100%;max-width:100%;height:auto;border:0px;border-radius:6px" /></a><div style="padding-top:8px;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';font-size:14px;text-align:center"><a href="https://youtube.com/watch?v=abc" target="_blank" style="color:#2563eb;text-decoration:none">▶ Watch the video</a></div></div></td></tr></table>"`;
 
 exports[`renderToJsx > matches a snapshot 1`] = `
 "import { Body, Button, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text } from '@react-email/components'
@@ -154,6 +156,46 @@ export function OrderShipped({ order, unsubscribe_url, user }) {
             </Section>
             <Section style={{ padding: "12px 24px 12px 24px", textAlign: "center" }}>
               <Section style={{ textAlign: "center" }}>
+                <Link
+                  href="https://example.com/shop"
+                  style={{
+                    display: "inline-block",
+                    padding: "5px 5px",
+                    color: "#2563eb",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'",
+                    fontSize: 14,
+                    textDecoration: "none",
+                  }}
+                >
+                  Shop
+                </Link>
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "5px 5px",
+                    color: "#9ca3af",
+                    fontSize: 14,
+                  }}
+                >
+                  |
+                </span>
+                <Link
+                  href="https://example.com/help"
+                  style={{
+                    display: "inline-block",
+                    padding: "5px 5px",
+                    color: "#2563eb",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'",
+                    fontSize: 14,
+                    textDecoration: "none",
+                  }}
+                >
+                  Help
+                </Link>
+              </Section>
+            </Section>
+            <Section style={{ padding: "12px 24px 12px 24px", textAlign: "center" }}>
+              <Section style={{ textAlign: "center" }}>
                 <Link href="https://youtube.com/watch?v=abc">
                   <Img
                     src="https://example.com/thumb.jpg"
@@ -191,7 +233,7 @@ export function OrderShipped({ order, unsubscribe_url, user }) {
                   textAlign: "left",
                   msoLineHeightRule: "exactly",
                 }}
-                dangerouslySetInnerHTML={{ __html: \`<a href="\${unsubscribe_url}">Unsubscribe</a>\` }}
+                dangerouslySetInnerHTML={{ __html: \`<a href="\${unsubscribe_url}" style="color:#2563eb">Unsubscribe</a>\` }}
               />
             </Section>
           </Container>
@@ -212,7 +254,7 @@ OrderShipped.PreviewProps = {
 exports[`renderToMjml > matches a snapshot 1`] = `
 "<mjml>
   <mj-head><mj-title>Your order is on its way</mj-title><mj-preview>Arriving Thursday</mj-preview><mj-attributes><mj-all font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'" /><mj-text color="#1f2937" /><mj-section padding="0" /></mj-attributes></mj-head>
-  <mj-body background-color="#f4f5f7" width="600px"><mj-wrapper padding="24px 0px 24px 0px" background-color="#eef2f7"><mj-section padding="0"><mj-column width="100%" vertical-align="top"><mj-text padding="12px 24px 4px 24px" align="left" font-size="26px" font-weight="bold" line-height="1.3" color="#1f2937"><h2 style="margin:0;font-size:inherit;font-weight:inherit;line-height:inherit;color:inherit">Thanks, Smit!</h2></mj-text><mj-text padding="8px 24px 8px 24px" align="left" font-size="16px" line-height="1.6" color="#1f2937" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'">Order <b>MK-2291</b> is packed.</mj-text><mj-button padding="16px 24px 16px 24px" align="center" href="https://example.com/track" background-color="#4f46e5" color="#ffffff" font-size="16px" font-weight="bold" border-radius="6px" inner-padding="14px 28px">Track it</mj-button><mj-image padding="12px 24px 12px 24px" align="center" src="https://example.com/hero.png" alt="Hero" width="552px" /><mj-divider padding="12px 24px 12px 24px" border-width="1px" border-style="solid" border-color="#e5e7eb" /><mj-spacer height="32px" /><mj-social padding="12px 24px 12px 24px" align="center" icon-size="24px" mode="horizontal" font-size="13px" color="#64748b"><mj-social-element name="twitter" href="https://twitter.com/">Twitter</mj-social-element><mj-social-element name="instagram" href="https://instagram.com/">Instagram</mj-social-element><mj-social-element name="linkedin" href="https://linkedin.com/">LinkedIn</mj-social-element></mj-social><mj-image src="https://example.com/thumb.jpg" href="https://youtube.com/watch?v=abc" alt="Watch the video" padding="0" border-radius="6px" align="center" /><mj-text align="center" padding="8px 0 0" font-size="14px"><a href="https://youtube.com/watch?v=abc" style="color:#2563eb;text-decoration:none">▶ Watch the video</a></mj-text><mj-raw><p style="margin:0">Raw</p></mj-raw><mj-text padding="8px 24px 8px 24px" align="left" font-size="12px" line-height="1.6" color="#1f2937" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'"><a href="https://example.com/unsub">Unsubscribe</a></mj-text></mj-column></mj-section></mj-wrapper></mj-body>
+  <mj-body background-color="#f4f5f7" width="600px"><mj-wrapper padding="24px 0px 24px 0px" background-color="#eef2f7"><mj-section padding="0"><mj-column width="100%" vertical-align="top"><mj-text padding="12px 24px 4px 24px" align="left" font-size="26px" font-weight="bold" line-height="1.3" color="#1f2937"><h2 style="margin:0;font-size:inherit;font-weight:inherit;line-height:inherit;color:inherit">Thanks, Smit!</h2></mj-text><mj-text padding="8px 24px 8px 24px" align="left" font-size="16px" line-height="1.6" color="#1f2937" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'">Order <b>MK-2291</b> is packed.</mj-text><mj-button padding="16px 24px 16px 24px" align="center" href="https://example.com/track" background-color="#4f46e5" color="#ffffff" font-size="16px" font-weight="bold" border-radius="6px" inner-padding="14px 28px">Track it</mj-button><mj-image padding="12px 24px 12px 24px" align="center" src="https://example.com/hero.png" alt="Hero" width="552px" /><mj-divider padding="12px 24px 12px 24px" border-width="1px" border-style="solid" border-color="#e5e7eb" /><mj-spacer height="32px" /><mj-social padding="12px 24px 12px 24px" align="center" icon-size="24px" mode="horizontal" font-size="13px" color="#64748b"><mj-social-element name="twitter" href="https://twitter.com/">Twitter</mj-social-element><mj-social-element name="instagram" href="https://instagram.com/">Instagram</mj-social-element><mj-social-element name="linkedin" href="https://linkedin.com/">LinkedIn</mj-social-element></mj-social><mj-navbar padding="12px 24px 12px 24px" align="center" hamburger="none"><mj-navbar-link href="https://example.com/shop" color="#2563eb" font-size="14px" text-decoration="none">Shop</mj-navbar-link><mj-navbar-link href="https://example.com/help" color="#2563eb" font-size="14px" text-decoration="none">Help</mj-navbar-link></mj-navbar><mj-image src="https://example.com/thumb.jpg" href="https://youtube.com/watch?v=abc" alt="Watch the video" padding="0" border-radius="6px" align="center" /><mj-text align="center" padding="8px 0 0" font-size="14px"><a href="https://youtube.com/watch?v=abc" style="color:#2563eb;text-decoration:none">▶ Watch the video</a></mj-text><mj-raw><p style="margin:0">Raw</p></mj-raw><mj-text padding="8px 24px 8px 24px" align="left" font-size="12px" line-height="1.6" color="#1f2937" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'"><a href="https://example.com/unsub" style="color:#2563eb">Unsubscribe</a></mj-text></mj-column></mj-section></mj-wrapper></mj-body>
 </mjml>"
 `;
 
@@ -233,6 +275,9 @@ Track it: https://example.com/track
 Twitter: https://twitter.com/
 Instagram: https://instagram.com/
 LinkedIn: https://linkedin.com/
+
+Shop: https://example.com/shop
+Help: https://example.com/help
 
 ▶ Watch the video: https://youtube.com/watch?v=abc
 
@@ -379,6 +424,46 @@ export function OrderShipped({ order, unsubscribe_url, user }: OrderShippedProps
             </Section>
             <Section style={{ padding: "12px 24px 12px 24px", textAlign: "center" }}>
               <Section style={{ textAlign: "center" }}>
+                <Link
+                  href="https://example.com/shop"
+                  style={{
+                    display: "inline-block",
+                    padding: "5px 5px",
+                    color: "#2563eb",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'",
+                    fontSize: 14,
+                    textDecoration: "none",
+                  }}
+                >
+                  Shop
+                </Link>
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "5px 5px",
+                    color: "#9ca3af",
+                    fontSize: 14,
+                  }}
+                >
+                  |
+                </span>
+                <Link
+                  href="https://example.com/help"
+                  style={{
+                    display: "inline-block",
+                    padding: "5px 5px",
+                    color: "#2563eb",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'",
+                    fontSize: 14,
+                    textDecoration: "none",
+                  }}
+                >
+                  Help
+                </Link>
+              </Section>
+            </Section>
+            <Section style={{ padding: "12px 24px 12px 24px", textAlign: "center" }}>
+              <Section style={{ textAlign: "center" }}>
                 <Link href="https://youtube.com/watch?v=abc">
                   <Img
                     src="https://example.com/thumb.jpg"
@@ -416,7 +501,7 @@ export function OrderShipped({ order, unsubscribe_url, user }: OrderShippedProps
                   textAlign: "left",
                   msoLineHeightRule: "exactly",
                 }}
-                dangerouslySetInnerHTML={{ __html: \`<a href="\${unsubscribe_url}">Unsubscribe</a>\` }}
+                dangerouslySetInnerHTML={{ __html: \`<a href="\${unsubscribe_url}" style="color:#2563eb">Unsubscribe</a>\` }}
               />
             </Section>
           </Container>

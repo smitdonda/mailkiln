@@ -473,6 +473,40 @@
   flex-shrink: 0;
 }
 
+/* The route back up the tree. Columns fill their row, so without this a row
+   with no padding has no clickable area of its own left on the canvas. */
+.mk-crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--mk-border);
+  flex-shrink: 0;
+}
+
+.mk-crumb {
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--mk-fg-muted);
+  cursor: pointer;
+}
+
+.mk-crumb:hover {
+  background: var(--mk-bg-hover);
+  color: var(--mk-fg);
+}
+
+.mk-crumb + .mk-crumb::before {
+  content: '›';
+  margin-right: 6px;
+  color: var(--mk-border-strong);
+}
+
 .mk-panel-title {
   flex: 1;
   min-width: 0;
@@ -981,6 +1015,13 @@
   background: var(--mk-accent-soft);
   outline: 1px dashed var(--mk-accent);
   outline-offset: -1px;
+}
+
+/* Dashed, where a selected row is solid: the two nest, and two solid outlines
+   two pixels apart read as one thick smear. */
+.mk-col[data-selected='true'] {
+  outline: 2px dashed var(--mk-accent);
+  outline-offset: -4px;
 }
 
 /*
@@ -1793,6 +1834,34 @@
   border: 1px solid var(--mk-border);
   border-radius: var(--mk-radius-md);
   background: var(--mk-bg-sunken);
+}
+
+/* --- rich-text field ------------------------------------------------------
+   The formatting bar sits directly on top of the textarea and shares its border
+   radius, so the two read as one control rather than a toolbar that happens to
+   float above a box. */
+
+.mk-richtext-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mk-richtext-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.mk-richtext-bar .mk-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+}
+
+.mk-richtext-bar .mk-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* --- merge-var autocomplete --------------------------------------------- */

@@ -91,6 +91,37 @@ describe('lintDocument', () => {
     expect(issuesFor(lintDocument(doc, { disable: ['unsubscribe'] }), 'unsubscribe')).toHaveLength(0)
   })
 
+  it('flags an image block with no source', () => {
+    // The canvas shows a placeholder, the export shows nothing at all — without
+    // this rule an unfinished image is a silent hole in the sent email.
+    const doc = docWith([
+      createBlock('image', { src: '', alt: 'Hero' }),
+      createBlock('videoThumb', { thumbnailUrl: '' }),
+      createBlock('image', { src: 'https://example.com/a.png', alt: 'Fine' }),
+    ])
+    const issues = issuesFor(lintDocument(doc), 'image-src')
+    expect(issues).toHaveLength(2)
+    expect(issues[0].message).toBe('Image block has no image.')
+    expect(issues[1].message).toBe('Video block has no thumbnail.')
+    expect(issues[0].nodeId).toBeTruthy()
+  })
+
+  it('flags a menu item with no link and one with no label', () => {
+    const doc = docWith([
+      createBlock('menu', {
+        items: [
+          { label: 'Shop', url: 'https://example.com/shop' },
+          { label: 'Careers', url: '' },
+          { label: '', url: 'https://example.com/jobs' },
+        ],
+      }),
+    ])
+    const result = lintDocument(doc)
+    expect(issuesFor(result, 'menu-url')).toHaveLength(1)
+    expect(issuesFor(result, 'menu-url')[0].message).toMatch(/Careers/)
+    expect(issuesFor(result, 'menu-label')).toHaveLength(1)
+  })
+
   it('accepts extra rules and reports a rule that throws instead of crashing', () => {
     const doc = docWith([createBlock('text', { text: 'hi' })])
     const result = lintDocument(doc, {

@@ -18,7 +18,6 @@ import {
   IconMobile,
   IconMoon,
   IconRedo,
-  IconSend,
   IconText,
   IconUndo,
   IconUpload,
@@ -33,7 +32,6 @@ import {
  * @param {(device: 'desktop' | 'mobile' | 'text') => void} props.onDevice
  * @param {() => void} props.onImport
  * @param {(bundle: import('../../core/types.js').ExportBundle) => void} [props.onExport]
- * @param {() => void} [props.onSendTest]
  * @param {'light' | 'dark'} props.appearance
  * @param {() => void} [props.onToggleAppearance] Renders a dark-mode toggle.
  *   `<MailKiln>` does not pass one — it takes its appearance from the `appearance`
@@ -48,7 +46,6 @@ export function Toolbar({
   onDevice,
   onImport,
   onExport,
-  onSendTest,
   appearance,
   onToggleAppearance,
 }) {
@@ -170,15 +167,6 @@ export function Toolbar({
         <IconUpload />
         {t('toolbar.import')}
       </button>
-
-      {/* Only when the consumer wired a handler — mailkiln cannot send email
-          itself, and a button that always fails is worse than no button. */}
-      {onSendTest ? (
-        <button type="button" className="mk-btn" onClick={onSendTest}>
-          <IconSend />
-          {t('toolbar.sendTest')}
-        </button>
-      ) : null}
 
       {onExport ? (
         <button

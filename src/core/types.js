@@ -84,6 +84,10 @@
  * @property {Spacing} padding
  * @property {string} [backgroundColor]
  * @property {'top' | 'middle' | 'bottom'} [verticalAlign]
+ * @property {string} [borderTop] CSS border shorthand, e.g. `1px solid #eee`.
+ * @property {string} [borderRight]
+ * @property {string} [borderBottom]
+ * @property {string} [borderLeft]
  */
 
 /**
@@ -100,6 +104,10 @@
  * @property {string} [backgroundColor]
  * @property {boolean} [stackOnMobile] Default true — columns become full width under 600px.
  * @property {number} [gap] Gutter between columns in px.
+ * @property {string} [borderTop] CSS border shorthand, e.g. `1px solid #eee`.
+ * @property {string} [borderRight]
+ * @property {string} [borderBottom]
+ * @property {string} [borderLeft]
  */
 
 /**

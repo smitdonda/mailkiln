@@ -124,16 +124,6 @@ export function App() {
             await new Promise((resolve) => setTimeout(resolve, 400))
             return URL.createObjectURL(file)
           }}
-          onSendTest={async (payload) => {
-            // A real app POSTs this to its own endpoint, which talks to
-            // SendGrid/Resend/SES. mailkiln only renders — it has no transport.
-            await new Promise((resolve) => setTimeout(resolve, 600))
-            // eslint-disable-next-line no-console
-            console.log('send test', payload)
-            if (payload.to.some((address) => address.endsWith('@fail.test'))) {
-              throw new Error('Recipient domain rejected the message')
-            }
-          }}
           onExport={(bundle) => {
             setLastExport(bundle)
             // eslint-disable-next-line no-console

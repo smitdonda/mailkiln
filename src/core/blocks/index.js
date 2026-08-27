@@ -1,5 +1,5 @@
 /**
- * The nine built-in blocks.
+ * The ten built-in blocks.
  *
  * Importing this module registers them, and `builtinBlocks` *uses* every import
  * — which is deliberate. A bare side-effect-only import would be a legal
@@ -16,6 +16,7 @@ import { buttonBlock } from './button.js'
 import { dividerBlock } from './divider.js'
 import { spacerBlock } from './spacer.js'
 import { socialBlock } from './social.js'
+import { menuBlock } from './menu.js'
 import { htmlBlock } from './html.js'
 import { videoThumbBlock } from './videoThumb.js'
 
@@ -27,6 +28,7 @@ export {
   dividerBlock,
   spacerBlock,
   socialBlock,
+  menuBlock,
   htmlBlock,
   videoThumbBlock,
 }
@@ -44,6 +46,7 @@ export const builtinBlocks = [
   dividerBlock,
   spacerBlock,
   socialBlock,
+  menuBlock,
   videoThumbBlock,
   htmlBlock,
 ]

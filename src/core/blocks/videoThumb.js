@@ -68,7 +68,10 @@ export const videoThumbBlock = defineBlock({
             border: 0,
             borderRadius: p.borderRadius || '',
           })} />`
-        : `<div${styleAttr({ padding: 32, backgroundColor: '#111827', color: '#f9fafb', fontSize: 13, textAlign: 'center' })}>No thumbnail selected</div>`
+        // Editor chrome only — see the note in the image block.
+        : ctx.options?.editable
+          ? `<div${styleAttr({ padding: 32, backgroundColor: '#111827', color: '#f9fafb', fontSize: 13, textAlign: 'center' })}>No thumbnail selected</div>`
+          : ''
       const caption = p.caption
         ? `<div${styleAttr({
             paddingTop: 8,
@@ -77,6 +80,9 @@ export const videoThumbBlock = defineBlock({
             textAlign: p.align,
           })}><a href="${href}" target="_blank"${styleAttr({ color: p.captionColor || ctx.settings.linkColor, textDecoration: 'none' })}>${ctx.resolve(p.caption)}</a></div>`
         : ''
+      // Nothing to show and nothing to say: emit nothing rather than an empty
+      // anchor the recipient can still click.
+      if (!thumb && !caption) return ''
       return `<div${styleAttr({ textAlign: p.align })}><a href="${href}" target="_blank"${styleAttr({ textDecoration: 'none' })}>${thumb}</a>${caption}</div>`
     },
     jsx(p, ctx) {

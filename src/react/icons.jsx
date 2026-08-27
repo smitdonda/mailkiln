@@ -85,6 +85,15 @@ export const IconSocial = icon(
   </>,
 )
 
+export const IconMenu = icon(
+  <>
+    <path d="M4 8h16" />
+    <path d="M4 16h16" />
+    <path d="M9 4v4" />
+    <path d="M15 16v4" />
+  </>,
+)
+
 export const IconVideo = icon(
   <>
     <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -331,6 +340,7 @@ export const BLOCK_ICONS = {
   divider: IconDivider,
   spacer: IconSpacer,
   social: IconSocial,
+  menu: IconMenu,
   video: IconVideo,
   code: IconCode,
 }

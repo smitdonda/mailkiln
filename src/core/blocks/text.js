@@ -9,20 +9,23 @@
 
 import { defineBlock } from '../registry.js'
 import { spacing } from '../schema.js'
-import { mergeStyles, styleAttr } from '../render/inline.js'
+import { mergeStyles, styleAttr, withLinkColor, withParagraphSpacing } from '../render/inline.js'
 import { el, needsInnerHtml, raw, varsToChildren, varsToTemplate } from '../render/jsxNode.js'
 import {
   ALIGN_FIELD,
   BACKGROUND_FIELD,
   FONT_FIELD,
   HIDE_ON_MOBILE_FIELD,
+  LINK_COLOR_FIELD,
   MOBILE_FONT_SIZE_FIELD,
   PADDING_FIELD,
+  PARAGRAPH_SPACING_FIELD,
   WEIGHT_OPTIONS,
   commonProps,
   editableAttr,
   hasBlockLevelChildren,
   mjCommonAttrs,
+  richTextHtml,
   stripTags,
 } from './shared.js'
 
@@ -61,8 +64,10 @@ export const textBlock = defineBlock({
     fontWeight: 'normal',
     letterSpacing: '',
     color: '',
+    linkColor: '',
     fontFamily: '',
     mobileFontSize: '',
+    paragraphSpacing: '',
   }),
   schema: [
     {
@@ -77,6 +82,7 @@ export const textBlock = defineBlock({
     { key: 'fontWeight', type: 'select', label: 'Weight', options: WEIGHT_OPTIONS, group: 'Type' },
     FONT_FIELD,
     { key: 'color', type: 'color', label: 'Colour', group: 'Type' },
+    LINK_COLOR_FIELD,
     {
       key: 'letterSpacing',
       type: 'text',
@@ -85,6 +91,7 @@ export const textBlock = defineBlock({
       vars: false,
       group: 'Type',
     },
+    PARAGRAPH_SPACING_FIELD,
     ALIGN_FIELD,
     PADDING_FIELD,
     BACKGROUND_FIELD,
@@ -93,14 +100,21 @@ export const textBlock = defineBlock({
   ],
   render: {
     html(p, ctx) {
-      return `<div${editableAttr(ctx, 'text')}${styleAttr(typography(p, ctx))}>${ctx.resolve(p.text ?? '')}</div>`
+      return `<div${editableAttr(ctx, 'text')}${styleAttr(typography(p, ctx))}>${richTextHtml(p, ctx, p.text)}</div>`
     },
     jsx(p, ctx) {
       const style = typography(p, ctx)
       if (needsInnerHtml(p.text)) {
+        // The colour and margin rewrites happen on the markup, not on the
+        // template literal — `varsToTemplate` would otherwise escape the
+        // attributes we just added.
+        const marked = withParagraphSpacing(
+          withLinkColor(String(p.text ?? ''), p.linkColor || ctx.settings.linkColor),
+          p.paragraphSpacing,
+        )
         return el('Text', {
           style,
-          dangerouslySetInnerHTML: raw(`{{ __html: ${varsToTemplate(p.text).__raw} }}`),
+          dangerouslySetInnerHTML: raw(`{{ __html: ${varsToTemplate(marked).__raw} }}`),
         })
       }
       return el('Text', { style }, varsToChildren(p.text ?? ''))
@@ -116,7 +130,7 @@ export const textBlock = defineBlock({
           ? ` font-family="${p.fontFamily || ctx.settings.fontFamily}"`
           : '',
       ].join('')
-      return `<mj-text${attrs}>${ctx.resolve(p.text ?? '')}</mj-text>`
+      return `<mj-text${attrs}>${richTextHtml(p, ctx, p.text)}</mj-text>`
     },
     text(p, ctx) {
       return stripTags(ctx.resolve(p.text ?? ''))

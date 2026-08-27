@@ -10,7 +10,6 @@ import {
   MailKiln,
   MailKilnProvider,
   Toolbar,
-  parseRecipients,
   useMailKiln,
 } from '../src/index.js'
 import {
@@ -132,6 +131,104 @@ describe('MailKiln', () => {
     editor.rerender()
     // The Inspector is now showing the new block.
     expect(screen.getByLabelText('Properties').textContent).toMatch(/Button/)
+  })
+
+  it('selects a column on click, so its own properties are reachable', () => {
+    const editor = renderEditor()
+    const column = document.querySelectorAll('.mk-col')[1]
+    fireEvent.click(/** @type {Element} */ (column))
+    editor.rerender()
+
+    const inspector = screen.getByLabelText('Properties')
+    expect(inspector.textContent).toMatch(/Column/)
+    // The fields that used to be unreachable: a column click bubbled to the row.
+    expect(within(inspector).getByLabelText('Width %')).toBeTruthy()
+    expect(within(inspector).getByLabelText('Background hex')).toBeTruthy()
+    expect(document.querySelectorAll('.mk-col')[1].getAttribute('data-selected')).toBe('true')
+  })
+
+  it('takes you to the block when a check is clicked', () => {
+    // The properties panel only exists in the design view, so selecting the node
+    // without switching back left the button — "Show the block this affects" —
+    // looking like it did nothing.
+    const editor = renderEditor({
+      value: (() => {
+        const doc = twoColumnDocument()
+        doc.sections[0].rows[0].columns[0].blocks.push({
+          id: 'blk_empty_image',
+          type: 'image',
+          props: { src: '', alt: '' },
+        })
+        return normalize(doc)
+      })(),
+    })
+
+    fireEvent.click(screen.getByRole('tab', { name: /Checks/ }))
+    editor.rerender()
+
+    const issue = screen.getByTitle('Show the block this affects')
+    fireEvent.click(issue)
+    editor.rerender()
+
+    // Back in the design view, with the offending block open in the panel.
+    expect(document.querySelector('.mk-canvas')).toBeTruthy()
+    expect(screen.getByLabelText('Properties').textContent).toMatch(/Image/)
+  })
+
+  it('walks back up the tree from the selected node', () => {
+    // The only route up. Columns fill their row, so once a column takes the
+    // click there is nothing left on a zero-padding row that means "the row".
+    const editor = renderEditor()
+    fireEvent.click(/** @type {Element} */ (document.querySelector('[data-block-id]')))
+    editor.rerender()
+
+    const crumbs = screen.getByLabelText('Selected node ancestors')
+    expect([...crumbs.querySelectorAll('button')].map((b) => b.textContent)).toEqual([
+      'Section',
+      'Row',
+      'Column',
+    ])
+
+    fireEvent.click(within(crumbs).getByText('Row'))
+    editor.rerender()
+    const inspector = screen.getByLabelText('Properties')
+    expect(inspector.textContent).toMatch(/Row/)
+    expect(within(inspector).getByLabelText('Stack on mobile')).toBeTruthy()
+  })
+
+  it('keeps appending into the column you were last working in', () => {
+    // Opening the palette means deselecting — the panel shows the selected
+    // node's properties otherwise — so without a remembered column every append
+    // after the first landed in the document's last column.
+    const editor = renderEditor()
+    const firstColumnId = editor.get().sections[0].rows[0].columns[0].id
+
+    fireEvent.click(/** @type {Element} */ (document.querySelectorAll('.mk-col')[0]))
+    editor.rerender()
+    fireEvent.click(screen.getByLabelText('Back to content'))
+    editor.rerender()
+    // Deselecting a structural node lands on the Rows tab, so the palette needs
+    // asking for by name.
+    fireEvent.click(screen.getByRole('tab', { name: 'Content' }))
+    editor.rerender()
+
+    fireEvent.click(within(screen.getByLabelText('Blocks')).getByText('Button'))
+    editor.rerender()
+
+    const columns = editor.get().sections[0].rows[0].columns
+    expect(columns[0].id).toBe(firstColumnId)
+    expect(columns[0].blocks.map((b) => b.type)).toEqual(['text', 'button'])
+    expect(columns[1].blocks.map((b) => b.type)).toEqual(['text'])
+
+    // And a second append still goes there, not to the end of the document.
+    fireEvent.click(screen.getByLabelText('Back to content'))
+    editor.rerender()
+    fireEvent.click(within(screen.getByLabelText('Blocks')).getByText('Divider'))
+    editor.rerender()
+
+    const after = editor.get().sections[0].rows[0].columns
+    expect(after[0].blocks.map((b) => b.type)).toEqual(['text', 'button', 'divider'])
+    expect(after[1].blocks).toHaveLength(1)
   })
 
   it('renders each canvas block with the real HTML renderer', () => {
@@ -797,92 +894,6 @@ describe('MailKiln', () => {
     })
   })
 
-  describe('send test', () => {
-    it('parses, de-duplicates and validates recipients', () => {
-      expect(parseRecipients('a@b.co, a@b.co; c@d.io\ne@f.dev')).toEqual({
-        valid: ['a@b.co', 'c@d.io', 'e@f.dev'],
-        invalid: [],
-      })
-      expect(parseRecipients('nope, a@b.co').invalid).toEqual(['nope'])
-      expect(parseRecipients('')).toEqual({ valid: [], invalid: [] })
-    })
-
-    it('hides the button when no handler is wired', () => {
-      renderEditor()
-      expect(screen.queryByText('Send test')).toBeNull()
-    })
-
-    it('renders the message and hands it to the handler', async () => {
-      const onSendTest = vi.fn()
-      renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, onSendTest })
-
-      fireEvent.click(screen.getByText('Send test'))
-      const dialog = screen.getByRole('dialog', { name: 'Send a test email' })
-
-      // Subject is pre-filled from the document and marked as a test.
-      expect(/** @type {HTMLInputElement} */ (within(dialog).getByLabelText('Subject')).value).toBe(
-        '[Test] Your order is on its way',
-      )
-
-      const send = within(dialog).getByRole('button', { name: /Send test/ })
-      expect(send.hasAttribute('disabled')).toBe(true)
-
-      fireEvent.change(within(dialog).getByLabelText('Send to'), {
-        target: { value: 'smit@example.com, broken' },
-      })
-      expect(within(dialog).getByText(/Not valid email addresses: broken/)).toBeTruthy()
-
-      await act(async () => {
-        fireEvent.click(send)
-      })
-
-      expect(onSendTest).toHaveBeenCalledTimes(1)
-      const payload = onSendTest.mock.calls[0][0]
-      expect(payload.to).toEqual(['smit@example.com'])
-      expect(payload.subject).toBe('[Test] Your order is on its way')
-      expect(payload.html).toContain('<!DOCTYPE html')
-      // Merge variables are resolved with the sample data before sending.
-      expect(payload.html).toContain('Thanks, Smit!')
-      expect(payload.text).toContain('Thanks, Smit!')
-      expect(payload.document.sections.length).toBeGreaterThan(0)
-
-      expect(within(dialog).getByText(/Sent to 1 recipient/)).toBeTruthy()
-    })
-
-    it('warns about lint errors before sending', () => {
-      // The default fixture has no unsubscribe link, which is an error — and a
-      // test send is the last cheap moment to notice.
-      renderEditor({ onSendTest: vi.fn() })
-      fireEvent.click(screen.getByText('Send test'))
-      const dialog = screen.getByRole('dialog', { name: 'Send a test email' })
-      expect(within(dialog).getByText(/Checks found \d+ error/)).toBeTruthy()
-    })
-
-    it('stays quiet when the email is clean', () => {
-      renderEditor({ value: kitchenSinkDocument(), onSendTest: vi.fn() })
-      fireEvent.click(screen.getByText('Send test'))
-      const dialog = screen.getByRole('dialog', { name: 'Send a test email' })
-      expect(within(dialog).queryByText(/Checks found/)).toBeNull()
-    })
-
-    it('reports a failing handler instead of pretending it sent', async () => {
-      const onSendTest = vi.fn().mockRejectedValue(new Error('SMTP refused'))
-      renderEditor({ onSendTest })
-
-      fireEvent.click(screen.getByText('Send test'))
-      const dialog = screen.getByRole('dialog', { name: 'Send a test email' })
-      fireEvent.change(within(dialog).getByLabelText('Send to'), {
-        target: { value: 'smit@example.com' },
-      })
-      await act(async () => {
-        fireEvent.click(within(dialog).getByRole('button', { name: /Send test/ }))
-      })
-
-      expect(within(dialog).getByText(/Could not send: SMTP refused/)).toBeTruthy()
-      expect(within(dialog).queryByText(/Sent to/)).toBeNull()
-    })
-  })
-
   it('opens quick insert with / after clicking the canvas', () => {
     // Reproduces the real focus path: clicking a <div> canvas leaves focus on
     // <body>, so the shortcut only works because the root pulls focus to itself.
@@ -1265,5 +1276,72 @@ describe('MailKiln', () => {
       store.undo()
     })
     expect(store.doc.sections[0].rows[0].columns[0].blocks).toHaveLength(1)
+  })
+
+  describe('rich-text field', () => {
+    /** @returns {HTMLElement} the panel showing a selected text block */
+    const selectTextBlock = () => {
+      const editor = renderEditor()
+      const node = document.querySelector('[data-block-id][data-block-type="text"]')
+      fireEvent.click(/** @type {Element} */ (node))
+      editor.rerender()
+      return screen.getByLabelText('Properties')
+    }
+
+    it('offers formatting buttons over the property-panel textarea', () => {
+      const inspector = selectTextBlock()
+      const bar = within(inspector).getByRole('group', { name: 'Text formatting' })
+      expect(within(bar).getByLabelText('Bold')).toBeTruthy()
+      expect(within(bar).getByLabelText('Link')).toBeTruthy()
+    })
+
+    it('wraps the selected run rather than making the author type tags', () => {
+      const inspector = selectTextBlock()
+      const field = /** @type {HTMLTextAreaElement} */ (within(inspector).getByLabelText('Text'))
+      fireEvent.change(field, { target: { value: 'Hello there' } })
+      field.setSelectionRange(0, 5)
+      fireEvent.click(within(inspector).getByLabelText('Bold'))
+
+      const updated = /** @type {HTMLTextAreaElement} */ (within(inspector).getByLabelText('Text'))
+      expect(updated.value).toBe('<b>Hello</b> there')
+    })
+
+    it('leaves the preheader a plain textarea — <b> in an inbox preview is a bug', () => {
+      renderEditor()
+      fireEvent.click(screen.getByRole('tab', { name: 'Settings' }))
+      const inspector = screen.getByLabelText('Settings')
+      expect(within(inspector).getByLabelText('Preheader')).toBeTruthy()
+      expect(within(inspector).queryByRole('group', { name: 'Text formatting' })).toBeNull()
+    })
+  })
+
+  it('offers border fields on a row and on a column', () => {
+    const editor = renderEditor()
+    const column = document.querySelector('[data-column-id]')
+    fireEvent.click(/** @type {Element} */ (column))
+    editor.rerender()
+
+    const inspector = screen.getByLabelText('Properties')
+    fireEvent.click(within(inspector).getByRole('button', { name: 'Borders' }))
+    const field = within(inspector).getByLabelText('Border right')
+    fireEvent.change(field, { target: { value: '5px solid #1d1d1f' } })
+
+    expect(editor.get().sections[0].rows[0].columns[0].props.borderRight).toBe('5px solid #1d1d1f')
+  })
+
+  it('honours lintDisable, so an accepted rule stops being reported', () => {
+    const wide = normalize(createDocument({ settings: { width: 700 } }))
+    /** @returns {string} the text of the Checks view */
+    const checksText = () => {
+      fireEvent.click(screen.getByRole('tab', { name: /Checks/ }))
+      return /** @type {HTMLElement} */ (document.querySelector('.mk-main')).textContent ?? ''
+    }
+
+    renderEditor({ value: wide })
+    expect(checksText()).toMatch(/700px/)
+
+    cleanup()
+    renderEditor({ value: wide, lintDisable: ['structure'] })
+    expect(checksText()).not.toMatch(/700px/)
   })
 })

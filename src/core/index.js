@@ -83,6 +83,7 @@ export {
   dividerBlock,
   spacerBlock,
   socialBlock,
+  menuBlock,
   htmlBlock,
   videoThumbBlock,
   PADDING_FIELD,

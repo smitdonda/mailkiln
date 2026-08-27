@@ -11,7 +11,15 @@
 
 import { defineBlock } from '../registry.js'
 import { spacing } from '../schema.js'
-import { escapeAttr, mergeStyles, styleAttr, tableOpen, TABLE_CLOSE } from '../render/inline.js'
+import {
+  escapeAttr,
+  mergeStyles,
+  mso,
+  notMso,
+  styleAttr,
+  tableOpen,
+  TABLE_CLOSE,
+} from '../render/inline.js'
 import { el, varsToAttr, varsToChildren } from '../render/jsxNode.js'
 import {
   ALIGN_FIELD,
@@ -24,6 +32,42 @@ import {
   mjCommonAttrs,
   stripTags,
 } from './shared.js'
+
+/**
+ * The Outlook-only VML twin of a rounded button, or '' when one is not needed.
+ *
+ * The width is estimated from the label because VML has no shrink-to-fit: 0.62em
+ * per character is the ratio that keeps Helvetica and Arial labels from
+ * clipping, and the cell is centred so a slightly generous box still looks
+ * right.
+ *
+ * @param {Record<string, any>} p
+ * @param {import('../types.js').RenderContext} ctx
+ * @param {string} href Already escaped.
+ * @param {string} label
+ * @returns {string}
+ */
+function roundrect(p, ctx, href, label) {
+  const radius = Number(p.borderRadius) || 0
+  if (!radius || p.fullWidth) return ''
+  const fontSize = Number(p.fontSize) || 16
+  const paddingX = Number(p.paddingX ?? 28)
+  const paddingY = Number(p.paddingY ?? 14)
+  const plain = stripTags(label)
+  const height = Math.round(fontSize * 1.15 + paddingY * 2)
+  const width = Math.round(plain.length * fontSize * 0.62 + paddingX * 2)
+  const arcsize = Math.min(50, Math.round((radius / Math.max(height, 1)) * 100))
+  const center = styleAttr({
+    color: p.color,
+    fontFamily: p.fontFamily || ctx.settings.fontFamily,
+    fontSize,
+    fontWeight: p.fontWeight,
+    letterSpacing: p.letterSpacing,
+  })
+  return mso(
+    `<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${href}" style="height:${height}px;v-text-anchor:middle;width:${width}px;" arcsize="${arcsize}%" stroke="f" fillcolor="${escapeAttr(p.buttonColor)}"><w:anchorlock/><center${center}>${plain}</center></v:roundrect>`,
+  )
+}
 
 export const buttonBlock = defineBlock({
   type: 'button',
@@ -49,6 +93,7 @@ export const buttonBlock = defineBlock({
     paddingX: 28,
     paddingY: 14,
     borderColor: '',
+    letterSpacing: '',
     fullWidth: false,
     align: /** @type {any} */ ('center'),
     padding: spacing(16, 24),
@@ -66,6 +111,14 @@ export const buttonBlock = defineBlock({
     { key: 'fullWidth', type: 'toggle', label: 'Full width', group: 'Layout' },
     { key: 'fontSize', type: 'number', label: 'Size', min: 10, max: 32, group: 'Type' },
     { key: 'fontWeight', type: 'select', label: 'Weight', options: WEIGHT_OPTIONS, group: 'Type' },
+    {
+      key: 'letterSpacing',
+      type: 'text',
+      label: 'Letter spacing',
+      placeholder: '0.02em',
+      vars: false,
+      group: 'Type',
+    },
     FONT_FIELD,
     ALIGN_FIELD,
     PADDING_FIELD,
@@ -88,12 +141,14 @@ export const buttonBlock = defineBlock({
         fontFamily: p.fontFamily || ctx.settings.fontFamily,
         fontSize: p.fontSize,
         fontWeight: p.fontWeight,
+        letterSpacing: p.letterSpacing,
         lineHeight: 1.15,
         textDecoration: 'none',
         whiteSpace: 'nowrap',
         msoLineHeightRule: 'exactly',
       })
-      return [
+      const href = escapeAttr(ctx.resolve(p.href ?? '#'))
+      const table = [
         tableOpen({
           width: p.fullWidth ? '100%' : undefined,
           align: p.align,
@@ -101,11 +156,19 @@ export const buttonBlock = defineBlock({
         }),
         '<tr>',
         `<td align="center" bgcolor="${escapeAttr(p.buttonColor)}"${styleAttr(mergeStyles({ backgroundColor: p.buttonColor }, cell))}>`,
-        `<a href="${escapeAttr(ctx.resolve(p.href ?? '#'))}" target="_blank"${styleAttr(anchor)}>${label}</a>`,
+        `<a href="${href}" target="_blank"${styleAttr(anchor)}>${label}</a>`,
         '</td>',
         '</tr>',
         TABLE_CLOSE,
       ].join('')
+
+      // Word-engine Outlook ignores border-radius, so a pill renders there as a
+      // rectangle. VML is the only shape it does round, and it needs explicit
+      // pixel dimensions — hence the estimate below. Square buttons and
+      // full-width ones keep the plain table: the first has nothing to round,
+      // and the second has no width to give VML.
+      const vml = roundrect(p, ctx, href, label)
+      return vml ? `${vml}${notMso(table)}` : table
     },
     jsx(p, ctx) {
       return el(
@@ -118,6 +181,7 @@ export const buttonBlock = defineBlock({
             fontFamily: p.fontFamily || ctx.settings.fontFamily,
             fontSize: p.fontSize,
             fontWeight: p.fontWeight,
+            letterSpacing: p.letterSpacing || '',
             borderRadius: p.borderRadius || '',
             border: p.borderColor ? `1px solid ${p.borderColor}` : '',
             padding: `${p.paddingY ?? 14}px ${p.paddingX ?? 28}px`,
@@ -130,7 +194,7 @@ export const buttonBlock = defineBlock({
       )
     },
     mjml(p, ctx) {
-      return `<mj-button${mjCommonAttrs(p)} href="${escapeAttr(ctx.resolve(p.href ?? '#'))}" background-color="${escapeAttr(p.buttonColor)}" color="${escapeAttr(p.color)}" font-size="${p.fontSize}px" font-weight="${escapeAttr(p.fontWeight)}" border-radius="${p.borderRadius ?? 0}px" inner-padding="${p.paddingY ?? 14}px ${p.paddingX ?? 28}px"${p.fullWidth ? ' width="100%"' : ''}>${ctx.resolve(p.text ?? '')}</mj-button>`
+      return `<mj-button${mjCommonAttrs(p)} href="${escapeAttr(ctx.resolve(p.href ?? '#'))}" background-color="${escapeAttr(p.buttonColor)}" color="${escapeAttr(p.color)}" font-size="${p.fontSize}px" font-weight="${escapeAttr(p.fontWeight)}" border-radius="${p.borderRadius ?? 0}px"${p.letterSpacing ? ` letter-spacing="${escapeAttr(p.letterSpacing)}"` : ''} inner-padding="${p.paddingY ?? 14}px ${p.paddingX ?? 28}px"${p.fullWidth ? ' width="100%"' : ''}>${ctx.resolve(p.text ?? '')}</mj-button>`
     },
     text(p, ctx) {
       const label = stripTags(ctx.resolve(p.text ?? ''))

@@ -24,9 +24,11 @@ const OPEN_TAG = /\{\{\s*([A-Za-z0-9_$.[\]]*)$/
  * @param {string} [props.placeholder]
  * @param {string} [props.id]
  * @param {boolean} [props.vars] Enable autocomplete. Off = a plain input.
+ * @param {(element: any) => void} [props.onElement] Receives the underlying input or
+ *   textarea. The formatting toolbar needs it to read the current selection.
  * @returns {import('react').ReactElement}
  */
-export function VarInput({ value, onChange, multiline, placeholder, id, vars = true }) {
+export function VarInput({ value, onChange, multiline, placeholder, id, vars = true, onElement }) {
   const t = useI18n()
   const { store } = useMailKilnContext()
   const inputRef = useRef(/** @type {any} */ (null))
@@ -108,7 +110,11 @@ export function VarInput({ value, onChange, multiline, placeholder, id, vars = t
 
   const shared = {
     id,
-    ref: inputRef,
+    /** @param {any} node */
+    ref: (node) => {
+      inputRef.current = node
+      onElement?.(node)
+    },
     value: value ?? '',
     placeholder,
     onChange: (/** @type {any} */ event) => {

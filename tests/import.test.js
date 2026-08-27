@@ -95,6 +95,40 @@ describe('importFromHtml', () => {
     expect(found).toContain('text')
   })
 
+  it('reads a row of text links back as a menu, not as text', () => {
+    const report = load(`<html><body><table><tr><td>
+      <div style="text-align:center">
+        <a href="https://example.com/shop" style="color:#d2d2d7;font-size:14px">Shop Online</a>
+        <span>|</span>
+        <a href="https://example.com/store" style="color:#d2d2d7;font-size:14px">Find a Store</a>
+        <span>|</span>
+        <a href="https://example.com/app" style="color:#d2d2d7;font-size:14px">Get the App</a>
+      </div>
+    </td></tr></table></body></html>`)
+
+    const menu = allBlocksIn(report.document).find((block) => block.type === 'menu')
+    expect(menu).toBeTruthy()
+    expect(menu?.props.items.map((/** @type {any} */ item) => item.label)).toEqual([
+      'Shop Online',
+      'Find a Store',
+      'Get the App',
+    ])
+    expect(menu?.props.items[0].url).toBe('https://example.com/shop')
+    expect(menu?.props.separator).toBe('|')
+    expect(menu?.props.color).toBe('#d2d2d7')
+  })
+
+  it('leaves a sentence containing links as a text block', () => {
+    // Prose with two links in it is not navigation, and turning it into one
+    // would silently drop the words around the links.
+    const report = load(
+      `<html><body><table><tr><td><p>Read our <a href="https://example.com/a">terms</a> and our
+       <a href="https://example.com/b">privacy policy</a> before you continue using the service.</p></td></tr></table></body></html>`,
+    )
+    expect(types(report.document)).toContain('text')
+    expect(types(report.document)).not.toContain('menu')
+  })
+
   it('keeps a spacer cell rather than discarding it as empty', () => {
     const doc = normalize(
       createDocument({

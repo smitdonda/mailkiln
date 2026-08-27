@@ -110,13 +110,19 @@ export function BlockPalette() {
 
 /**
  * The column a keyboard-appended block should go into: the selected column, the
- * column holding the selected block, or the last column in the document.
+ * column holding the selected block, the column the last selection was in, or
+ * the last column in the document.
+ *
+ * The third of those is what makes appending twice into the same column work.
+ * Opening the palette requires deselecting — the panel shows the selected node's
+ * properties otherwise — so without a remembered column every append after the
+ * first would land at the bottom of the document.
  *
  * @param {import('../useMailKiln.js').EditorStore} store
  * @returns {string | null}
  */
 export function targetColumnId(store) {
-  const { doc, selectedId } = store
+  const { doc, selectedId, focusColumnId } = store
   if (selectedId) {
     const found = findNode(doc, selectedId)
     if (found?.kind === 'column') return found.node.id
@@ -124,6 +130,7 @@ export function targetColumnId(store) {
     if (found?.kind === 'row') return found.node.columns?.[0]?.id ?? null
     if (found?.kind === 'section') return found.node.rows?.[0]?.columns?.[0]?.id ?? null
   }
+  if (focusColumnId && findNode(doc, focusColumnId)?.kind === 'column') return focusColumnId
   const columns = listColumns(doc)
   return columns.length ? columns[columns.length - 1].id : null
 }

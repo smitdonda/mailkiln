@@ -2,14 +2,14 @@
  * Field definitions and small helpers shared by the built-in blocks.
  *
  * Nothing here is privileged — a third-party block can import the same helpers,
- * which is the point: built-ins are just the first nine consumers of the public
+ * which is the point: built-ins are just the first ten consumers of the public
  * `defineBlock` API.
  *
  * @module mailkiln/core/blocks/shared
  */
 
 import { spacing } from '../schema.js'
-import { escapeAttr, spacingToCss } from '../render/inline.js'
+import { escapeAttr, spacingToCss, withLinkColor, withParagraphSpacing } from '../render/inline.js'
 
 /** @typedef {import('../types.js').FieldDef} FieldDef */
 /** @typedef {import('../types.js').Spacing} Spacing */
@@ -81,6 +81,43 @@ export const MOBILE_FONT_SIZE_FIELD = {
   max: 72,
   group: 'Mobile',
   help: 'Applied below the mobile breakpoint. Leave empty to keep the desktop size.',
+}
+
+/**
+ * Colour for links *inside* this block's copy.
+ *
+ * Empty falls back to `settings.linkColor`. It exists as a per-block field
+ * because a footer's links are routinely a different colour from the body's, and
+ * the alternative — hand-writing `<a style="color:…">` in the text field — is the
+ * kind of markup this package exists to stop people writing.
+ *
+ * @type {FieldDef}
+ */
+export const LINK_COLOR_FIELD = {
+  key: 'linkColor',
+  type: 'color',
+  label: 'Link colour',
+  group: 'Type',
+  help: 'Applied to links in this block. Empty uses the document link colour.',
+}
+
+/**
+ * Bottom margin for `<p>` elements inside the block's copy.
+ *
+ * Email clients disagree on the default paragraph margin (1em in most, none in
+ * a few), so a template with paragraphs has different rhythm depending on where
+ * it is opened. Empty means "leave the client's default alone".
+ *
+ * @type {FieldDef}
+ */
+export const PARAGRAPH_SPACING_FIELD = {
+  key: 'paragraphSpacing',
+  type: 'number',
+  label: 'Paragraph spacing',
+  min: 0,
+  max: 60,
+  group: 'Type',
+  help: 'Space below each <p>. Leave empty to keep the client default.',
 }
 
 /**
@@ -168,6 +205,27 @@ export function mjCommonAttrs(props, options = {}) {
  */
 export function editableAttr(ctx, propKey) {
   return ctx.options?.editable ? ` data-mk-edit="${propKey}"` : ''
+}
+
+/**
+ * Resolve a rich-text prop and apply the two rewrites email cannot express in a
+ * stylesheet: an explicit colour on every anchor, and a bottom margin on every
+ * paragraph.
+ *
+ * Shared by the text and heading blocks so a link behaves the same in both, and
+ * exported so a custom block with a rich-text field gets it too.
+ *
+ * @param {Record<string, any>} props
+ * @param {import('../types.js').RenderContext} ctx
+ * @param {string} [value] Defaults to `props.text`.
+ * @returns {string}
+ */
+export function richTextHtml(props, ctx, value) {
+  const html = ctx.resolve(value ?? props.text ?? '')
+  return withParagraphSpacing(
+    withLinkColor(html, props.linkColor || ctx.settings.linkColor),
+    props.paragraphSpacing,
+  )
 }
 
 /**

@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import { getBlockDef } from '../../core/index.js'
+import { findNode, getBlockDef } from '../../core/index.js'
 import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { BlockPalette } from './BlockPalette.jsx'
@@ -81,6 +81,7 @@ export function SidePanel() {
             <IconTrash />
           </button>
         </div>
+        <Breadcrumbs selection={selection} />
         <div className="mk-panel-body">
           <NodeFields location={selection} />
         </div>
@@ -121,5 +122,41 @@ export function SidePanel() {
         {tab === 'settings' ? <DocumentFields /> : null}
       </div>
     </aside>
+  )
+}
+
+/**
+ * The ancestor trail of the selected node: Section › Row › Column › Block.
+ *
+ * Not decoration — it is the only reliable way *up*. Columns fill their row, so
+ * on a row with no padding there is nowhere left to click that means "the row";
+ * before this, adding padding to such a row was impossible from the canvas.
+ *
+ * @param {object} props
+ * @param {import('../../core/types.js').NodeLocation} props.selection
+ * @returns {import('react').ReactElement | null}
+ */
+function Breadcrumbs({ selection }) {
+  const t = useI18n()
+  const { store } = useMailKilnContext()
+  const trail = (selection.path ?? []).slice(0, -1)
+  if (!trail.length) return null
+
+  return (
+    <nav className="mk-crumbs" aria-label={t('panel.ancestors')}>
+      {trail.map((id) => {
+        const found = findNode(store.doc, id)
+        if (!found) return null
+        const label =
+          found.kind === 'block'
+            ? (getBlockDef(found.node.type)?.label ?? found.node.type)
+            : t(`inspector.${found.kind}`)
+        return (
+          <button key={id} type="button" className="mk-crumb" onClick={() => store.select(id)}>
+            {label}
+          </button>
+        )
+      })}
+    </nav>
   )
 }
