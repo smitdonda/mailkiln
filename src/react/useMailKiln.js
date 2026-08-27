@@ -57,6 +57,8 @@ import {
  * @property {import('../core/types.js').LintResult} lint
  * @property {string | null} selectedId
  * @property {import('../core/types.js').NodeLocation | null} selection
+ * @property {string | null} focusColumnId The column the last selection was in,
+ *   kept after that selection is cleared. It is where the palette appends.
  * @property {string | null} hoveredId
  * @property {(id: string | null) => void} select
  * @property {(id: string | null) => void} setHovered
@@ -90,10 +92,11 @@ import {
  * @param {(doc: EmailDocument) => void} [options.onChange]
  * @param {import('../core/types.js').VarsDef | null} [options.vars]
  * @param {number} [options.historyLimit]
+ * @param {string[]} [options.lintDisable] Rule ids to skip, e.g. `['contrast']`.
  * @returns {EditorStore}
  */
 export function useMailKiln(options = {}) {
-  const { value, defaultValue, onChange, vars = null, historyLimit } = options
+  const { value, defaultValue, onChange, vars = null, historyLimit, lintDisable } = options
 
   const [history, setHistory] = useState(() =>
     createHistory(normalize(value ?? defaultValue ?? createDocument()), { limit: historyLimit }),
@@ -153,6 +156,7 @@ export function useMailKiln(options = {}) {
     hoveredId,
     setHoveredId,
     vars,
+    lintDisable,
   })
 
   return store
@@ -171,6 +175,7 @@ export function useMailKiln(options = {}) {
  * @property {string | null} hoveredId
  * @property {(id: string | null) => void} setHoveredId
  * @property {import('../core/types.js').VarsDef | null} vars
+ * @property {string[] | undefined} lintDisable
  */
 
 /**
@@ -193,6 +198,7 @@ function useEditorStore(args) {
     hoveredId,
     setHoveredId,
     vars,
+    lintDisable,
   } = args
 
   const selection = useMemo(
@@ -206,7 +212,35 @@ function useEditorStore(args) {
     if (selectedId && !findNode(doc, selectedId)) setSelectedId(null)
   }, [doc, selectedId, setSelectedId])
 
-  const lint = useMemo(() => lintDocument(doc, { vars }), [doc, vars])
+  // Where the palette appends, remembered across a deselection.
+  //
+  // Selecting a block swaps the side panel from the palette to that block's
+  // properties, and going back to the palette deselects — so by the time you can
+  // click a tile, "the column you were working in" existed only in your head.
+  // Every append landed in the document's last column instead, which made a
+  // second block in any other column reachable by drag alone.
+  const [focusColumnId, setFocusColumnId] = useState(/** @type {string | null} */ (null))
+
+  useEffect(() => {
+    if (!selection) return
+    const id = columnIdOf(selection)
+    if (id) setFocusColumnId(id)
+  }, [selection])
+
+  useEffect(() => {
+    if (focusColumnId && !findNode(doc, focusColumnId)) setFocusColumnId(null)
+  }, [doc, focusColumnId])
+
+  // `disable` was reachable from `lintDocument` but from nowhere in React, so a
+  // rule that is wrong for one template — brand-blue contrast, a deliberate
+  // 700px width — could not be acknowledged and sat in the panel forever.
+  // Joined into a string so a fresh array literal on every render does not
+  // re-lint the document.
+  const disableKey = (lintDisable ?? []).join(',')
+  const lint = useMemo(
+    () => lintDocument(doc, { vars, disable: disableKey ? disableKey.split(',') : [] }),
+    [doc, vars, disableKey],
+  )
 
   const undo = useCallback(() => {
     const next = undoHistory(historyRef.current)
@@ -390,6 +424,7 @@ function useEditorStore(args) {
     lint,
     selectedId,
     selection,
+    focusColumnId,
     hoveredId,
     select: setSelectedId,
     setHovered: setHoveredId,
@@ -400,6 +435,20 @@ function useEditorStore(args) {
     canRedo: canRedoHistory(history),
     ...actions,
   }
+}
+
+/**
+ * The column a selection sits in, or that it contains.
+ *
+ * @param {import('../core/types.js').NodeLocation} selection
+ * @returns {string | null}
+ */
+function columnIdOf(selection) {
+  if (selection.kind === 'column') return selection.node.id
+  if (selection.kind === 'block') return selection.parent.id
+  if (selection.kind === 'row') return selection.node.columns?.[0]?.id ?? null
+  if (selection.kind === 'section') return selection.node.rows?.[0]?.columns?.[0]?.id ?? null
+  return null
 }
 
 /**

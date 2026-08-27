@@ -64,6 +64,12 @@ export function kitchenSinkDocument() {
                     createBlock('divider'),
                     createBlock('spacer', { height: 32 }),
                     createBlock('social'),
+                    createBlock('menu', {
+                      items: [
+                        { label: 'Shop', url: 'https://example.com/shop' },
+                        { label: 'Help', url: 'https://example.com/help' },
+                      ],
+                    }),
                     createBlock('videoThumb', {
                       thumbnailUrl: 'https://example.com/thumb.jpg',
                       videoUrl: 'https://youtube.com/watch?v=abc',

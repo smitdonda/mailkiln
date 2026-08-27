@@ -1,8 +1,11 @@
 /**
  * The lint panel — pillar 3.
  *
- * Issues are clickable: selecting one selects the offending node, which is the
- * difference between a warning you act on and a warning you dismiss.
+ * Issues are clickable: selecting one shows the offending node, which is the
+ * difference between a warning you act on and a warning you dismiss. Selecting
+ * alone is not enough — the properties panel only exists in the design view, so
+ * clicking an issue from here has to take you back there. `<MailKiln>` passes
+ * `onShowBlock` to do exactly that; standalone consumers get plain selection.
  *
  * @module mailkiln/react/panels/LintPanel
  */
@@ -15,9 +18,12 @@ import { IconAlert, IconCheckCircle, IconInfo, IconWarning } from '../icons.jsx'
 const LEVEL_ICON = { error: IconAlert, warn: IconWarning, info: IconInfo }
 
 /**
+ * @param {object} [props]
+ * @param {(nodeId: string) => void} [props.onShowBlock] Called instead of plain
+ *   selection when an issue is clicked.
  * @returns {import('react').ReactElement}
  */
-export function LintPanel() {
+export function LintPanel({ onShowBlock } = {}) {
   const t = useI18n()
   const { store } = useMailKilnContext()
   const { issues, errors, warnings, infos, sizeBytes } = store.lint
@@ -60,7 +66,11 @@ export function LintPanel() {
                     data-level={issue.level}
                     disabled={!issue.nodeId}
                     title={issue.nodeId ? t('lint.goto') : undefined}
-                    onClick={() => issue.nodeId && store.select(issue.nodeId)}
+                    onClick={() => {
+                      if (!issue.nodeId) return
+                      if (onShowBlock) onShowBlock(issue.nodeId)
+                      else store.select(issue.nodeId)
+                    }}
                   >
                     <span className="mk-lint-icon">
                       <Icon />

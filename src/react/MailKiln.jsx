@@ -26,7 +26,6 @@ import { CodePanel } from './panels/CodePanel.jsx'
 import { LintPanel } from './panels/LintPanel.jsx'
 import { ImportDialog } from './panels/ImportDialog.jsx'
 import { QuickInsert } from './panels/QuickInsert.jsx'
-import { SendTestDialog } from './panels/SendTestDialog.jsx'
 
 /**
  * @param {object} props
@@ -42,11 +41,12 @@ import { SendTestDialog } from './panels/SendTestDialog.jsx'
  * @param {string} [props.locale]
  * @param {Record<string, string>} [props.messages] Per-key string overrides.
  * @param {(file: File) => Promise<string>} [props.onImageUpload]
- * @param {(payload: import('./panels/SendTestDialog.jsx').SendTestPayload) => Promise<void> | void} [props.onSendTest]
- *   Enables the "Send test" button. mailkiln renders the message; your app sends it.
  * @param {Array<{ label: string, value: string }>} [props.specialLinks] Replaces the
  *   built-in unsubscribe / preferences / view-in-browser entries offered by every link
  *   field. Pass `[]` to remove the picker.
+ * @param {string[]} [props.lintDisable] Lint rule ids to skip — `['contrast']`, or
+ *   `['block:html']` for a whole block type's own rules. The rule stops being reported
+ *   everywhere in this document.
  * @param {(bundle: import('../core/types.js').ExportBundle) => void} [props.onExport]
  * @param {boolean} [props.showPalette]
  * @param {boolean} [props.showInspector]
@@ -61,13 +61,13 @@ export function MailKiln({
   vars,
   blocks: customBlocks,
   tools,
-  onSendTest,
   theme,
   appearance = 'light',
   locale = 'en',
   messages,
   onImageUpload,
   specialLinks,
+  lintDisable,
   onExport,
   showPalette = true,
   showInspector = true,
@@ -80,7 +80,6 @@ export function MailKiln({
   const [device, setDevice] = useState(/** @type {'desktop' | 'mobile' | 'text'} */ ('desktop'))
   const [importOpen, setImportOpen] = useState(false)
   const [quickOpen, setQuickOpen] = useState(false)
-  const [sendOpen, setSendOpen] = useState(false)
   const [systemDark, setSystemDark] = useState(false)
 
   // Custom blocks are registered before the first render that could reference
@@ -98,7 +97,7 @@ export function MailKiln({
     [customBlocks, tools],
   )
 
-  const store = useMailKiln({ value, defaultValue, onChange, vars: vars ?? null })
+  const store = useMailKiln({ value, defaultValue, onChange, vars: vars ?? null, lintDisable })
 
   useEffect(() => {
     if (appearance !== 'auto' || typeof window === 'undefined' || !window.matchMedia) return
@@ -133,26 +132,38 @@ export function MailKiln({
       store,
       blocks,
       onImageUpload,
-      onSendTest,
       specialLinks,
       tools,
       instanceId,
       drag: { activeDrag: null, dropTarget: null },
     }),
-    [store, blocks, onImageUpload, onSendTest, specialLinks, tools, instanceId],
+    [store, blocks, onImageUpload, specialLinks, tools, instanceId],
   )
 
   /**
    * Pull focus into the editor when the user clicks somewhere that cannot take
-   * it (the canvas, a section background). Clicking a real control is
-   * unaffected: the browser focuses it as the default action of the same
-   * pointer event, after this runs.
+   * it (the canvas, a section background).
+   *
+   * The focus call has to happen *after* the pointer event's default action,
+   * not during it: mousedown's default moves focus on its own, and in Chrome a
+   * click on the canvas lands it on `<body>` — which silently undid a `focus()`
+   * made in the pointerdown handler and left every editor shortcut (`/`,
+   * Delete, Escape, Ctrl+Z) dead until you happened to tab into a control. So
+   * this defers a frame and only claims focus if nothing inside the editor took
+   * it, which leaves a clicked input, button or contentEditable alone.
    */
   const focusRoot = useCallback(() => {
     const root = rootRef.current
     if (!root) return
-    if (root.contains(document.activeElement)) return
-    root.focus({ preventScroll: true })
+    const claim = () => {
+      const current = rootRef.current
+      if (!current) return
+      if (current.contains(document.activeElement)) return
+      current.focus({ preventScroll: true })
+    }
+    claim()
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(claim)
+    else setTimeout(claim, 0)
   }, [])
 
   const handleKeyDown = useCallback(
@@ -230,7 +241,6 @@ export function MailKiln({
               onDevice={setDevice}
               onImport={() => setImportOpen(true)}
               onExport={onExport}
-              onSendTest={onSendTest ? () => setSendOpen(true) : undefined}
               appearance={resolvedAppearance}
             />
 
@@ -241,7 +251,14 @@ export function MailKiln({
                 ) : null}
                 {view === 'preview' ? <PreviewFrame device={device} /> : null}
                 {view === 'code' ? <CodePanel /> : null}
-                {view === 'checks' ? <LintPanel /> : null}
+                {view === 'checks' ? (
+                  <LintPanel
+                    onShowBlock={(nodeId) => {
+                      store.select(nodeId)
+                      setView('design')
+                    }}
+                  />
+                ) : null}
               </main>
 
               {/* One panel, on the right, that swaps between the content tabs
@@ -252,7 +269,6 @@ export function MailKiln({
 
             {importOpen ? <ImportDialog onClose={() => setImportOpen(false)} /> : null}
             {quickOpen ? <QuickInsert onClose={() => setQuickOpen(false)} /> : null}
-            {sendOpen ? <SendTestDialog onClose={() => setSendOpen(false)} /> : null}
           </DndRoot>
         </div>
       </MailKilnProvider>

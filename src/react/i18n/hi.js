@@ -26,6 +26,7 @@ export const hi = {
   'panel.rows': 'पंक्तियाँ',
   'panel.settings': 'सेटिंग्स',
   'panel.back': 'सामग्री पर वापस',
+  'panel.ancestors': 'चयनित नोड के मूल',
   'panel.contentHint': 'ब्लॉक को कैनवास पर खींचें, या जोड़ने के लिए Enter दबाएँ।',
   'panel.rowsHint': 'नई पंक्ति जोड़ने के लिए किसी लेआउट पर क्लिक करें।',
 
@@ -39,16 +40,6 @@ export const hi = {
   'palette.empty': '“{query}” से मेल खाता कोई ब्लॉक नहीं।',
   'palette.hint': 'कैनवास पर खींचें, या जोड़ने के लिए Enter दबाएँ।',
   'palette.limit': '{label}: इस टेम्पलेट के लिए {limit} की सीमा पूरी हो चुकी है।',
-
-  'toolbar.sendTest': 'टेस्ट भेजें',
-
-
-  'sendTest.title': 'टेस्ट ईमेल भेजें',
-  'sendTest.to': 'भेजें',
-  'sendTest.subject': 'विषय',
-  'sendTest.send': 'टेस्ट भेजें',
-  'sendTest.sending': 'भेजा जा रहा है…',
-  'sendTest.done': 'बंद करें',
 
   'blank.title': 'अपना ईमेल बनाना शुरू करें',
   'blank.body': 'पैनल से ब्लॉक खींचें, या नीचे से शुरुआत चुनें।',

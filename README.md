@@ -199,12 +199,12 @@ if (errors > 0) {
 | `blocks` | `BlockDef[]` | Custom blocks from `defineBlock`. |
 | `tools` | `Record<string, ToolConfig>` | Per-tool palette config — `enabled`, `position`, `usageLimit`. See below. |
 | `specialLinks` | `Array<{ label, value }>` | Replaces the built-in unsubscribe / preferences / view-in-browser entries. |
+| `lintDisable` | `string[]` | Lint rule ids to stop reporting — `['contrast']`, or `['block:html']` for a block type's own rules. |
 | `theme` | `Theme` | Editor chrome colours. Applied as CSS variables on this instance only. |
 | `appearance` | `'light' \| 'dark' \| 'auto'` | Chrome appearance. Default `'light'`; `'auto'` follows `prefers-color-scheme`. There is no in-editor toggle — your app owns the setting. |
 | `locale` | `string` | `'en'` or `'hi'` ship built in. |
 | `messages` | `Record<string, string>` | Per-key string overrides. |
 | `onImageUpload` | `(file: File) => Promise<string>` | Enables the upload button. A URL field is always available regardless. |
-| `onSendTest` | `(payload) => Promise<void>` | Enables the **Send test** button. See below. |
 | `onExport` | `(bundle) => void` | Called by the Export button with all six formats. |
 | `showPalette` / `showInspector` | `boolean` | Hide either panel to build your own layout. |
 | `className` / `style` | — | Applied to the root element. |
@@ -364,6 +364,43 @@ The breakpoint is one pixel *below* the content width — `max-width:599px` for 
 email. At exactly 600px the content still fits, and treating that as "mobile" made the
 editor's own 600px desktop preview hide anything marked hidden.
 
+## Typography and layout controls
+
+Fields that exist because a real rebuild needed them and the editor could not express them:
+
+- **Link colour** (text, heading) — email clients do not inherit a `<div>`'s colour into an
+  `<a>`, and the head stylesheet is stripped by several of them, so every anchor inside copy
+  is given the colour inline. Empty falls back to `settings.linkColor`; an anchor that
+  already carries its own `color` is never overwritten. The contrast rule checks it too.
+- **Weight** (heading) — headings were locked to bold for as long as the block existed.
+- **Paragraph spacing** (text) — clients disagree on the default `<p>` margin. Empty keeps
+  whatever the client does; a margin you wrote yourself wins over this field.
+- **Letter spacing** (button, menu) — the field text and heading already had.
+- **Outlook width (px)** (image) — Outlook cannot compute a percentage against a table cell,
+  so a fluid image needs a pixel `width` attribute as well. Setting it silences the
+  `image-width` rule.
+- **Borders** (row, column) — four per-side CSS shorthands, e.g. `5px solid #1d1d1f`. Per
+  side because the common case is one edge: the gutter between two cards.
+
+## Buttons in Outlook
+
+The Word rendering engine ignores `border-radius`. A rounded button that is not full width
+therefore ships twice: a VML `<v:roundrect>` inside `<!--[if mso]>`, and the ordinary anchor
+table inside `<!--[if !mso]><!-->`, so exactly one of the two is ever visible. The VML width
+is estimated from the label, since VML has no shrink-to-fit. Square buttons and full-width
+ones emit the plain table only — the first has nothing to round, the second no width to give.
+
+## Silencing a check
+
+Some rules are wrong for a particular template: brand colours that miss WCAG AA by a hair, a
+deliberately wide layout. `lintDisable` takes rule ids and the panel stops reporting them.
+
+```jsx
+<MailKiln lintDisable={['contrast', 'structure']} />
+```
+
+Headless, the same list goes to `lintDocument(doc, { disable: [...] })`.
+
 ## Special links
 
 Every link field — the inline toolbar's popover, and the `href` on button, image, social and
@@ -398,26 +435,9 @@ exportFilenames(documentName(doc)).html   // order-shipped.html
 
 Edit it inline in the toolbar, or in the Settings tab. With no name, `documentName(doc)` falls back to the subject and then to `EmailTemplate` — so a subject like "50% off — today only!" no longer has to double as a component name.
 
-## Sending a test
-
-mailkiln does not send email. It has no backend, no account and no ESP integration — adding one would undo the "self-hosted, works offline" promise. What it does is render the message and hand it to you:
-
-```jsx
-<MailKiln
-  onSendTest={async ({ to, subject, html, text, document }) => {
-    await fetch('/api/send-test', {
-      method: 'POST',
-      body: JSON.stringify({ to, subject, html, text }),
-    })
-  }}
-/>
-```
-
-The button only appears when the handler is provided. The dialog validates recipients, pre-fills the subject, and surfaces any lint **errors** first — a test send is the cheapest moment to notice a missing unsubscribe link. Throw from the handler and the failure is shown; it never claims to have sent.
-
 ## Custom blocks
 
-`defineBlock` is the same API the nine built-in blocks use — there is no privileged path. One definition gives you a palette entry, a generated Inspector, four render targets, a lint rule and HTML-import support:
+`defineBlock` is the same API the ten built-in blocks use — there is no privileged path. One definition gives you a palette entry, a generated Inspector, four render targets, a lint rule and HTML-import support:
 
 ```js
 import { defineBlock, spacing } from 'mailkiln/core'
@@ -471,7 +491,7 @@ mailkiln: block "countdown" schema[1] ("endsAt") edits "endsAt" but
 | Visual drag & drop editor | ✅ nested, free-form | ✅ | ✅ | insert menus only | ❌ |
 | **Exports editable code** | ✅ react-email JSX/TSX | ❌ HTML only | ❌ HTML only | ❌ | n/a |
 | **Imports existing HTML** | ✅ with a confidence report | ❌ | ❌ | ❌ | ❌ |
-| Deliverability linter | ✅ 16 rules | ❌ | ❌ | ❌ | ❌ |
+| Deliverability linter | ✅ 17 rules | ❌ | ❌ | ❌ | ❌ |
 | Typed merge variables | ✅ | partial | ❌ | ❌ | via your own props |
 | Conditions & loops | ✅ real JSX expressions | ESP syntax baked into the HTML | ❌ | ❌ | write them yourself |
 | Self-hosted / offline | ✅ | ❌ hosted SaaS iframe | ✅ | ✅ | ✅ |
@@ -531,7 +551,7 @@ TypeScript consumers are first-class: the shipped types are real, and `renderToJ
 
 Real-time collaboration, AI copy generation, a hosted template marketplace, Vue/Svelte ports.
 
-**ESP integrations specifically**: there are none and there will be none. mailkiln never talks to SendGrid, Mailchimp, Resend or anyone else — `onSendTest` hands you a rendered message and your app owns the transport. That is the difference between a hook and an integration, and it is why this still works offline with no account.
+**ESP integrations specifically**: there are none and there will be none. mailkiln never talks to SendGrid, Mailchimp, Resend or anyone else — `exportDocument()` hands you the rendered HTML and text and your app owns the transport. That is the difference between a hook and an integration, and it is why this still works offline with no account.
 
 `core/` is React-free so a port stays cheap later.
 

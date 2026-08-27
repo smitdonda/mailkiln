@@ -200,6 +200,87 @@ export function tableOpen({ width, align, className, style, extra } = {}) {
 export const TABLE_CLOSE = '</table>'
 
 /**
+ * Give every `<a>` in a fragment an explicit colour.
+ *
+ * `settings.linkColor` used to reach nothing but the video block's caption: the
+ * head stylesheet is stripped by several clients and ignored by Outlook, and an
+ * anchor does not inherit the colour of the `<div>` it sits in — so a link typed
+ * into a text block rendered in the client's default blue-violet no matter what
+ * the template said. The colour therefore has to be inlined on the tag itself.
+ *
+ * An anchor that already carries its own `color` is left alone: an author who
+ * coloured one link meant it.
+ *
+ * @param {string} html
+ * @param {string | undefined | null} color
+ * @returns {string}
+ */
+export function withLinkColor(html, color) {
+  if (!color || typeof html !== 'string' || !/<a\b/i.test(html)) return String(html ?? '')
+  return html.replace(/<a\b([^>]*)>/gi, (match, rawAttrs) => {
+    const style = /\sstyle\s*=\s*"([^"]*)"/i.exec(rawAttrs)
+    if (style && /(^|;)\s*color\s*:/i.test(style[1])) return match
+    if (style) {
+      const merged = `${style[1].trim().replace(/;$/, '')};color:${color}`
+      return `<a${rawAttrs.replace(style[0], ` style="${escapeAttr(merged)}"`)}>`
+    }
+    return `<a${rawAttrs} style="color:${escapeAttr(color)}">`
+  })
+}
+
+/**
+ * Give every `<p>` in a fragment an explicit bottom margin.
+ *
+ * A `<p>` inside a text block otherwise falls back to the client's default
+ * margin — 1em in most, zero in a few — so the same template has different
+ * paragraph rhythm in Gmail and Outlook. There is nowhere to put a stylesheet
+ * rule for it, since the block emits one `<div>` and the paragraphs are inside
+ * the author's own markup.
+ *
+ * @param {string} html
+ * @param {number | string | undefined | null} spacing Bottom margin in px.
+ * @returns {string}
+ */
+export function withParagraphSpacing(html, spacing) {
+  // Empty means "client default", and `Number('')` is 0 — which would write
+  // `margin:0 0 0px` onto every paragraph of every template that never touched
+  // the field.
+  if (spacing === '' || spacing == null) return String(html ?? '')
+  const gap = Number(spacing)
+  if (!Number.isFinite(gap) || gap < 0) return String(html ?? '')
+  if (typeof html !== 'string' || !/<p\b/i.test(html)) return String(html ?? '')
+  const margin = `margin:0 0 ${gap}px`
+  return html.replace(/<p\b([^>]*)>/gi, (match, rawAttrs) => {
+    const style = /\sstyle\s*=\s*"([^"]*)"/i.exec(rawAttrs)
+    if (style && /(^|;)\s*margin(-bottom)?\s*:/i.test(style[1])) return match
+    if (style) {
+      const merged = `${margin};${style[1].trim().replace(/^;/, '')}`
+      return `<p${rawAttrs.replace(style[0], ` style="${escapeAttr(merged)}"`)}>`
+    }
+    return `<p${rawAttrs} style="${escapeAttr(margin)}">`
+  })
+}
+
+/**
+ * The four border sides of a row, column or section, as a style object.
+ *
+ * Rows and columns take borders per side rather than one shorthand because the
+ * common use is a single edge — the hairline gutter between two cards — and a
+ * shorthand cannot express that.
+ *
+ * @param {Record<string, any> | undefined | null} props
+ * @returns {StyleObject}
+ */
+export function borderStyles(props) {
+  return {
+    borderTop: props?.borderTop || '',
+    borderRight: props?.borderRight || '',
+    borderBottom: props?.borderBottom || '',
+    borderLeft: props?.borderLeft || '',
+  }
+}
+
+/**
  * Wrap content in an Outlook-only conditional comment.
  *
  * @param {string} content

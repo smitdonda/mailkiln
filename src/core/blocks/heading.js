@@ -8,18 +8,21 @@
 
 import { defineBlock } from '../registry.js'
 import { spacing } from '../schema.js'
-import { mergeStyles, styleAttr } from '../render/inline.js'
+import { mergeStyles, styleAttr, withLinkColor } from '../render/inline.js'
 import { el, needsInnerHtml, raw, varsToChildren, varsToTemplate } from '../render/jsxNode.js'
 import {
   ALIGN_FIELD,
   BACKGROUND_FIELD,
   FONT_FIELD,
   HIDE_ON_MOBILE_FIELD,
+  LINK_COLOR_FIELD,
   MOBILE_FONT_SIZE_FIELD,
   PADDING_FIELD,
+  WEIGHT_OPTIONS,
   commonProps,
   editableAttr,
   mjCommonAttrs,
+  richTextHtml,
   stripTags,
 } from './shared.js'
 
@@ -61,6 +64,7 @@ export const headingBlock = defineBlock({
     fontWeight: 'bold',
     letterSpacing: '',
     color: '',
+    linkColor: '',
     fontFamily: '',
     mobileFontSize: '',
     padding: spacing(12, 24, 4),
@@ -75,8 +79,13 @@ export const headingBlock = defineBlock({
     },
     { key: 'fontSize', type: 'number', label: 'Size', min: 10, max: 72, group: 'Type' },
     { key: 'lineHeight', type: 'number', label: 'Line height', min: 1, max: 2, step: 0.1, group: 'Type' },
+    // A heading carried `fontWeight` in its defaults from the start and had no
+    // control for it, so every heading exported bold — a light or regular
+    // display heading was unreachable from the editor.
+    { key: 'fontWeight', type: 'select', label: 'Weight', options: WEIGHT_OPTIONS, group: 'Type' },
     FONT_FIELD,
     { key: 'color', type: 'color', label: 'Colour', group: 'Type' },
+    LINK_COLOR_FIELD,
     {
       key: 'letterSpacing',
       type: 'text',
@@ -94,21 +103,22 @@ export const headingBlock = defineBlock({
   render: {
     html(p, ctx) {
       const tag = `h${clampLevel(p.level)}`
-      return `<${tag}${editableAttr(ctx, 'text')}${styleAttr(typography(p, ctx))}>${ctx.resolve(p.text ?? '')}</${tag}>`
+      return `<${tag}${editableAttr(ctx, 'text')}${styleAttr(typography(p, ctx))}>${richTextHtml(p, ctx, p.text)}</${tag}>`
     },
     jsx(p, ctx) {
       const props = { as: `h${clampLevel(p.level)}`, style: typography(p, ctx) }
       if (needsInnerHtml(p.text)) {
+        const marked = withLinkColor(String(p.text ?? ''), p.linkColor || ctx.settings.linkColor)
         return el('Heading', {
           ...props,
-          dangerouslySetInnerHTML: raw(`{{ __html: ${varsToTemplate(p.text).__raw} }}`),
+          dangerouslySetInnerHTML: raw(`{{ __html: ${varsToTemplate(marked).__raw} }}`),
         })
       }
       return el('Heading', props, varsToChildren(p.text ?? ''))
     },
     mjml(p, ctx) {
       const style = typography(p, ctx)
-      return `<mj-text${mjCommonAttrs(p)} font-size="${style.fontSize}px" font-weight="${style.fontWeight}" line-height="${style.lineHeight}" color="${style.color}"><h${clampLevel(p.level)} style="margin:0;font-size:inherit;font-weight:inherit;line-height:inherit;color:inherit">${ctx.resolve(p.text ?? '')}</h${clampLevel(p.level)}></mj-text>`
+      return `<mj-text${mjCommonAttrs(p)} font-size="${style.fontSize}px" font-weight="${style.fontWeight}" line-height="${style.lineHeight}" color="${style.color}"><h${clampLevel(p.level)} style="margin:0;font-size:inherit;font-weight:inherit;line-height:inherit;color:inherit">${richTextHtml(p, ctx, p.text)}</h${clampLevel(p.level)}></mj-text>`
     },
     text(p, ctx) {
       const value = stripTags(ctx.resolve(p.text ?? ''))

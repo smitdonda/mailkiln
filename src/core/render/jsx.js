@@ -268,6 +268,23 @@ function conditional(node, rendered) {
 }
 
 /**
+ * The border sides a row or column has set, as React style properties. Only the
+ * sides actually in use are emitted, so a template with no borders exports the
+ * same JSX it did before the field existed.
+ *
+ * @param {Record<string, any> | undefined} props
+ * @returns {Record<string, string>}
+ */
+function borders(props) {
+  /** @type {Record<string, string>} */
+  const out = {}
+  for (const side of ['borderTop', 'borderRight', 'borderBottom', 'borderLeft']) {
+    if (props?.[side]) out[side] = String(props[side])
+  }
+  return out
+}
+
+/**
  * @param {import('../types.js').Row} row
  * @param {RenderContext} ctx
  * @returns {JsxNode}
@@ -296,6 +313,7 @@ function rowNodeOnce(row, ctx, extraProps) {
   const rowStyle = {
     padding: spacingToCss(row.props?.padding) || undefined,
     backgroundColor: row.props?.backgroundColor || undefined,
+    ...borders(row.props),
   }
   const hasRowStyle = Object.values(rowStyle).some((v) => v !== undefined)
 
@@ -306,6 +324,7 @@ function rowNodeOnce(row, ctx, extraProps) {
     const plain =
       !spacingToCss(column.props?.padding) &&
       !column.props?.backgroundColor &&
+      Object.keys(borders(column.props)).length === 0 &&
       (column.props?.verticalAlign ?? 'top') === 'top'
     // …unless the row is mapped: React needs the `key` on a single element, and
     // an array of blocks has nowhere to put one.
@@ -332,6 +351,7 @@ function rowNodeOnce(row, ctx, extraProps) {
             verticalAlign: column.props?.verticalAlign || undefined,
             padding: spacingToCss(column.props?.padding) || undefined,
             backgroundColor: column.props?.backgroundColor || undefined,
+            ...borders(column.props),
           },
         },
         // An empty cell collapses in several clients, so give it a nbsp — the

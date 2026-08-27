@@ -71,12 +71,20 @@ function rowMjmlOnce(row, ctx) {
         'vertical-align': column.props?.verticalAlign,
         'background-color': column.props?.backgroundColor,
         padding: spacingToCss(column.props?.padding),
+        'border-top': column.props?.borderTop,
+        'border-right': column.props?.borderRight,
+        'border-bottom': column.props?.borderBottom,
+        'border-left': column.props?.borderLeft,
       })}>${blocks}</mj-column>`
     })
     .join('')
   return `<mj-section${attrs({
     padding: spacingToCss(row.props?.padding) || '0',
     'background-color': row.props?.backgroundColor,
+    'border-top': row.props?.borderTop,
+    'border-right': row.props?.borderRight,
+    'border-bottom': row.props?.borderBottom,
+    'border-left': row.props?.borderLeft,
   })}>${columns}</mj-section>`
 }
 

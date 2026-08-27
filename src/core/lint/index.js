@@ -16,7 +16,7 @@ import { getBlockDef } from '../registry.js'
 import { eachBlock } from './walk.js'
 import { byteLength, gmailClippingRule } from './rules/gmailClipping.js'
 import { outlookUnsafeCssRule } from './rules/outlookUnsafeCss.js'
-import { imageAltRule, imageFormatRule, imageWidthRule } from './rules/images.js'
+import { imageAltRule, imageFormatRule, imageSourceRule, imageWidthRule } from './rules/images.js'
 import { backgroundImageRule } from './rules/backgroundImage.js'
 import { contrastRule, darkModeRule } from './rules/contrast.js'
 import {
@@ -46,6 +46,7 @@ export const builtinRules = [
   outlookUnsafeCssRule,
   contrastRule,
   darkModeRule,
+  imageSourceRule,
   imageAltRule,
   imageFormatRule,
   imageWidthRule,

@@ -22,6 +22,17 @@ import {
   widthValue,
 } from './shared.js'
 
+/**
+ * The pixel width Outlook should use, as a string, or '' when unset.
+ *
+ * @param {Record<string, any>} p
+ * @returns {string}
+ */
+function outlookWidth(p) {
+  const value = Number(p.pxWidth)
+  return Number.isFinite(value) && value > 0 ? String(Math.round(value)) : ''
+}
+
 export const imageBlock = defineBlock({
   type: 'image',
   label: 'Image',
@@ -32,6 +43,7 @@ export const imageBlock = defineBlock({
     src: '',
     alt: '',
     width: '100%',
+    pxWidth: '',
     href: '',
     borderRadius: 0,
     align: /** @type {any} */ ('center'),
@@ -41,6 +53,18 @@ export const imageBlock = defineBlock({
     { key: 'src', type: 'image', label: 'Image' },
     { key: 'alt', type: 'text', label: 'Alt text', vars: true, help: 'Shown when images are blocked — never leave it empty.' },
     { key: 'width', type: 'text', label: 'Width', placeholder: '100% or 480', help: 'A px value renders more predictably in Outlook.' },
+    // A fluid image still needs a pixel width for Outlook, which cannot compute
+    // a percentage against a table cell. Two fields rather than one because the
+    // reference behaviour — `width="670"` plus `width:100%` — needs both at once.
+    {
+      key: 'pxWidth',
+      type: 'number',
+      label: 'Outlook width (px)',
+      min: 0,
+      max: 2000,
+      group: 'Layout',
+      help: 'Sent as the width attribute when Width is a percentage. Use the image’s display width.',
+    },
     { key: 'href', type: 'url', label: 'Link', vars: true },
     { key: 'borderRadius', type: 'number', label: 'Corner radius', min: 0, max: 80, group: 'Layout' },
     ALIGN_FIELD,
@@ -50,8 +74,13 @@ export const imageBlock = defineBlock({
   ],
   render: {
     html(p, ctx) {
+      // The placeholder is editor chrome, not content: exporting it would post a
+      // dashed "No image selected" box to every recipient. Outside the canvas an
+      // image with no source renders as nothing, and the linter says so.
       if (!p.src) {
-        return `<div${styleAttr({ padding: 24, border: '1px dashed #cbd5e1', color: '#64748b', fontSize: 13, textAlign: 'center' })}>No image selected</div>`
+        return ctx.options?.editable
+          ? `<div${styleAttr({ padding: 24, border: '1px dashed #cbd5e1', color: '#64748b', fontSize: 13, textAlign: 'center' })}>No image selected</div>`
+          : ''
       }
       const w = widthValue(p.width, 600)
       const style = mergeStyles({
@@ -68,7 +97,7 @@ export const imageBlock = defineBlock({
       const img = `<img${attrs({
         src: ctx.resolve(p.src),
         alt: ctx.resolve(p.alt ?? ''),
-        width: w.attr,
+        width: w.attr ?? outlookWidth(p),
       })}${styleAttr(style)} />`
       if (!p.href) return img
       return `<a href="${escapeAttr(ctx.resolve(p.href))}" target="_blank"${styleAttr({ textDecoration: 'none' })}>${img}</a>`
@@ -78,7 +107,7 @@ export const imageBlock = defineBlock({
       const img = el('Img', {
         src: varsToAttr(p.src ?? ''),
         alt: varsToAttr(p.alt ?? ''),
-        width: w.attr ? Number(w.attr) : undefined,
+        width: w.attr ? Number(w.attr) : Number(outlookWidth(p)) || undefined,
         style: mergeStyles({
           display: 'block',
           width: w.css,
@@ -97,7 +126,7 @@ export const imageBlock = defineBlock({
         src: ctx.resolve(p.src ?? ''),
         alt: ctx.resolve(p.alt ?? ''),
         href: p.href ? ctx.resolve(p.href) : '',
-        width: w.isPercent ? '' : w.css,
+        width: w.isPercent ? (outlookWidth(p) ? `${outlookWidth(p)}px` : '') : w.css,
         'border-radius': p.borderRadius ? `${p.borderRadius}px` : '',
       })} />`
     },

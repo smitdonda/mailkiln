@@ -43,8 +43,12 @@ export function Canvas({ device = 'desktop', onQuickInsert }) {
   const { doc } = store
   const blank = isPristine(doc)
   // The mobile frame narrows the paper, so chrome sized to the document width
-  // would hang off it.
-  const width = device === 'mobile' ? 375 : Number(doc.settings.width) || 600
+  // would hang off it. On desktop the paper fills the working area rather than
+  // sitting at `settings.width` — the narrow card left most of the screen as dead
+  // gutter. The trade-off: desktop blocks lay out wider than the email really is,
+  // so the Preview tab (a real iframe at `settings.width`) stays the honest check
+  // on line lengths before sending.
+  const width = device === 'mobile' ? 375 : null
 
   // One render context per document version, shared by every block. `editable`
   // is what makes blocks mark their inline-editable element; no export path sets
@@ -61,7 +65,7 @@ export function Canvas({ device = 'desktop', onQuickInsert }) {
           className="mk-canvas"
           data-device={device}
           style={{
-            maxWidth: width,
+            maxWidth: width ?? undefined,
             backgroundColor: doc.settings.contentBackgroundColor,
           }}
         >
@@ -87,7 +91,7 @@ export function Canvas({ device = 'desktop', onQuickInsert }) {
           <button
             type="button"
             className="mk-btn mk-btn-outline mk-add-section"
-            style={{ maxWidth: width }}
+            style={{ maxWidth: width ?? undefined }}
             onClick={(event) => {
               event.stopPropagation()
               store.addSection()
@@ -100,6 +104,23 @@ export function Canvas({ device = 'desktop', onQuickInsert }) {
       </div>
     </div>
   )
+}
+
+/**
+ * Row and column borders, as inline style. The canvas has to draw them or the
+ * design disagrees with the export, which is the one thing a WYSIWYG editor
+ * cannot do.
+ *
+ * @param {Record<string, any>} props
+ * @returns {import('react').CSSProperties}
+ */
+function borderStyle(props) {
+  return {
+    borderTop: props?.borderTop || undefined,
+    borderRight: props?.borderRight || undefined,
+    borderBottom: props?.borderBottom || undefined,
+    borderLeft: props?.borderLeft || undefined,
+  }
 }
 
 /**
@@ -233,6 +254,7 @@ function RowView({ row, ctx, sectionId, index, count }) {
         padding: spacingToCss(props.padding) || undefined,
         backgroundColor: props.backgroundColor || undefined,
         gap: props.gap ? `${props.gap}px` : undefined,
+        ...borderStyle(props),
       }}
       onClick={(event) => {
         event.stopPropagation()
@@ -294,13 +316,24 @@ function ColumnView({ column, ctx }) {
       ref={setNodeRef}
       className="mk-col"
       data-over={isOver || undefined}
+      data-selected={store.selectedId === column.id || undefined}
       data-column-id={column.id}
+      // A column has its own width, padding, background and vertical alignment,
+      // and none of them were reachable without this: clicking a column used to
+      // bubble to the row, so the column property panel could never be opened.
+      // It also decides where the palette appends, which made the second block
+      // in a multi-column row drag-only.
+      onClick={(event) => {
+        event.stopPropagation()
+        store.select(column.id)
+      }}
       style={{
         flexBasis: `${props.width ?? 100}%`,
         maxWidth: `${props.width ?? 100}%`,
         padding: spacingToCss(props.padding) || undefined,
         backgroundColor: props.backgroundColor || undefined,
         verticalAlign: props.verticalAlign,
+        ...borderStyle(props),
       }}
     >
       <SortableContext items={items} strategy={verticalListSortingStrategy}>

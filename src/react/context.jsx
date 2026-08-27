@@ -13,7 +13,6 @@ import { createContext, useContext } from 'react'
  * @property {import('./useMailKiln.js').EditorStore} store
  * @property {import('../core/types.js').BlockDef[]} blocks Palette contents, in order.
  * @property {(file: File) => Promise<string>} [onImageUpload]
- * @property {(payload: import('./panels/SendTestDialog.jsx').SendTestPayload) => Promise<void> | void} [onSendTest]
  * @property {Array<{ label: string, value: string }>} [specialLinks] Replaces the built-in
  *   list offered by every link field. An empty array removes the picker entirely.
  * @property {Record<string, import('./tools.js').ToolConfig>} [tools] Per-tool palette config.

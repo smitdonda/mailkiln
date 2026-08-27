@@ -12,7 +12,6 @@ export const en = {
   'toolbar.redo': 'Redo',
   'toolbar.import': 'Import HTML',
   'toolbar.export': 'Export',
-  'toolbar.sendTest': 'Send test',
   'toolbar.desktop': 'Desktop',
   'toolbar.mobile': 'Mobile',
   'toolbar.theme': 'Toggle dark mode',
@@ -30,6 +29,7 @@ export const en = {
   'panel.rows': 'Rows',
   'panel.settings': 'Settings',
   'panel.back': 'Back to content',
+  'panel.ancestors': 'Selected node ancestors',
   'panel.contentHint': 'Drag a block onto the canvas, or press Enter to append it.',
   'panel.rowsHint': 'Click a layout to add it as a new row.',
 
@@ -58,22 +58,6 @@ export const en = {
   'blank.addSection': 'Add columns',
   'blank.addText': 'Add text',
   'blank.addButton': 'Add button',
-
-
-  // send test
-  'sendTest.title': 'Send a test email',
-  'sendTest.hint':
-    'mailkiln renders the message and hands it to your app’s send handler — it does not send anything itself.',
-  'sendTest.to': 'Send to',
-  'sendTest.subject': 'Subject',
-  'sendTest.send': 'Send test',
-  'sendTest.sending': 'Sending…',
-  'sendTest.done': 'Close',
-  'sendTest.sent': 'Sent to {count} recipient(s). Check the inbox — and the spam folder.',
-  'sendTest.failed': 'Could not send: {message}',
-  'sendTest.invalid': 'Not valid email addresses: {list}',
-  'sendTest.lintWarning':
-    'Checks found {count} error(s). A test send is the cheapest moment to fix them.',
 
   // quick insert
   'quick.title': 'Quick insert',

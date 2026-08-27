@@ -11,6 +11,7 @@ import { attrs, mergeStyles, styleAttr, tableOpen, TABLE_CLOSE } from '../render
 import { el } from '../render/jsxNode.js'
 import {
   ALIGN_FIELD,
+  BACKGROUND_FIELD,
   HIDE_ON_MOBILE_FIELD,
   PADDING_FIELD,
   commonProps,
@@ -48,6 +49,7 @@ export const dividerBlock = defineBlock({
     { key: 'width', type: 'text', label: 'Width', placeholder: '100% or 240' },
     ALIGN_FIELD,
     PADDING_FIELD,
+    BACKGROUND_FIELD,
     HIDE_ON_MOBILE_FIELD,
   ],
   render: {

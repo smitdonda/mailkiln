@@ -17,6 +17,40 @@ const RISKY_FORMATS = [
   { ext: 'svg', clients: 'most email clients (and it is stripped by Gmail)', use: 'PNG' },
 ]
 
+/**
+ * An image block with no source.
+ *
+ * The canvas shows a placeholder so you can see the block you just dropped, but
+ * the export emits nothing at all — so an unfinished image is a hole in the sent
+ * email that nothing else would have told you about.
+ *
+ * @type {import('../../types.js').LintRule}
+ */
+export const imageSourceRule = {
+  id: 'image-src',
+  level: 'warn',
+  title: 'Image blocks need a source',
+  docs: 'An image with no source is dropped from the exported email.',
+  check(ctx) {
+    /** @type {import('../../types.js').LintIssue[]} */
+    const issues = []
+    for (const { block } of eachBlock(ctx.doc)) {
+      if (block.type !== 'image' && block.type !== 'videoThumb') continue
+      const src = String(block.props?.src ?? block.props?.thumbnailUrl ?? '').trim()
+      if (src) continue
+      issues.push({
+        id: 'image-src',
+        level: 'warn',
+        message:
+          block.type === 'image' ? 'Image block has no image.' : 'Video block has no thumbnail.',
+        hint: 'Set one, or delete the block — it renders as nothing in the exported email.',
+        nodeId: block.id,
+      })
+    }
+    return issues
+  },
+}
+
 /** @type {import('../../types.js').LintRule} */
 export const imageAltRule = {
   id: 'image-alt',
@@ -58,6 +92,10 @@ export const imageWidthRule = {
       const src = block.props?.src ?? block.props?.thumbnailUrl
       if (!src) continue
       const width = String(block.props?.width ?? '').trim()
+      // A percentage plus an explicit `pxWidth` is the fluid-but-Outlook-safe
+      // shape, not a defect — the width attribute reaches Outlook either way.
+      const pxWidth = Number(block.props?.pxWidth)
+      if (Number.isFinite(pxWidth) && pxWidth > 0) continue
       if (!width || width.endsWith('%')) {
         issues.push({
           id: 'image-width',

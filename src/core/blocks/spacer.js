@@ -7,9 +7,9 @@
 
 import { defineBlock } from '../registry.js'
 import { spacing } from '../schema.js'
-import { attrs, styleAttr, tableOpen, TABLE_CLOSE } from '../render/inline.js'
+import { attrs, escapeAttr, styleAttr, tableOpen, TABLE_CLOSE } from '../render/inline.js'
 import { el, raw } from '../render/jsxNode.js'
-import { HIDE_ON_MOBILE_FIELD } from './shared.js'
+import { BACKGROUND_FIELD, HIDE_ON_MOBILE_FIELD } from './shared.js'
 
 export const spacerBlock = defineBlock({
   type: 'spacer',
@@ -27,6 +27,7 @@ export const spacerBlock = defineBlock({
   },
   schema: [
     { key: 'height', type: 'range', label: 'Height', min: 2, max: 160, step: 2 },
+    BACKGROUND_FIELD,
     HIDE_ON_MOBILE_FIELD,
   ],
   render: {
@@ -53,7 +54,14 @@ export const spacerBlock = defineBlock({
       )
     },
     mjml(p) {
-      return `<mj-spacer height="${Math.max(1, Number(p.height) || 24)}px" />`
+      // Background travels as `container-background-color`, the attribute every
+      // other block uses — a spacer with a colour is how you get a band of it
+      // between two blocks. Written out rather than taken from mjCommonAttrs
+      // because a spacer has no padding or align field to emit.
+      const background = p.backgroundColor
+        ? ` container-background-color="${escapeAttr(p.backgroundColor)}"`
+        : ''
+      return `<mj-spacer height="${Math.max(1, Number(p.height) || 24)}px"${background} />`
     },
     text() {
       return ''

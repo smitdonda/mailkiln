@@ -147,8 +147,8 @@ describe('registry', () => {
     expect(() => requireBlockDef('ghost')).toThrow(/unknown block type "ghost". Registered: text/)
   })
 
-  it('registers all nine built-ins through the public API', () => {
-    expect(builtinBlocks).toHaveLength(9)
+  it('registers all ten built-ins through the public API', () => {
+    expect(builtinBlocks).toHaveLength(10)
     for (const def of builtinBlocks) {
       expect(getBlockDef(def.type)).toBe(def)
     }

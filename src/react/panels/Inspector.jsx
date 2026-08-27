@@ -227,6 +227,12 @@ function ColumnFields({ location }) {
     },
     { key: 'padding', type: 'spacing', label: 'Padding' },
     { key: 'backgroundColor', type: 'color', label: 'Background' },
+    // Per side, not one shorthand: the common case is a single edge — the
+    // hairline gutter between two cards — which a shorthand cannot express.
+    { key: 'borderTop', type: 'text', label: 'Border top', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
+    { key: 'borderRight', type: 'text', label: 'Border right', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
+    { key: 'borderBottom', type: 'text', label: 'Border bottom', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
+    { key: 'borderLeft', type: 'text', label: 'Border left', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
   ]
 
   return (
@@ -255,6 +261,10 @@ function RowFields({ location }) {
     { key: 'gap', type: 'range', label: t('inspector.gap'), min: 0, max: 40, step: 2 },
     { key: 'padding', type: 'spacing', label: 'Padding' },
     { key: 'backgroundColor', type: 'color', label: 'Background' },
+    { key: 'borderTop', type: 'text', label: 'Border top', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
+    { key: 'borderRight', type: 'text', label: 'Border right', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
+    { key: 'borderBottom', type: 'text', label: 'Border bottom', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
+    { key: 'borderLeft', type: 'text', label: 'Border left', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
   ]
 
   return (

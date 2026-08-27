@@ -174,9 +174,20 @@ describe('renderToHtml', () => {
 describe('block HTML', () => {
   const ctx = createRenderContext(kitchenSinkDocument(), { vars: sampleVars })
 
+  // Image-shaped blocks need a source, or the export is empty by design and the
+  // snapshot records nothing useful.
+  /** @type {Record<string, Record<string, any> | undefined>} */
+  const SNAPSHOT_SEED = {
+    image: { src: 'https://example.com/hero.png', alt: 'Hero' },
+    videoThumb: {
+      thumbnailUrl: 'https://example.com/thumb.jpg',
+      videoUrl: 'https://youtube.com/watch?v=abc',
+    },
+  }
+
   it('renders each built-in block to a snapshot', () => {
     for (const def of builtinBlocks) {
-      const block = createBlock(def.type)
+      const block = createBlock(def.type, SNAPSHOT_SEED[def.type])
       expect(renderBlockHtml(block, ctx)).toMatchSnapshot(def.type)
     }
   })
@@ -194,9 +205,11 @@ describe('block HTML', () => {
   it('gives the button its own colour without painting the wrapper cell', () => {
     const html = renderBlockHtml(createBlock('button'), ctx)
     expect(html).toContain('bgcolor="#4f46e5"')
-    // The outer wrapper cell carries padding and alignment only.
-    const wrapper = html.slice(0, html.indexOf('<table', 1))
-    expect(wrapper).not.toContain('#4f46e5')
+    // The outer wrapper cell carries padding and alignment only. Sliced to that
+    // cell's opening tag rather than to the first nested table: the Outlook VML
+    // twin sits between the two and legitimately names the button colour.
+    const wrapperCell = html.slice(html.indexOf('<td'), html.indexOf('>', html.indexOf('<td')) + 1)
+    expect(wrapperCell).not.toContain('#4f46e5')
   })
 
   it('gives images display:block to avoid the descender gap', () => {
@@ -215,6 +228,139 @@ describe('block HTML', () => {
     expect(renderBlockHtml(createBlock('divider', { style: 'dashed' }), ctx)).toContain(
       'border-top:1px dashed',
     )
+  })
+
+  it('keeps the empty-image placeholder inside the editor', () => {
+    // It used to render everywhere, so exporting an unfinished template posted a
+    // dashed "No image selected" box to every recipient.
+    const editableCtx = createRenderContext(kitchenSinkDocument(), {
+      vars: sampleVars,
+      options: { editable: true },
+    })
+    expect(renderBlockHtml(createBlock('image'), editableCtx)).toContain('No image selected')
+    expect(renderBlockHtml(createBlock('image'), ctx)).toBe('')
+
+    expect(renderBlockHtml(createBlock('videoThumb'), editableCtx)).toContain(
+      'No thumbnail selected',
+    )
+    // No thumbnail and no caption: nothing to show, and no empty anchor either.
+    expect(renderBlockHtml(createBlock('videoThumb', { caption: '' }), ctx)).toBe('')
+  })
+
+  describe('menu', () => {
+    it('emits an Outlook table and an inline-block row carrying the same links', () => {
+      const html = renderBlockHtml(
+        createBlock('menu', {
+          items: [
+            { label: 'Shop', url: 'https://example.com/shop' },
+            { label: 'Help', url: 'https://example.com/help' },
+          ],
+        }),
+        ctx,
+      )
+      // Word's engine ignores inline-block and would stack the links, so it gets
+      // a one-row table; everyone else gets anchors that can wrap.
+      expect(html).toContain('<!--[if mso]>')
+      expect(html).toContain('<!--[if !mso]><!-->')
+      expect(html.match(/https:\/\/example\.com\/shop/g)).toHaveLength(2)
+      expect(html).toContain('display:inline-block')
+      expect(html).toContain('>|<')
+    })
+
+    it('stacks a vertical menu without the Outlook table or separators', () => {
+      const html = renderBlockHtml(createBlock('menu', { layout: 'vertical' }), ctx)
+      expect(html).not.toContain('[if mso]')
+      expect(html).toContain('display:block')
+      expect(html).not.toContain('>|<')
+    })
+
+    it('resolves merge variables in labels and links', () => {
+      const html = renderBlockHtml(
+        createBlock('menu', { items: [{ label: 'Hi {{user.name}}', url: '{{unsubscribe_url}}' }] }),
+        ctx,
+      )
+      expect(html).toContain('Hi Smit')
+      expect(html).toContain('https://example.com/unsub')
+    })
+
+    it('exports as mj-navbar, and as mj-text when vertical', () => {
+      const doc = (/** @type {Record<string, any>} */ props) =>
+        normalize(
+          createDocument({
+            sections: [
+              createSection({
+                rows: [
+                  createRow({
+                    children: [createColumn({ width: 100, blocks: [createBlock('menu', props)] })],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        )
+      expect(renderToMjml(doc({}))).toContain('<mj-navbar-link')
+      expect(renderToMjml(doc({ layout: 'vertical' }))).not.toContain('<mj-navbar')
+    })
+
+    it('lists label and URL in the plain-text alternative', () => {
+      const text = renderToText(
+        normalize(
+          createDocument({
+            sections: [
+              createSection({
+                rows: [
+                  createRow({
+                    children: [
+                      createColumn({
+                        width: 100,
+                        blocks: [
+                          createBlock('menu', {
+                            items: [{ label: 'Shop', url: 'https://example.com/shop' }],
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ),
+      )
+      expect(text).toContain('Shop: https://example.com/shop')
+    })
+  })
+
+  it('gives the divider and the spacer the Background field every other block has', () => {
+    // Both already carried `backgroundColor` in their defaults and both wrapper
+    // renderers already emitted it — only the panel field was missing, so the
+    // colour could be set from code and never from the editor.
+    for (const type of ['divider', 'spacer']) {
+      const def = builtinBlocks.find((block) => block.type === type)
+      expect((def?.schema ?? []).some((field) => field.key === 'backgroundColor')).toBe(true)
+      expect(renderBlockHtml(createBlock(type, { backgroundColor: '#1d1d1f' }), ctx)).toContain(
+        'background-color:#1d1d1f',
+      )
+    }
+    const spacerDoc = normalize(
+      createDocument({
+        sections: [
+          createSection({
+            rows: [
+              createRow({
+                children: [
+                  createColumn({
+                    width: 100,
+                    blocks: [createBlock('spacer', { backgroundColor: '#1d1d1f' })],
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    )
+    expect(renderToMjml(spacerDoc)).toContain('container-background-color="#1d1d1f"')
   })
 
   it('marks the inline-editable element only when the canvas asks for it', () => {

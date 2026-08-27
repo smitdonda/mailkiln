@@ -13,6 +13,7 @@ import { getBlockDef } from '../registry.js'
 import {
   TABLE_CLOSE,
   attrs,
+  borderStyles,
   escapeAttr,
   escapeHtml,
   mergeStyles,
@@ -133,14 +134,17 @@ function renderColumn(column, row, availableWidth, index, ctx) {
   const pxWidth = Math.max(1, Math.round((pct / 100) * availableWidth))
 
   const blocks = (column.blocks ?? []).map((b) => renderBlockHtml(b, ctx)).join('')
-  const cellStyle = mergeStyles({
-    width: `${pct}%`,
-    verticalAlign: props.verticalAlign || 'top',
-    padding: spacingToCss(props.padding),
-    paddingLeft: !isFirst && half ? half : '',
-    paddingRight: !isLast && half ? half : '',
-    backgroundColor: props.backgroundColor,
-  })
+  const cellStyle = mergeStyles(
+    {
+      width: `${pct}%`,
+      verticalAlign: props.verticalAlign || 'top',
+      padding: spacingToCss(props.padding),
+      paddingLeft: !isFirst && half ? half : '',
+      paddingRight: !isLast && half ? half : '',
+      backgroundColor: props.backgroundColor,
+    },
+    borderStyles(props),
+  )
 
   return `<td${attrs({
     class: row.props?.stackOnMobile === false ? undefined : STACK_CLASS,
@@ -182,10 +186,13 @@ function renderRowOnce(row, availableWidth, ctx) {
     .map((column, i) => renderColumn(column, row, inner, i, ctx))
     .join('')
   const rowTable = `${tableOpen({ width: '100%' })}<tr>${cells}</tr>${TABLE_CLOSE}`
-  const cellStyle = mergeStyles({
-    padding: spacingToCss(padding),
-    backgroundColor: row.props?.backgroundColor,
-  })
+  const cellStyle = mergeStyles(
+    {
+      padding: spacingToCss(padding),
+      backgroundColor: row.props?.backgroundColor,
+    },
+    borderStyles(row.props),
+  )
   return `<tr><td${styleAttr(cellStyle)}>${rowTable}</td></tr>`
 }
 
@@ -285,7 +292,11 @@ function headStyles(ctx) {
     '*{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}',
     'table,td{mso-table-lspace:0pt !important;mso-table-rspace:0pt !important;border-collapse:collapse !important}',
     'img{-ms-interpolation-mode:bicubic;border:0;height:auto;line-height:100%;outline:none;text-decoration:none}',
-    'a{text-decoration:none}',
+    // Belt and braces with the inline colour every text block now writes: this
+    // catches anchors inside a raw-HTML block, which we emit verbatim.
+    ctx.settings.linkColor
+      ? `a{color:${ctx.settings.linkColor};text-decoration:none}`
+      : 'a{text-decoration:none}',
     '#outlook a{padding:0}',
     // iOS turns these into blue links otherwise.
     "a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;font-size:inherit !important;font-family:inherit !important;font-weight:inherit !important;line-height:inherit !important}",

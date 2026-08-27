@@ -14,6 +14,7 @@ import { VarInput } from './VarInput.jsx'
 import { ImageField } from './ImageField.jsx'
 import { LinkField } from './LinkField.jsx'
 import { ListField } from './ListField.jsx'
+import { RichTextArea } from './RichTextArea.jsx'
 import { IconAlignCenter, IconAlignLeft, IconAlignRight } from '../icons.jsx'
 
 /**
@@ -81,8 +82,24 @@ export function Field({ field, value, onChange }) {
         </div>
       )
 
-    case 'textarea':
+    // `richtext` gets the formatting bar; `textarea` stays plain, because a
+    // preheader with <b> in it is a bug, not a feature.
     case 'richtext':
+      return (
+        <div className="mk-field">
+          {label}
+          <RichTextArea
+            id={id}
+            value={value ?? ''}
+            placeholder={field.placeholder}
+            vars={field.vars !== false}
+            onChange={(next) => onChange(next, field.key)}
+          />
+          {help}
+        </div>
+      )
+
+    case 'textarea':
       return (
         <div className="mk-field">
           {label}
@@ -329,3 +346,4 @@ export { VarInput } from './VarInput.jsx'
 export { ImageField } from './ImageField.jsx'
 export { LinkField } from './LinkField.jsx'
 export { ListField } from './ListField.jsx'
+export { RichTextArea } from './RichTextArea.jsx'

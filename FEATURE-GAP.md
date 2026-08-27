@@ -28,7 +28,7 @@ Listing these so we don't accidentally "fix" them:
 |---|---|---|
 | Ejects editable code | react-email JSX **and** TSX, deterministic | HTML only |
 | Imports existing HTML | yes, with a confidence report | no |
-| Deliverability linter | 16 rules, click-to-fix | none |
+| Deliverability linter | 17 rules, click an issue to jump to the block | none |
 | Headless usage | full React-free core (Node/CLI/CI) | none — iframe + hosted service |
 | Document format | plain JSON you own | proprietary |
 | Runs offline, no account | yes | no |
@@ -42,7 +42,7 @@ Listing these so we don't accidentally "fix" them:
 
 | Capability | Unlayer | mailkiln today | Verdict |
 |---|---|---|---|
-| **Rich-text toolbar** (bold, italic, link, lists) | yes | **none** — you must type raw HTML | **Build — biggest gap** |
+| **Rich-text toolbar** (bold, italic, link, lists) | yes | **yes** — inline on the canvas, and a formatting bar on every rich-text field in the panel | Done |
 | **Per-tool config** (enable/disable, order, usage limit, icon) | yes | no | **Build** |
 | **Mobile controls** (hide on mobile, mobile font size) | yes | CSS emitted but no UI | **Build** |
 | **Special links** (unsubscribe / view-in-browser picker) | yes | no | **Build** |
@@ -53,7 +53,7 @@ Listing these so we don't accidentally "fix" them:
 | RTL output | yes | no | Later |
 | Image editing / stock images / media library | yes (hosted) | `onImageUpload` only | Expose a hook |
 | Social icon set | bundled icons | you supply URLs | Expose a hook |
-| Menu / navigation block | yes | no | Later |
+| Menu / navigation block | yes | **yes** — horizontal or vertical, separators, HTML import | Done |
 | Auto video thumbnail from a URL | yes (network call) | manual URL | Skip |
 | Export to image / PDF | yes (cloud API) | no | **Out of scope** |
 | AI assistant | yes | no | **Out of scope** |
@@ -63,6 +63,17 @@ Listing these so we don't accidentally "fix" them:
 | Form tool | yes (page mode) | no | **Out of scope** — no forms in email |
 
 _Unverified: whether Unlayer still ships an "audit" tool, and their complete built-in tool list._
+
+### Closed after the Apple-template rebuild (August 2026)
+
+Building a real commercial template through the UI — an Apple MacBook Pro announcement, block
+by block with Playwright — surfaced nine things the editor could not say. All nine are now
+built: inline link colour (`settings.linkColor` previously reached only the video caption),
+heading weight, per-side borders on rows and columns, a VML round-rect twin so rounded
+buttons stay rounded in Outlook, `lintDisable` on `<MailKiln>`, a formatting bar on
+rich-text fields in the property panel, paragraph spacing, letter spacing on buttons and
+menus, and a pixel width an image can carry alongside a percentage.
+
 
 ---
 

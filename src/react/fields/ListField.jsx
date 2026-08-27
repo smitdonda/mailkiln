@@ -35,20 +35,9 @@ export function ListField({ value, onChange, field, FieldComponent }) {
   return (
     <div className="mk-field">
       {items.map((item, index) => (
-        <div
-          key={index}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            padding: 8,
-            border: '1px solid var(--mk-border)',
-            borderRadius: 6,
-            background: 'var(--mk-bg)',
-          }}
-        >
-          <div className="mk-field-row mk-field">
-            <span className="mk-label">
+        <div key={index} className="mk-list-item">
+          <div className="mk-list-item-head">
+            <span className="mk-list-item-title">
               {String(item?.label || item?.network || `#${index + 1}`)}
             </span>
             <button

@@ -114,7 +114,14 @@ export function DndRoot({ children }) {
     /** @param {any} event */
     (event) => {
       const activeData = event.active?.data?.current
-      const dropTarget = computeTarget(event) ?? target
+      // `target` — the position the drop indicator has been drawing — wins over a
+      // fresh computation. Recomputing here read `active.rect.current` after the
+      // pointer had been released, whose translated rect no longer matches the
+      // one the last dragOver resolved from, so a drop could commit one slot
+      // above the line the user was looking at. What you see is what lands;
+      // computeTarget stays as the fallback for a drop with no dragOver before
+      // it.
+      const dropTarget = target ?? computeTarget(event)
       setActive(null)
       setTarget(null)
       if (!activeData || !dropTarget) return

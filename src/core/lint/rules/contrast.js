@@ -56,6 +56,23 @@ export const contrastRule = {
           data: { ratio, minimum, foreground, background },
         })
       }
+
+      // Links are copy too, and they are now coloured by their own field rather
+      // than by the block's — checking only `color` would have quietly stopped
+      // examining half the words in a footer.
+      if (isButton || !/<a[\s>]/i.test(String(block.props?.text ?? ''))) continue
+      const linkColor = block.props?.linkColor || settings.linkColor
+      if (!linkColor) continue
+      const linkRatio = contrastRatio(String(linkColor), String(background))
+      if (linkRatio === null || linkRatio >= minimum) continue
+      issues.push({
+        id: 'contrast',
+        level: linkRatio < minimum - 1.5 ? 'error' : 'warn',
+        message: `Link colour ${linkColor} on ${background} is ${linkRatio.toFixed(2)}:1 — below the ${minimum}:1 minimum.`,
+        hint: 'Set a brighter link colour on this block, or change the document link colour.',
+        nodeId: block.id,
+        data: { ratio: linkRatio, minimum, foreground: linkColor, background },
+      })
     }
 
     return issues
