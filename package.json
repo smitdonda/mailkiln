@@ -55,6 +55,7 @@
   },
   "scripts": {
     "dev": "vite --config examples/demo/vite.config.js",
+    "demo:build": "vite build --config examples/demo/vite.config.js",
     "build": "npm run build:js && npm run build:css && npm run build:types",
     "build:js": "vite build",
     "build:css": "tailwindcss -i ./src/styles.css -o ./dist/style.css",
