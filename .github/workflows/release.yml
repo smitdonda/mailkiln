@@ -16,9 +16,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
@@ -32,7 +32,10 @@ jobs:
       - run: npm run build
       - run: npm run verify:types
       - run: npx publint
-      - run: npx @arethetypeswrong/cli --pack .
+      # Through the npm script, not a bare npx call: the script passes
+      # --ignore-rules no-resolution, and without it the CSS export (which has
+      # no types by definition) and the node10 subpath fail the run.
+      - run: npm run verify:attw
 
       - name: Check the tag matches package.json
         run: |
