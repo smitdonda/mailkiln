@@ -88,9 +88,34 @@ are settling, and a breaking change to either is likely before 1.0.
 - **Four starter documents** (Welcome, Receipt, Newsletter, Password reset) in the
   headless core, each passing the built-in linter with zero errors — enforced by a
   test. There is no template gallery in the editor UI; use them as a starting `value`.
-- **Send a test email** via an `onSendTest` hook: mailkiln renders the HTML and text
-  and hands them over — it has no transport of its own. The dialog validates
-  recipients and shows lint errors before sending.
+- **Typography and layout controls that email needs and CSS cannot express.**
+  `settings.linkColor` is written inline onto every `<a>` in a text or heading block,
+  because clients strip the head stylesheet and an anchor never inherits the colour of
+  the `<div>` around it — without this a link rendered in the client's default
+  blue-violet no matter what the template said. Both blocks also take a per-block **Link
+  colour**, headings take a **Weight** (they were locked to bold), text takes
+  **Paragraph spacing** (clients disagree on the default `<p>` margin), buttons and menus
+  take **Letter spacing**, and rows and columns take **per-side borders** — per side
+  because the common case is one edge, the hairline gutter between two cards.
+- **Rounded buttons stay rounded in Outlook.** The Word engine ignores `border-radius`,
+  so a rounded, non-full-width button ships a VML `<v:roundrect>` twin inside
+  `<!--[if mso]>` with the ordinary anchor table hidden from it — exactly one of the two
+  is ever visible.
+- **An image can be fluid and Outlook-safe at once.** An **Outlook width (px)** field
+  emits the `width` attribute alongside a percentage style, which is what a hand-written
+  email does; the `image-width` rule stops asking once it is set.
+- **A formatting bar on rich-text fields in the property panel**, not just on the canvas:
+  bold, italic, underline, link, bulleted list and clear formatting wrap the selection, so
+  editing copy there no longer means typing `<b>` and `<a href>` by hand. `textarea`
+  fields — the preheader — stay plain.
+- **`lintDisable`** on `<MailKiln>`: `lintDocument` has always accepted a `disable` list
+  and nothing in React passed one, so a rule that is wrong for one template — brand-blue
+  contrast, a deliberate 700px width — sat in the panel with no way to acknowledge it.
+  The contrast rule now also checks link colour, so moving copy onto that field does not
+  quietly drop it from the check.
+- **Fixed:** clicking the canvas left focus on `<body>` in Chrome, so `/`, Delete, Escape
+  and Ctrl+Z did nothing until you happened to tab into a control. Focus is re-claimed a
+  frame after the pointer event's own default action.
 - Section and row action strips (move up/down, duplicate, delete), plus the same
   actions in the panel header. Reordering sections previously had no UI at all.
 - Mobile framing in the *design* view, not just in preview — you can lay out at
@@ -116,8 +141,16 @@ are settling, and a breaking change to either is likely before 1.0.
 
 ### Blocks
 
-Text, Heading, Image, Button, Divider, Spacer, Social, Video thumbnail, Raw HTML —
-all nine declared through the public `defineBlock` API.
+Text, Heading, Image, Button, Divider, Spacer, Social, **Menu**, Video thumbnail, Raw
+HTML — all ten declared through the public `defineBlock` API.
+
+The Menu block is the one most footers need and that a text block full of hand-written
+`<a>` tags served badly: label + URL pairs with merge variables, horizontal or vertical
+layout, an optional separator with its own colour. The HTML target emits two paths — a
+one-row table for Outlook, whose engine ignores `inline-block` and would otherwise stack
+every link, and plain anchors everywhere else so a long menu wraps on a narrow screen.
+MJML exports as `mj-navbar`, and the importer recognises a container of text links as a
+menu, inferring the separator and link colour.
 
 ### Packaging
 
