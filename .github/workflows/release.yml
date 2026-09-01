@@ -46,6 +46,10 @@ jobs:
             exit 1
           fi
 
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Trusted publishing (OIDC) needs npm >= 11.5.1; setup-node ships an older
+      # npm with Node 22. No NODE_AUTH_TOKEN: the registry trades this workflow's
+      # OIDC identity for a short-lived credential, so no long-lived token exists
+      # to leak. Provenance comes with it automatically.
+      - run: npm install -g npm@latest
+
+      - run: npm publish --access public
