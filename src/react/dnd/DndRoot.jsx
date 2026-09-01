@@ -58,7 +58,7 @@ export function useDragState() {
  * @returns {import('react').ReactElement}
  */
 export function DndRoot({ children }) {
-  const { store } = useMailKilnContext()
+  const { store, instanceId } = useMailKilnContext()
   const t = useI18n()
   const [active, setActive] = useState(/** @type {any} */ (null))
   const [target, setTarget] = useState(/** @type {any} */ (null))
@@ -176,6 +176,11 @@ export function DndRoot({ children }) {
 
   return (
     <DndContext
+      // dnd-kit derives its accessibility element ids from a module-global
+      // counter, which starts over on the client and so never matches what the
+      // server rendered -- a hydration mismatch in Next.js. `instanceId` is a
+      // `useId()`, stable across both renders and unique per editor.
+      id={instanceId}
       sensors={sensors}
       collisionDetection={collisionDetection}
       measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}

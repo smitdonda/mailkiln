@@ -4,7 +4,20 @@ All notable changes to mailkiln are documented here. This project follows
 [semantic versioning](https://semver.org/); versions are managed with
 [changesets](https://github.com/changesets/changesets).
 
-## 0.1.0 — unreleased
+## 0.1.1
+
+### Fixed
+
+- **Server rendering no longer breaks hydration in Next.js.** `@dnd-kit` names its
+  accessibility elements from a module-global counter, so every draggable's
+  `aria-describedby` pointed at `DndDescribedBy-0` in the server HTML and
+  `DndDescribedBy-1` once the client re-rendered — React discarded the server
+  markup and Next.js logged a hydration error on every mount. The editor's
+  `DndContext` now carries the instance's own `useId()`, which is stable across
+  both renders. A test renders the editor twice in one process, which advances
+  the counter exactly as server-then-client does.
+
+## 0.1.0
 
 First release. Pre-1.0 on purpose: the document schema and the `defineBlock` API
 are settling, and a breaking change to either is likely before 1.0.
