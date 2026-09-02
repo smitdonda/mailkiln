@@ -20,14 +20,26 @@ import { useI18n } from '../i18n/index.jsx'
 import { BlockPalette } from './BlockPalette.jsx'
 import { RowLayouts } from './RowLayouts.jsx'
 import { DocumentFields, NodeFields } from './Inspector.jsx'
-import { IconArrowLeft, IconCopy, IconGrid, IconRows, IconSliders, IconTrash } from '../icons.jsx'
+import {
+  IconArrowLeft,
+  IconClose,
+  IconCopy,
+  IconGrid,
+  IconRows,
+  IconSliders,
+  IconTrash,
+} from '../icons.jsx'
 
 /** @typedef {'content' | 'rows' | 'settings'} PanelTab */
 
 /**
+ * @param {object} props
+ * @param {() => void} [props.onClose] Renders a close button. Passed only where the
+ *   panel is an overlay — on a wide viewport it is a column, and a column that can
+ *   close itself with no way back would be a trap.
  * @returns {import('react').ReactElement}
  */
-export function SidePanel() {
+export function SidePanel({ onClose }) {
   const t = useI18n()
   const { store } = useMailKilnContext()
   const [tab, setTab] = useState(/** @type {PanelTab} */ ('content'))
@@ -80,6 +92,17 @@ export function SidePanel() {
           >
             <IconTrash />
           </button>
+          {onClose ? (
+            <button
+              type="button"
+              className="mk-btn mk-btn-icon mk-panel-close"
+              aria-label={t('panel.close')}
+              title={t('panel.close')}
+              onClick={onClose}
+            >
+              <IconClose />
+            </button>
+          ) : null}
         </div>
         <Breadcrumbs selection={selection} />
         <div className="mk-panel-body">
@@ -114,6 +137,17 @@ export function SidePanel() {
             {t(key)}
           </button>
         ))}
+        {onClose ? (
+          <button
+            type="button"
+            className="mk-btn mk-btn-icon mk-panel-close"
+            aria-label={t('panel.close')}
+            title={t('panel.close')}
+            onClick={onClose}
+          >
+            <IconClose />
+          </button>
+        ) : null}
       </div>
 
       <div className="mk-panel-body">

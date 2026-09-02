@@ -25,9 +25,7 @@ export { BlankState, isPristine } from './react/panels/BlankState.jsx'
 export { QuickInsert } from './react/panels/QuickInsert.jsx'
 export { Inspector, NodeFields, DocumentFields } from './react/panels/Inspector.jsx'
 export { PreviewFrame, DEVICE_WIDTHS } from './react/panels/PreviewFrame.jsx'
-export { CodePanel } from './react/panels/CodePanel.jsx'
 export { LintPanel } from './react/panels/LintPanel.jsx'
-export { ImportDialog } from './react/panels/ImportDialog.jsx'
 
 // --- drag & drop pieces ----------------------------------------------------
 export { DndRoot, useDragState } from './react/dnd/DndRoot.jsx'

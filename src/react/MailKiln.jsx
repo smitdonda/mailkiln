@@ -22,9 +22,7 @@ import { targetColumnId } from './panels/BlockPalette.jsx'
 import { Canvas } from './panels/Canvas.jsx'
 import { SidePanel } from './panels/SidePanel.jsx'
 import { PreviewFrame } from './panels/PreviewFrame.jsx'
-import { CodePanel } from './panels/CodePanel.jsx'
 import { LintPanel } from './panels/LintPanel.jsx'
-import { ImportDialog } from './panels/ImportDialog.jsx'
 import { QuickInsert } from './panels/QuickInsert.jsx'
 
 /**
@@ -48,14 +46,6 @@ import { QuickInsert } from './panels/QuickInsert.jsx'
  *   `['block:html']` for a whole block type's own rules. The rule stops being reported
  *   everywhere in this document.
  * @param {(bundle: import('../core/types.js').ExportBundle) => void} [props.onExport]
- * @param {Array<'design' | 'preview' | 'code' | 'checks'>} [props.views] Which view tabs
- *   the toolbar offers, in the order given. Defaults to `['design', 'preview', 'checks']`:
- *   the code panel is opt-in, because most apps embedding the editor are not showing
- *   their users JSX. Pass `['design', 'preview', 'code', 'checks']` to put the Code tab
- *   back. Nothing is unregistered either way — `renderToJsx` and friends stay callable
- *   from `mailkiln/core`, `onExport` still hands over all six formats, and `CodePanel`
- *   is still exported for a custom layout. An empty or unrecognised list falls back to
- *   `['design']`, so the editor always has something to show.
  * @param {boolean} [props.showPalette]
  * @param {boolean} [props.showInspector]
  * @param {string} [props.className]
@@ -77,7 +67,6 @@ export function MailKiln({
   specialLinks,
   lintDisable,
   onExport,
-  views,
   showPalette = true,
   showInspector = true,
   className,
@@ -85,31 +74,15 @@ export function MailKiln({
 }) {
   const instanceId = useId()
   const rootRef = useRef(/** @type {HTMLDivElement | null} */ (null))
-  // Keyed on the joined list rather than the array itself: a consumer writing
-  // `views={['design', 'preview']}` inline hands us a new array every render.
-  const viewKey = views?.join(',')
-  const availableViews = useMemo(() => {
-    const known = /** @type {const} */ (['design', 'preview', 'code', 'checks'])
-    // The code panel is not in the default set: it is the eject-to-JSX surface,
-    // and an app embedding the editor for non-developers does not want it.
-    const fallback = /** @type {const} */ (['design', 'preview', 'checks'])
-    const picked = (views ?? fallback).filter((v) => known.includes(/** @type {any} */ (v)))
-    return picked.length ? picked : ['design']
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewKey])
-  const [view, setView] = useState(
-    /** @type {'design' | 'preview' | 'code' | 'checks'} */ (availableViews[0]),
-  )
-  // A view that disappears from the list mid-session would otherwise leave the
-  // canvas on a tab with no button to leave it by.
-  useEffect(() => {
-    if (!availableViews.includes(view)) {
-      setView(/** @type {any} */ (availableViews[0]))
-    }
-  }, [availableViews, view])
+  const [view, setView] = useState(/** @type {'design' | 'preview' | 'checks'} */ ('design'))
   const [device, setDevice] = useState(/** @type {'desktop' | 'mobile' | 'text'} */ ('desktop'))
-  const [importOpen, setImportOpen] = useState(false)
   const [quickOpen, setQuickOpen] = useState(false)
+  // Below the panel breakpoint the side panel is an overlay, so it needs a way
+  // in and a way out. Above it the panel is a column and this state is inert.
+  const [panelOpen, setPanelOpen] = useState(false)
+  // `showPalette` and `showInspector` both gate the panel: either one is enough
+  // to want it. It only exists in the design view.
+  const showPanel = (showPalette || showInspector) && view === 'design'
   const [systemDark, setSystemDark] = useState(false)
 
   // Custom blocks are registered before the first render that could reference
@@ -239,10 +212,13 @@ export function MailKiln({
         return
       }
       if (key === 'escape') {
-        store.select(null)
+        // Closing the overlay panel first: on a narrow viewport it covers the
+        // canvas, so dismissing it is what Escape most obviously means there.
+        if (panelOpen) setPanelOpen(false)
+        else store.select(null)
       }
     },
-    [store],
+    [store, panelOpen],
   )
 
   return (
@@ -265,23 +241,22 @@ export function MailKiln({
         >
           <DndRoot>
             <Toolbar
-              views={availableViews}
               view={view}
               onView={setView}
               device={device}
               onDevice={setDevice}
-              onImport={() => setImportOpen(true)}
               onExport={onExport}
+              panelOpen={panelOpen}
+              onTogglePanel={showPanel ? () => setPanelOpen((open) => !open) : undefined}
               appearance={resolvedAppearance}
             />
 
-            <div className="mk-shell">
+            <div className="mk-shell" data-panel-open={showPanel && panelOpen ? 'true' : undefined}>
               <main className="mk-main">
                 {view === 'design' ? (
                   <Canvas device={device} onQuickInsert={() => setQuickOpen(true)} />
                 ) : null}
                 {view === 'preview' ? <PreviewFrame device={device} /> : null}
-                {view === 'code' ? <CodePanel /> : null}
                 {view === 'checks' ? (
                   <LintPanel
                     onShowBlock={(nodeId) => {
@@ -295,10 +270,22 @@ export function MailKiln({
               {/* One panel, on the right, that swaps between the content tabs
                   and the selected node's properties. `showPalette` and
                   `showInspector` both gate it: either one is enough to want it. */}
-              {(showPalette || showInspector) && view === 'design' ? <SidePanel /> : null}
+              {showPanel ? (
+                <>
+                  {/* Backdrop for the overlay panel, and nothing else: `display:none`
+                      above the breakpoint, where the panel is a column. Decoration
+                      rather than a control — Escape closes the panel for the
+                      keyboard, so this needs no focus and no name. */}
+                  <div
+                    className="mk-scrim"
+                    aria-hidden="true"
+                    onPointerDown={() => setPanelOpen(false)}
+                  />
+                  <SidePanel onClose={() => setPanelOpen(false)} />
+                </>
+              ) : null}
             </div>
 
-            {importOpen ? <ImportDialog onClose={() => setImportOpen(false)} /> : null}
             {quickOpen ? <QuickInsert onClose={() => setQuickOpen(false)} /> : null}
           </DndRoot>
         </div>

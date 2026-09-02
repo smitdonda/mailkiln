@@ -10,30 +10,30 @@ import { documentName, exportDocument, toComponentName } from '../../core/index.
 import { useI18n } from '../i18n/index.jsx'
 import { useMailKilnContext } from '../context.jsx'
 import {
-  IconCode,
   IconDesktop,
   IconDownload,
   IconEye,
   IconGrid,
   IconMobile,
   IconMoon,
+  IconSliders,
   IconRedo,
   IconText,
   IconUndo,
-  IconUpload,
   IconWarning,
 } from '../icons.jsx'
 
 /**
  * @param {object} props
- * @param {ReadonlyArray<string>} [props.views] Which view tabs to render, in order.
- *   Defaults to all four.
- * @param {'design' | 'preview' | 'code' | 'checks'} props.view
- * @param {(view: 'design' | 'preview' | 'code' | 'checks') => void} props.onView
+ * @param {'design' | 'preview' | 'checks'} props.view
+ * @param {(view: 'design' | 'preview' | 'checks') => void} props.onView
  * @param {'desktop' | 'mobile' | 'text'} props.device
  * @param {(device: 'desktop' | 'mobile' | 'text') => void} props.onDevice
- * @param {() => void} props.onImport
  * @param {(bundle: import('../../core/types.js').ExportBundle) => void} [props.onExport]
+ * @param {boolean} [props.panelOpen] Whether the side panel is showing. Only meaningful
+ *   below the layout's panel breakpoint, where the panel is an overlay rather than a column.
+ * @param {() => void} [props.onTogglePanel] Renders the panel toggle. Hidden by CSS on
+ *   wide viewports, where the panel is always visible and a toggle would be noise.
  * @param {'light' | 'dark'} props.appearance
  * @param {() => void} [props.onToggleAppearance] Renders a dark-mode toggle.
  *   `<MailKiln>` does not pass one — it takes its appearance from the `appearance`
@@ -42,13 +42,13 @@ import {
  * @returns {import('react').ReactElement}
  */
 export function Toolbar({
-  views: enabledViews,
   view,
   onView,
   device,
   onDevice,
-  onImport,
   onExport,
+  panelOpen,
+  onTogglePanel,
   appearance,
   onToggleAppearance,
 }) {
@@ -57,16 +57,11 @@ export function Toolbar({
   const { errors, warnings } = store.lint
   const issues = errors + warnings
 
-  const allViews = /** @type {const} */ ([
+  const views = /** @type {const} */ ([
     ['design', 'view.design', IconGrid],
     ['preview', 'view.preview', IconEye],
-    ['code', 'view.code', IconCode],
     ['checks', 'view.checks', IconWarning],
   ])
-  // The consumer's order wins: `views={['checks', 'design']}` puts checks first.
-  const views = enabledViews
-    ? enabledViews.flatMap((id) => allViews.filter(([known]) => known === id))
-    : allViews
 
   const devices = /** @type {const} */ ([
     ['desktop', 'toolbar.desktop', IconDesktop],
@@ -135,6 +130,20 @@ export function Toolbar({
         ))}
       </div>
 
+      {onTogglePanel ? (
+        <button
+          type="button"
+          className="mk-btn mk-btn-panel"
+          data-open={panelOpen ? 'true' : undefined}
+          title={t('toolbar.panel')}
+          aria-expanded={panelOpen === true}
+          onClick={onTogglePanel}
+        >
+          <IconSliders />
+          {t('toolbar.panel')}
+        </button>
+      ) : null}
+
       {view === 'design' || view === 'preview' ? (
         <div className="mk-segmented" role="group" aria-label="Preview width">
           {devices
@@ -169,11 +178,6 @@ export function Toolbar({
           <IconMoon />
         </button>
       ) : null}
-
-      <button type="button" className="mk-btn" onClick={onImport}>
-        <IconUpload />
-        {t('toolbar.import')}
-      </button>
 
       {onExport ? (
         <button

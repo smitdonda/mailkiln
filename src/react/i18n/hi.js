@@ -9,22 +9,22 @@
 export const hi = {
   'toolbar.undo': 'पहले जैसा',
   'toolbar.redo': 'दोबारा करें',
-  'toolbar.import': 'HTML आयात करें',
   'toolbar.export': 'निर्यात',
   'toolbar.desktop': 'डेस्कटॉप',
   'toolbar.mobile': 'मोबाइल',
+  'toolbar.panel': 'पैनल',
   'toolbar.theme': 'डार्क मोड बदलें',
   'toolbar.name': 'टेम्पलेट नाम',
   'toolbar.untitled': 'बिना नाम का ईमेल',
 
   'view.design': 'डिज़ाइन',
   'view.preview': 'पूर्वावलोकन',
-  'view.code': 'कोड',
   'view.checks': 'जाँच',
 
   'panel.content': 'सामग्री',
   'panel.rows': 'पंक्तियाँ',
   'panel.settings': 'सेटिंग्स',
+  'panel.close': 'पैनल बंद करें',
   'panel.back': 'सामग्री पर वापस',
   'panel.ancestors': 'चयनित नोड के मूल',
   'panel.contentHint': 'ब्लॉक को कैनवास पर खींचें, या जोड़ने के लिए Enter दबाएँ।',
@@ -141,16 +141,8 @@ export const hi = {
   'field.addItem': 'आइटम जोड़ें',
   'field.removeItem': 'हटाएँ',
 
-  'code.copy': 'कॉपी',
-  'code.copied': 'कॉपी हो गया',
-  'code.download': 'डाउनलोड',
 
   'lint.clean': 'कोई समस्या नहीं मिली।',
   'lint.size': 'रेंडर आकार: {size}',
 
-  'import.title': 'मौजूदा ईमेल आयात करें',
-  'import.hint': 'HTML चिपकाएँ, या .html फ़ाइल छोड़ें।',
-  'import.parse': 'विश्लेषण करें',
-  'import.confirm': 'टेम्पलेट बदलें',
-  'import.cancel': 'रद्द करें',
 }

@@ -1973,16 +1973,6 @@
   background: #fff;
 }
 
-.mk-code-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--mk-border);
-  background: var(--mk-bg);
-  flex-shrink: 0;
-}
 
 .mk-code {
   margin: 0;
@@ -1996,44 +1986,11 @@
   white-space: pre;
 }
 
-.mk-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin: 12px 12px 0;
-  padding: 9px 11px;
-  border: 1px solid color-mix(in srgb, var(--mk-warn) 30%, transparent);
-  border-radius: var(--mk-radius-md);
-  background: var(--mk-warn-soft);
-  color: var(--mk-fg);
-  font-size: 11.5px;
-  line-height: 1.45;
-}
 
-.mk-note svg {
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
-  color: var(--mk-warn);
-}
 
-.mk-note[data-level='error'] {
-  border-color: color-mix(in srgb, var(--mk-danger) 30%, transparent);
-  background: var(--mk-danger-soft);
-}
 
-.mk-note[data-level='error'] svg {
-  color: var(--mk-danger);
-}
 
-.mk-note[data-level='ok'] {
-  border-color: color-mix(in srgb, var(--mk-success) 30%, transparent);
-  background: color-mix(in srgb, var(--mk-success) 10%, transparent);
-}
 
-.mk-note[data-level='ok'] svg {
-  color: var(--mk-success);
-}
 
 .mk-lint-summary {
   display: flex;
@@ -2277,21 +2234,214 @@
   transition: width 220ms ease;
 }
 
-.mk-dropzone {
-  padding: 20px;
-  border: 1.5px dashed var(--mk-border-strong);
-  border-radius: var(--mk-radius-md);
-  background: var(--mk-bg-subtle);
-  color: var(--mk-fg-muted);
-  font-size: 12px;
-  text-align: center;
-  transition:
-    border-color 130ms ease,
-    background 130ms ease;
+
+
+/* ===========================================================================
+   Responsive layout
+
+   The editor is three fixed columns of chrome around a document that is itself
+   600px wide, so the first thing to give way is the side panel: below
+   `--mk-panel-break` it stops being a column and becomes an overlay the
+   toolbar's Panel button slides in. The canvas keeps the full width instead of
+   being squeezed to a strip, which is the failure mode of a builder on a
+   tablet.
+
+   Everything here is width-driven, not device-driven: a narrow desktop window
+   gets the same treatment as a tablet, which is the point.
+   =========================================================================== */
+
+/* Off above the breakpoint, where the panel is a column and needs neither. */
+.mk-scrim,
+.mk-btn-panel,
+.mk-panel-close {
+  display: none;
 }
 
-.mk-dropzone[data-over='true'] {
-  border-color: var(--mk-accent);
-  background: var(--mk-accent-softer);
-  color: var(--mk-accent);
+@media (max-width: 1200px) {
+  .mk-root {
+    --mk-panel-width: 288px;
+  }
+
+  .mk-canvas-wrap {
+    padding: 22px 18px 100px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mk-root {
+    --mk-panel-width: 264px;
+  }
+}
+
+/* The panel breakpoint: below this the canvas gets the whole shell. */
+@media (max-width: 900px) {
+  .mk-shell {
+    position: relative;
+  }
+
+  .mk-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    width: min(340px, 86vw);
+    border-left: 1px solid var(--mk-border);
+    box-shadow: -12px 0 32px -18px rgb(15 23 42 / 45%);
+    transform: translateX(101%);
+    transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mk-shell[data-panel-open='true'] .mk-panel {
+    transform: none;
+  }
+
+  /* An overlay needs a way out that is visible from inside it. The backdrop and
+     the toolbar toggle both close the panel, but neither is obvious while the
+     panel covers the canvas — so the panel carries its own close button. */
+  .mk-panel-close {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .mk-panel-tabs {
+    align-items: center;
+    padding-right: 8px;
+    border-bottom: 1px solid var(--mk-border);
+    padding-bottom: 8px;
+  }
+
+  /* Reads as a sheet over the canvas rather than a second page. */
+  .mk-panel {
+    border-top-left-radius: 14px;
+    border-bottom-left-radius: 14px;
+  }
+
+  .mk-scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: rgb(15 23 42 / 32%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease;
+  }
+
+  .mk-shell[data-panel-open='true'] .mk-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* A labelled button beside the view tabs, not a bare glyph in the corner:
+     it is the only way to reach the palette at this width, so it has to read
+     as a control and has to show whether the panel is open. */
+  .mk-btn-panel {
+    display: inline-flex;
+  }
+
+  .mk-btn-panel[data-open='true'] {
+    border-color: var(--mk-accent);
+    background: var(--mk-accent-soft);
+    color: var(--mk-accent);
+  }
+
+  .mk-btn-panel[data-open='true'] svg {
+    color: var(--mk-accent);
+  }
+
+  /* `flex-wrap` plus a fixed height clips the wrapped row: the toolbar has to
+     be allowed to grow the moment its contents stop fitting on one line. */
+  .mk-toolbar {
+    height: auto;
+    min-height: 56px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .mk-canvas-wrap {
+    padding: 18px 14px 96px;
+  }
+}
+
+/* Phones and small tablets: the toolbar stops pretending to be one row. */
+@media (max-width: 640px) {
+  .mk-toolbar {
+    min-height: 52px;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  /* The template name takes its own line rather than crushing the controls. */
+  .mk-title {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .mk-toolbar-sep {
+    display: none;
+  }
+
+  .mk-canvas-wrap {
+    padding: 14px 10px 88px;
+  }
+
+  /* Comfortable touch targets: 36px is the smallest that does not mis-tap. */
+  .mk-toolbar button,
+  .mk-panel-tab,
+  .mk-tile {
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Not the full width: leaving a strip of canvas showing is what tells you
+     this is a sheet over your document, and it keeps the backdrop tappable.
+     `100vw` would be wrong anyway — the editor is rarely flush with the
+     viewport, so a vw width hangs off the side and clips its own contents. */
+  .mk-panel {
+    width: min(360px, 92%);
+  }
+
+  .mk-canvas-wrap {
+    padding: 10px 8px 80px;
+  }
+
+  /* Four wrapped rows of toolbar on a phone leaves no canvas. Tightening the
+     segmented controls fits the views, the devices and Export onto one. */
+  .mk-segmented button {
+    padding: 0 8px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .mk-btn {
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .mk-toolbar-group {
+    gap: 2px;
+  }
+
+  /* The name shares the first row with undo/redo here rather than taking a
+     whole one to itself: on a 390px screen every toolbar row costs canvas. */
+  .mk-title {
+    flex: 1 1 96px;
+    font-size: 13px;
+  }
+
+  /* The phone frame is wider than the phone. Drop it and let the document
+     have the screen; the Preview view still shows the real 375px rendering. */
+  .mk-canvas[data-device='mobile'] {
+    outline-width: 0;
+    border-radius: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-panel,
+  .mk-scrim {
+    transition: none;
+  }
 }

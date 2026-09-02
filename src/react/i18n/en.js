@@ -10,10 +10,10 @@ export const en = {
   // toolbar
   'toolbar.undo': 'Undo',
   'toolbar.redo': 'Redo',
-  'toolbar.import': 'Import HTML',
   'toolbar.export': 'Export',
   'toolbar.desktop': 'Desktop',
   'toolbar.mobile': 'Mobile',
+  'toolbar.panel': 'Panel',
   'toolbar.theme': 'Toggle dark mode',
   'toolbar.name': 'Template name',
   'toolbar.untitled': 'Untitled email',
@@ -21,13 +21,13 @@ export const en = {
   // views
   'view.design': 'Design',
   'view.preview': 'Preview',
-  'view.code': 'Code',
   'view.checks': 'Checks',
 
   // side panel
   'panel.content': 'Content',
   'panel.rows': 'Rows',
   'panel.settings': 'Settings',
+  'panel.close': 'Close panel',
   'panel.back': 'Back to content',
   'panel.ancestors': 'Selected node ancestors',
   'panel.contentHint': 'Drag a block onto the canvas, or press Enter to append it.',
@@ -163,18 +163,7 @@ export const en = {
   'field.varsHint': 'Type {{ to insert a variable',
 
   // code panel
-  'code.copy': 'Copy',
-  'code.copied': 'Copied',
-  'code.download': 'Download',
-  'code.lang': 'Language',
-  'code.jsx': 'JSX',
-  'code.tsx': 'TSX',
-  'code.html': 'HTML',
-  'code.mjml': 'MJML',
   'code.text': 'Text',
-  'code.json': 'JSON',
-  'code.mjmlNote':
-    'MJML markup only — mailkiln does not bundle the MJML compiler. Run mjml or mjml-browser on this.',
 
   // lint
   'lint.clean': 'No issues found.',
@@ -185,19 +174,6 @@ export const en = {
   'lint.goto': 'Show the block this affects',
 
   // import
-  'import.title': 'Import an existing email',
-  'import.hint': 'Paste HTML, or drop a .html file.',
-  'import.placeholder': '<table role="presentation">…',
-  'import.parse': 'Analyse',
-  'import.confirm': 'Replace template',
-  'import.cancel': 'Cancel',
-  'import.report': '{recognized} of {total} blocks are fully editable.',
-  'import.raw': '{count} kept as raw HTML — content preserved, not visually editable.',
-  'import.warnings': 'Notes',
-  'import.failed': 'Could not read that HTML: {message}',
-  'import.replaceWarning': 'This replaces the current template. Your undo history keeps the old one.',
-  'import.editable': 'editable',
-  'import.drop': 'Drop a .html file here, or paste the markup below.',
 
   // dnd announcements
   'dnd.instructions':

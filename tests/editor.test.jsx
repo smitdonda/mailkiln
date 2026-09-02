@@ -39,9 +39,6 @@ function renderEditor(props = {}) {
   return { get: () => current, rerender, utils, onChange }
 }
 
-// The Code tab is opt-in, so any test that drives the code view asks for it.
-const withCode = /** @type {const} */ (['design', 'preview', 'code', 'checks'])
-
 /**
  * The action strip inside a canvas node. Section, row and block actions share
  * their labels with the panel header on purpose — two routes to the same thing —
@@ -61,7 +58,7 @@ describe('MailKiln', () => {
     renderEditor()
     expect(screen.getByLabelText('Blocks')).toBeTruthy()
     expect(screen.getByLabelText('Properties')).toBeTruthy()
-    expect(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Design/ })).toBeTruthy()
+    expect(screen.getByRole('tab', { name: /Design/ })).toBeTruthy()
   })
 
   it('lists every built-in block in the palette, grouped', () => {
@@ -166,7 +163,7 @@ describe('MailKiln', () => {
       })(),
     })
 
-    fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Checks/ }))
+    fireEvent.click(screen.getByRole('tab', { name: /Checks/ }))
     editor.rerender()
 
     const issue = screen.getByTitle('Show the block this affects')
@@ -877,23 +874,17 @@ describe('MailKiln', () => {
       const onExport = vi.fn()
       const doc = kitchenSinkDocument()
       doc.settings.name = 'Order shipped'
-      renderEditor({ value: doc, vars: sampleVars, onExport, views: withCode })
-
-      fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
-      expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
-        'export function OrderShipped(',
-      )
+      renderEditor({ value: doc, vars: sampleVars, onExport })
 
       fireEvent.click(screen.getByText('Export'))
       expect(onExport.mock.calls[0][0].jsx).toContain('export function OrderShipped(')
     })
 
     it('falls back to the subject when unnamed', () => {
-      renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, views: withCode })
-      fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
-      expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
-        'export function YourOrderIsOnItsWay(',
-      )
+      const onExport = vi.fn()
+      renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, onExport })
+      fireEvent.click(screen.getByText('Export'))
+      expect(onExport.mock.calls[0][0].jsx).toContain('export function YourOrderIsOnItsWay(')
     })
   })
 
@@ -990,34 +981,38 @@ describe('MailKiln', () => {
     expect(listBlocks(editor.get())[0].props.text).toBe('Hi {{user.name}}')
   })
 
-  it('switches to the code view and shows the emitted component', () => {
-    renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, views: withCode })
-    fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
-    const code = /** @type {Element} */ (document.querySelector('.mk-code'))
-    expect(code.textContent).toContain("from '@react-email/components'")
-    expect(code.textContent).toContain('export function YourOrderIsOnItsWay')
-    expect(code.textContent).toContain('{user.name}')
+  // The toolbar has no Code tab: Export is the way out of the editor, and it
+  // hands over every format at once rather than one visible tab at a time.
+  it('offers no code view in the toolbar', () => {
+    renderEditor()
+    expect(screen.queryByRole('tab', { name: /Code/ })).toBeNull()
+    expect(document.querySelector('.mk-code')).toBeNull()
   })
 
-  it('offers every export format in the code view, including TSX', () => {
-    renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, views: withCode })
-    fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
-    fireEvent.click(screen.getByRole('tab', { name: 'TSX' }))
-    expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
-      'export interface YourOrderIsOnItsWayProps',
-    )
+  it('exports the emitted component through the Export button', () => {
+    const onExport = vi.fn()
+    renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, onExport })
+    fireEvent.click(screen.getByText('Export'))
+
+    const bundle = onExport.mock.calls[0][0]
+    expect(bundle.jsx).toContain("from '@react-email/components'")
+    expect(bundle.jsx).toContain('export function YourOrderIsOnItsWay')
+    expect(bundle.jsx).toContain('{user.name}')
   })
 
-  it('warns about the MJML caveat where the user will see it', () => {
-    renderEditor({ views: withCode })
-    fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
-    fireEvent.click(screen.getByRole('tab', { name: 'MJML' }))
-    expect(document.body.textContent).toMatch(/does not bundle the MJML compiler/)
+  it('exports every format, including TSX', () => {
+    const onExport = vi.fn()
+    renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, onExport })
+    fireEvent.click(screen.getByText('Export'))
+
+    const bundle = onExport.mock.calls[0][0]
+    expect(bundle.tsx).toContain('export interface YourOrderIsOnItsWayProps')
+    expect(Object.keys(bundle).sort()).toEqual(['html', 'json', 'jsx', 'mjml', 'text', 'tsx'])
   })
 
   it('shows lint issues, and selects the offending block when one is clicked', () => {
     const editor = renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
-    fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Checks/ }))
+    fireEvent.click(screen.getByRole('tab', { name: /Checks/ }))
 
     const items = screen.getAllByRole('listitem')
     expect(items.length).toBeGreaterThan(0)
@@ -1028,13 +1023,13 @@ describe('MailKiln', () => {
     editor.rerender()
 
     // The canvas only exists in the Design view, so go back to see the selection.
-    fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Design/ }))
+    fireEvent.click(screen.getByRole('tab', { name: /Design/ }))
     expect(document.querySelector('[data-selected="true"]')).toBeTruthy()
   })
 
   it('shows an issue count badge on the Checks tab', () => {
     renderEditor()
-    const tab = within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Checks/ })
+    const tab = screen.getByRole('tab', { name: /Checks/ })
     expect(tab.textContent).toMatch(/\d/)
   })
 
@@ -1064,43 +1059,9 @@ describe('MailKiln', () => {
     )
   })
 
-  it('imports HTML through the dialog, reporting before replacing', () => {
-    const editor = renderEditor()
-    fireEvent.click(screen.getByText('Import HTML'))
-
-    const dialog = screen.getByRole('dialog')
-    const source =
-      '<html><head><title>Imported</title></head><body><table><tr><td style="padding:10px"><h1>Imported heading</h1></td></tr></table></body></html>'
-    fireEvent.change(within(dialog).getByLabelText('Import an existing email'), {
-      target: { value: source },
-    })
-
-    // Nothing is replaced until the report has been shown and confirmed.
-    fireEvent.click(within(dialog).getByText('Analyse'))
-    expect(dialog.textContent).toMatch(/blocks are fully editable/)
-    expect(editor.get().settings.subject).not.toBe('Imported')
-
-    fireEvent.click(within(dialog).getByText('Replace template'))
-    expect(editor.get().settings.subject).toBe('Imported')
-    expect(listBlocks(editor.get()).some((b) => b.type === 'heading')).toBe(true)
-  })
-
-  it('keeps the previous template on the undo stack after an import', () => {
-    const editor = renderEditor()
-    fireEvent.click(screen.getByText('Import HTML'))
-    const dialog = screen.getByRole('dialog')
-    fireEvent.change(within(dialog).getByLabelText('Import an existing email'), {
-      target: { value: '<html><body><table><tr><td><p>New</p></td></tr></table></body></html>' },
-    })
-    fireEvent.click(within(dialog).getByText('Analyse'))
-    fireEvent.click(within(dialog).getByText('Replace template'))
-    editor.rerender()
-
-    fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mk-root')), {
-      key: 'z',
-      ctrlKey: true,
-    })
-    expect(listBlocks(editor.get()).map((b) => b.props.text)).toContain('A')
+  it('offers no HTML import in the toolbar', () => {
+    renderEditor()
+    expect(screen.queryByText('Import HTML')).toBeNull()
   })
 
   it('calls onExport with all six formats', () => {
@@ -1174,7 +1135,6 @@ describe('MailKiln', () => {
             onView={() => {}}
             device="desktop"
             onDevice={() => {}}
-            onImport={() => {}}
             appearance="light"
             onToggleAppearance={onToggleAppearance}
           />
@@ -1185,6 +1145,58 @@ describe('MailKiln', () => {
 
     fireEvent.click(screen.getByLabelText('Toggle dark mode'))
     expect(onToggleAppearance).toHaveBeenCalledTimes(1)
+  })
+
+  // Narrow viewports get the panel as an overlay rather than a column; the
+  // toggle is in the DOM at every width and hidden by CSS above the breakpoint,
+  // because a media query cannot mount a component.
+  describe('narrow viewports', () => {
+    it('offers a panel toggle that marks the shell open and shut', () => {
+      renderEditor()
+      const toggle = screen.getByRole('button', { name: 'Panel' })
+      const shell = /** @type {Element} */ (document.querySelector('.mk-shell'))
+      expect(toggle.getAttribute('aria-expanded')).toBe('false')
+      expect(shell.getAttribute('data-panel-open')).toBeNull()
+
+      fireEvent.click(toggle)
+      expect(toggle.getAttribute('aria-expanded')).toBe('true')
+      expect(shell.getAttribute('data-panel-open')).toBe('true')
+
+      fireEvent.click(toggle)
+      expect(shell.getAttribute('data-panel-open')).toBeNull()
+    })
+
+    it('closes the overlay on a backdrop press and on Escape', () => {
+      renderEditor()
+      const shell = /** @type {Element} */ (document.querySelector('.mk-shell'))
+      const toggle = screen.getByRole('button', { name: 'Panel' })
+
+      fireEvent.click(toggle)
+      fireEvent.pointerDown(/** @type {Element} */ (document.querySelector('.mk-scrim')))
+      expect(shell.getAttribute('data-panel-open')).toBeNull()
+
+      fireEvent.click(toggle)
+      fireEvent.keyDown(/** @type {Element} */ (document.querySelector('.mk-root')), {
+        key: 'Escape',
+      })
+      expect(shell.getAttribute('data-panel-open')).toBeNull()
+    })
+
+    it('closes from inside the panel too, since the overlay covers the canvas', () => {
+      renderEditor()
+      const shell = /** @type {Element} */ (document.querySelector('.mk-shell'))
+      fireEvent.click(screen.getByRole('button', { name: 'Panel' }))
+      expect(shell.getAttribute('data-panel-open')).toBe('true')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Close panel' }))
+      expect(shell.getAttribute('data-panel-open')).toBeNull()
+    })
+
+    it('drops the toggle along with the panel it opens', () => {
+      renderEditor({ showPalette: false, showInspector: false })
+      expect(screen.queryByRole('button', { name: 'Panel' })).toBeNull()
+      expect(document.querySelector('.mk-scrim')).toBeNull()
+    })
   })
 
   it('can hide the palette and inspector for a custom layout', () => {
@@ -1336,7 +1348,7 @@ describe('MailKiln', () => {
     const wide = normalize(createDocument({ settings: { width: 700 } }))
     /** @returns {string} the text of the Checks view */
     const checksText = () => {
-      fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Checks/ }))
+      fireEvent.click(screen.getByRole('tab', { name: /Checks/ }))
       return /** @type {HTMLElement} */ (document.querySelector('.mk-main')).textContent ?? ''
     }
 
@@ -1346,55 +1358,5 @@ describe('MailKiln', () => {
     cleanup()
     renderEditor({ value: wide, lintDisable: ['structure'] })
     expect(checksText()).not.toMatch(/700px/)
-  })
-
-  // The code panel is the eject-to-JSX surface, so hiding it is a prop rather
-  // than a fork: an app embedding the editor for non-developers wants Design and
-  // Preview and nothing else, while the exporters stay callable from the core.
-  describe('views', () => {
-    // Scoped to the toolbar: the side panel's Content/Rows/Settings are tabs too.
-    /** @returns {string[]} the toolbar's view tabs, in order */
-    const tabs = () =>
-      within(screen.getByRole('tablist', { name: 'View' }))
-        .getAllByRole('tab')
-        .map((tab) => (tab.textContent ?? '').replace(/\d+$/, '').trim())
-
-    it('leaves the code panel out by default', () => {
-      renderEditor()
-      expect(tabs()).toEqual(['Design', 'Preview', 'Checks'])
-      expect(
-        within(screen.getByRole('tablist', { name: 'View' })).queryByRole('tab', { name: /Code/ }),
-      ).toBeNull()
-    })
-
-    it('puts the Code tab back when a consumer asks for it', () => {
-      renderEditor({ views: withCode })
-      expect(tabs()).toEqual(['Design', 'Preview', 'Code', 'Checks'])
-    })
-
-    it('drops the tabs a consumer leaves out', () => {
-      renderEditor({ views: ['design', 'checks'] })
-      expect(tabs()).toEqual(['Design', 'Checks'])
-    })
-
-    it('keeps the order the consumer asked for, and opens on the first tab', () => {
-      renderEditor({ views: ['checks', 'design'] })
-      expect(tabs()).toEqual(['Checks', 'Design'])
-      expect(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Checks/ }).getAttribute('aria-selected')).toBe('true')
-    })
-
-    it('falls back to the design view rather than rendering an editor with no tabs', () => {
-      renderEditor({ views: [] })
-      expect(tabs()).toEqual(['Design'])
-    })
-
-    it('leaves a view that disappears from the list', () => {
-      const { rerender } = renderEditor({ views: withCode })
-      fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
-      expect(document.querySelector('.mk-code')).not.toBeNull()
-      rerender({ views: ['design', 'preview'] })
-      expect(document.querySelector('.mk-code')).toBeNull()
-      expect(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Design/ }).getAttribute('aria-selected')).toBe('true')
-    })
   })
 })

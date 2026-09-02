@@ -8,20 +8,54 @@ All notable changes to mailkiln are documented here. This project follows
 
 ### Added
 
-- **`views` on `<MailKiln>`** — which toolbar tabs to offer, in the order given.
-  An empty or unrecognised list falls back to `['design']`, and a view that
-  disappears while it is open falls back too, rather than stranding the canvas on
-  a tab with no button to leave by.
+- **A responsive editor.** The chrome was three fixed columns and did not survive a
+  narrow window, let alone a tablet. It is now width-driven at every size:
 
-### Changed
+  - **Below 900px** the side panel stops being a column and becomes an overlay that
+    slides in from the right, opened by a new **Panel** button and closed by the
+    backdrop, the button, or Escape. The button sits beside the view tabs, carries a
+    label rather than a bare glyph, and takes an accent border and tint while the
+    panel is open — at this width it is the only way to reach the palette, so it has
+    to read as a control and has to show its state. The panel itself reads as a sheet
+    over the document rather than a second page: rounded on the leading edge, a strip
+    of dimmed canvas left showing beside it, and a close button in its own header,
+    because the toggle and the backdrop are both out of sight while the sheet covers
+    the canvas. The canvas keeps the full width instead of being squeezed to a strip —
+    the usual failure of a builder on a tablet.
+  - **The toolbar grows when it wraps.** It was `flex-wrap: wrap` on a fixed 56px
+    height, so as soon as the controls stopped fitting, the wrapped row was clipped
+    and Export became unreachable.
+  - **Below 640px** the template name takes its own line and touch targets go to 36px.
+  - **Below 480px** the panel takes `min(360px, 92%)`, the segmented controls tighten so the
+    views, the device switcher and Export share one row, and the phone frame around
+    the mobile canvas is dropped — the frame was wider than the phone. The Preview
+    view still renders at a true 375px.
+  - Transitions are dropped under `prefers-reduced-motion`.
 
-- **The Code tab is no longer in the toolbar by default.** It is the eject-to-JSX
-  surface, and most apps embedding the editor are not showing their users JSX, so
-  the default is now `['design', 'preview', 'checks']`. Pass
-  `views={['design', 'preview', 'code', 'checks']}` to put it back. Nothing was
-  unregistered: `renderToJsx` and the other exporters stay callable from
-  `mailkiln/core`, the Export button still hands `onExport` all six formats, and
-  `CodePanel` is still exported for anyone assembling their own layout.
+  Widths, not devices: a narrow desktop window gets exactly the same treatment.
+
+### Removed
+
+- **The Import HTML button and its dialog.** The toolbar no longer opens an import
+  dialog, and `ImportDialog` is gone along with its export from the package, the
+  `toolbar.import` and `import.*` locale strings in both locales, and the
+  `.mk-dropzone` styles.
+
+  **The importer itself is untouched.** `importFromHtml()` and `inferSettings()`
+  stay exported from `mailkiln/core` with their confidence report intact, so an app
+  can still build its own import flow — call it and pass the result as `value`.
+
+- **The code panel, in full.** The toolbar is Design, Preview and Checks; the live
+  JSX/TSX/HTML/MJML/text/JSON view with its copy and download buttons is gone, and
+  so is everything behind it — the `CodePanel` component and its export from the
+  package, the `view.code` and `code.*` locale strings in both locales, and the
+  `.mk-code-bar` and `.mk-note` styles.
+
+  **Export is unaffected.** The Export button still hands `onExport` all six
+  formats at once, and `renderToJsx`, `renderToHtml`, `renderToMjml` and
+  `exportDocument` stay callable from `mailkiln/core` — the renderers were never
+  in the panel, only displayed by it. `code.text` and the `.mk-code` style stay
+  too: the plain-text preview uses both.
 
 ### Fixed
 
@@ -165,8 +199,10 @@ are settling, and a breaking change to either is likely before 1.0.
   exactly one.
 - Inspector generated entirely from each block's `schema`, built-ins included.
 - Sandboxed iframe preview at 600px/375px, plus a plain-text view.
-- Live code panel with JSX/TSX/HTML/MJML/text/JSON, copy and download.
-- Import dialog that reports before it replaces.
+- Live code panel with JSX/TSX/HTML/MJML/text/JSON, copy and download. (Removed
+  entirely in 0.2.0.)
+- Import dialog that reports before it replaces. (Removed in 0.2.0; the importer
+  itself stays in `mailkiln/core`.)
 - Theming via CSS variables, `prefers-color-scheme` support, and `en` + `hi` locales.
 
 ### Blocks
