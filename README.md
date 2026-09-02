@@ -86,9 +86,11 @@ The guarantee is narrow and absolute:
 
 Anything unrecognised becomes a raw `html` block holding its original markup. Mailchimp `*|FNAME|*`, Mailgun `%recipient:name%` and `%%NAME%%` tags are converted to mailkiln variables on the way in. No other builder on npm attempts this.
 
+Import is a **headless API**, not a button: the editor has no paste-HTML dialog. Call `importFromHtml` yourself and hand the document it returns to `<MailKiln>` as `value` — that way the confidence report and the warnings go somewhere your app can act on them, rather than into a modal the user dismisses.
+
 ### 3. Built-in deliverability linter
 
-Sixteen rules, running live while you design:
+Seventeen rules, running live while you design:
 
 | Rule | What it catches |
 |---|---|
@@ -100,6 +102,7 @@ Sixteen rules, running live while you design:
 | `contrast` | Below WCAG AA, with the measured ratio |
 | `dark-mode` | Palettes that break when a client force-inverts them |
 | `image-alt` / `image-width` / `image-format` | Blocked-image copy, Outlook sizing, webp/avif/svg |
+| `image-src` | An image or video block with no source — it renders as nothing |
 | `background-image` | Missing VML fallback or fallback colour |
 | `plain-text` | Thin or missing `text/plain` alternative |
 | `preheader` | Missing, or too long to show |
@@ -560,7 +563,7 @@ Real-time collaboration, AI copy generation, a hosted template marketplace, Vue/
 ```bash
 npm install
 npm run dev          # playground at http://localhost:5180
-npm test             # 297 tests
+npm test             # 473 tests
 npm run typecheck    # tsc --checkJs over the JSDoc
 npm run lint
 npm run build        # dist/: ESM + CJS + .d.ts + style.css

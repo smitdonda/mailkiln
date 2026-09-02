@@ -1,6 +1,8 @@
 # mailkiln vs. react-email-editor (Unlayer) — gap analysis & roadmap
 
 _Compared 31 July 2026 against Unlayer's live documentation, not from memory._
+_Last reviewed 2 September 2026, after the editor chrome changes described in
+[Removed since](#removed-since-september-2026)._
 
 Two caveats before the tables: Unlayer gates much of this behind a paid hosted project (`projectId`
 plus domain whitelisting), so "they have it" often means "they host it". And their docs do not publish
@@ -27,7 +29,7 @@ Listing these so we don't accidentally "fix" them:
 | | mailkiln | Unlayer |
 |---|---|---|
 | Ejects editable code | react-email JSX **and** TSX, deterministic | HTML only |
-| Imports existing HTML | yes, with a confidence report | no |
+| Imports existing HTML | yes, with a confidence report — a core API, no editor dialog | no |
 | Deliverability linter | 17 rules, click an issue to jump to the block | none |
 | Headless usage | full React-free core (Node/CLI/CI) | none — iframe + hosted service |
 | Document format | plain JSON you own | proprietary |
@@ -74,6 +76,22 @@ buttons stay rounded in Outlook, `lintDisable` on `<MailKiln>`, a formatting bar
 rich-text fields in the property panel, paragraph spacing, letter spacing on buttons and
 menus, and a pixel width an image can carry alongside a percentage.
 
+### Removed since (September 2026)
+
+Two panels came out of the editor chrome. Neither removal costs the package a capability —
+both features stayed in `mailkiln/core`, where they are now reached by API instead of by
+button:
+
+- **The code panel** (`view.code` tab, `CodePanel`, and the short-lived `views` prop). The
+  Export button already hands `onExport` all six formats at once, so the tab was a second,
+  worse way to read output that the consuming app was receiving anyway.
+- **The Import HTML button and its dialog.** `importFromHtml` returns a confidence score,
+  a warning list and an `unrecognized` id list — none of which a modal the user dismisses
+  can act on. The consumer calls it and passes the result in as `value`.
+
+Read the "mailkiln today" column of the table above with that in mind: it describes what the
+package can do, not what has a button in the editor.
+
 
 ---
 
@@ -105,22 +123,23 @@ headlessly testable and lets the HTML importer reuse it. Setting `styleWithCSS(f
 
 Hooks into the existing `data-mk-edit` mechanism in `SortableBlock.jsx` — no new editing model.
 
-## 4. Prioritised roadmap
+#### 2. Per-tool config
+**New:** `src/react/tools.js`
 
-Based on what drives adoption, ordered by effort/impact:
+Unlayer's `tools` shape, taken deliberately so a config written for it works here:
+`{ image: { enabled: false }, button: { position: 0, usageLimit: 1 } }`. Palette policy only —
+`enabled: false` hides the tile without unregistering the block, so a document that already
+contains one still renders, exports and edits.
 
-### Phase 1 — Quick wins (high impact, low risk)
+#### 3. Mobile controls
+**Modified:** `render/html.js`, `render/jsx.js`, the Inspector
 
-1. **Rich-text inline editing**
-   - When a text block is selected, render a minimal inline toolbar (Bold, Italic, Underline, Link, Unlink, Clear Formatting) positioned above it.
-   - Use `contentEditable` on the block's editable element only while selected, serialising back to the block's `text` property on blur / change.
-   - Preserves HTML formatting while typing.
-
-2. **Mobile visibility & font sizing**
-   - `.mk-hide-sm` is **already emitted** by the HTML renderer and nothing ever applies it. Wire a
-     `hideOnMobile: true` toggle to any block, section, or row.
-   - Add a `mobileFontSize` field to text/heading blocks that emits a `@media (max-width: 599px)` rule
-     in the `<style>` head keyed on a stable `mk-b-<id>` class. Adds a "Mobile" group to the Inspector.
+`.mk-hide-sm` was already emitted by the HTML renderer with nothing ever applying it. A
+`hideOnMobile` toggle on any block, section or row wires it up, and a `mobileFontSize` field on
+text, heading and button blocks emits a `@media (max-width: 599px)` rule keyed on a stable
+`mk-b-<id>` class. Both reach the ejected component, not just the HTML. Adds a "Mobile" group to
+the Inspector; on the canvas a hidden block is dimmed rather than hidden, for the same reason
+conditions are marked rather than hidden.
 
 #### 4. Special links
 **New:** `src/react/fields/LinkField.jsx`
@@ -156,8 +175,9 @@ competitor.
 ### Tier 3 — if wanted later
 
 Saved blocks (needs `savedBlocks` + `onSaveBlock` hooks), custom fonts, RTL via
-`settings.direction`, an `onPickImage` hook so consumers can plug in their own media library or stock
-provider, and a menu/navigation block.
+`settings.direction`, and an `onPickImage` hook so consumers can plug in their own media library
+or stock provider. The menu/navigation block that used to sit on this list shipped with the
+August rebuild.
 
 ---
 
@@ -177,8 +197,9 @@ say so in the README than to half-ship them.
    filtering, condition/loop rendering across all four targets, scoped variable resolution.
 2. `npm run typecheck && npm run lint && npm run build && npx publint`.
 3. Browser pass on `npm run dev`: bold a word, insert a merge-variable link, confirm `props.text`
-   holds only whitelisted markup; toggle hide-on-mobile and find the media query in the Code panel;
-   add a repeat over `order.items` and see three rows on canvas and a `.map()` in the JSX tab.
+   holds only whitelisted markup; toggle hide-on-mobile and find the media query in the `html` the
+   Export button hands `onExport`; add a repeat over `order.items` and see three rows on canvas and
+   a `.map()` in that bundle's `jsx`.
 4. Round-trip: new markup must survive `html → import → export → import` unchanged.
 
 ---
