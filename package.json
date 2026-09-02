@@ -1,6 +1,6 @@
 {
   "name": "mailkiln",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Drag & drop email builder that ejects to real React Email code. Visual editor, HTML import/round-trip, deliverability linter, typed merge variables. No lock-in.",
   "keywords": [
     "email",

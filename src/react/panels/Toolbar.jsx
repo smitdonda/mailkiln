@@ -26,6 +26,8 @@ import {
 
 /**
  * @param {object} props
+ * @param {ReadonlyArray<string>} [props.views] Which view tabs to render, in order.
+ *   Defaults to all four.
  * @param {'design' | 'preview' | 'code' | 'checks'} props.view
  * @param {(view: 'design' | 'preview' | 'code' | 'checks') => void} props.onView
  * @param {'desktop' | 'mobile' | 'text'} props.device
@@ -40,6 +42,7 @@ import {
  * @returns {import('react').ReactElement}
  */
 export function Toolbar({
+  views: enabledViews,
   view,
   onView,
   device,
@@ -54,12 +57,16 @@ export function Toolbar({
   const { errors, warnings } = store.lint
   const issues = errors + warnings
 
-  const views = /** @type {const} */ ([
+  const allViews = /** @type {const} */ ([
     ['design', 'view.design', IconGrid],
     ['preview', 'view.preview', IconEye],
     ['code', 'view.code', IconCode],
     ['checks', 'view.checks', IconWarning],
   ])
+  // The consumer's order wins: `views={['checks', 'design']}` puts checks first.
+  const views = enabledViews
+    ? enabledViews.flatMap((id) => allViews.filter(([known]) => known === id))
+    : allViews
 
   const devices = /** @type {const} */ ([
     ['desktop', 'toolbar.desktop', IconDesktop],

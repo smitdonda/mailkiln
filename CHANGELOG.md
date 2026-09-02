@@ -4,7 +4,17 @@ All notable changes to mailkiln are documented here. This project follows
 [semantic versioning](https://semver.org/); versions are managed with
 [changesets](https://github.com/changesets/changesets).
 
-## 0.1.1
+## 0.2.0
+
+### Added
+
+- **`views` on `<MailKiln>`** — which toolbar tabs to offer, in the order given.
+  `views={['design', 'preview', 'checks']}` drops the code panel for an app whose
+  users are not developers, without unregistering anything: `renderToJsx` and the
+  other exporters stay callable from `mailkiln/core`, and `onExport` still hands
+  over all six formats. An empty or unrecognised list falls back to `['design']`,
+  and a view that disappears while it is open falls back too rather than stranding
+  the canvas on a tab with no button to leave by.
 
 ### Fixed
 

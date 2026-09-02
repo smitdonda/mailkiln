@@ -48,6 +48,11 @@ import { QuickInsert } from './panels/QuickInsert.jsx'
  *   `['block:html']` for a whole block type's own rules. The rule stops being reported
  *   everywhere in this document.
  * @param {(bundle: import('../core/types.js').ExportBundle) => void} [props.onExport]
+ * @param {Array<'design' | 'preview' | 'code' | 'checks'>} [props.views] Which view tabs
+ *   the toolbar offers, in the order given. Defaults to all four. `['design', 'preview',
+ *   'checks']` drops the code panel without unregistering the exporters — `renderToJsx`
+ *   and friends stay callable from `mailkiln/core`. An empty or unrecognised list falls
+ *   back to `['design']`, so the editor always has something to show.
  * @param {boolean} [props.showPalette]
  * @param {boolean} [props.showInspector]
  * @param {string} [props.className]
@@ -69,6 +74,7 @@ export function MailKiln({
   specialLinks,
   lintDisable,
   onExport,
+  views,
   showPalette = true,
   showInspector = true,
   className,
@@ -76,7 +82,25 @@ export function MailKiln({
 }) {
   const instanceId = useId()
   const rootRef = useRef(/** @type {HTMLDivElement | null} */ (null))
-  const [view, setView] = useState(/** @type {'design' | 'preview' | 'code' | 'checks'} */ ('design'))
+  // Keyed on the joined list rather than the array itself: a consumer writing
+  // `views={['design', 'preview']}` inline hands us a new array every render.
+  const viewKey = views?.join(',')
+  const availableViews = useMemo(() => {
+    const known = /** @type {const} */ (['design', 'preview', 'code', 'checks'])
+    const picked = (views ?? known).filter((v) => known.includes(/** @type {any} */ (v)))
+    return picked.length ? picked : ['design']
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewKey])
+  const [view, setView] = useState(
+    /** @type {'design' | 'preview' | 'code' | 'checks'} */ (availableViews[0]),
+  )
+  // A view that disappears from the list mid-session would otherwise leave the
+  // canvas on a tab with no button to leave it by.
+  useEffect(() => {
+    if (!availableViews.includes(view)) {
+      setView(/** @type {any} */ (availableViews[0]))
+    }
+  }, [availableViews, view])
   const [device, setDevice] = useState(/** @type {'desktop' | 'mobile' | 'text'} */ ('desktop'))
   const [importOpen, setImportOpen] = useState(false)
   const [quickOpen, setQuickOpen] = useState(false)
@@ -235,6 +259,7 @@ export function MailKiln({
         >
           <DndRoot>
             <Toolbar
+              views={availableViews}
               view={view}
               onView={setView}
               device={device}
