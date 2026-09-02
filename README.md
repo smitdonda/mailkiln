@@ -17,10 +17,12 @@ npm install mailkiln
 
 Email tooling is split in two, and nothing connects the halves.
 
-- **The code world** — [`react-email`](https://react.email) has ~4M downloads/week and is where developers already are. It has **no visual editor**, so a marketer or designer can't touch a template without a pull request.
-- **The visual world** — Unlayer, Stripo, easy-email. Every one of them stores your template as a **proprietary JSON blob**, requires a specific UI framework, and is **export-only**. None of them can read an email back in.
+- **The code world** — [`react-email`](https://react.email) has ~4M downloads/week and is where developers already are. Since React Email 6.0 (April 2026) it also has a visual editor, [`@react-email/editor`](https://react.email/docs/editor/overview) — a TipTap **document** editor. You compose an email the way you compose a page in Notion: text, headings, lists, an image, a preset column split. What you do not get is a layout canvas — sections you drag, rows you split, per-column padding and backgrounds, a block dragged from one column into another.
+- **The visual world** — Unlayer, Stripo, easy-email. These have the layout canvas. Every one of them stores your template as a **proprietary JSON blob**, requires a specific UI framework, and is **export-only**. None of them can read an email back in.
 
-mailkiln is the bridge. The visual editor is an *authoring convenience*; the code is the artefact you keep. Delete mailkiln from your `package.json` tomorrow and your templates still build.
+mailkiln is the bridge: the layout canvas of the second world, ejecting the code of the first. The visual editor is an *authoring convenience*; the code is the artefact you keep. Delete mailkiln from your `package.json` tomorrow and your templates still build.
+
+**If prose is what you are editing, use `@react-email/editor`** — it is MIT, it is Resend's, and it does that job well. Reach for mailkiln when the thing being edited is the *layout*, when you need to read existing HTML back in, or when the output has to survive a deliverability review.
 
 ## The four pillars
 
@@ -489,21 +491,24 @@ mailkiln: block "countdown" schema[1] ("endsAt") edits "endsAt" but
 
 ## Honest comparison
 
-| | mailkiln | Unlayer (`react-email-editor`) | `easy-email-editor` | `@usewaypoint/email-builder` | `react-email` |
+| | mailkiln | `@react-email/editor` | Unlayer (`react-email-editor`) | `easy-email-editor` | `@usewaypoint/email-builder` |
 |---|---|---|---|---|---|
-| Visual drag & drop editor | ✅ nested, free-form | ✅ | ✅ | insert menus only | ❌ |
-| **Exports editable code** | ✅ react-email JSX/TSX | ❌ HTML only | ❌ HTML only | ❌ | n/a |
-| **Imports existing HTML** | ✅ with a confidence report | ❌ | ❌ | ❌ | ❌ |
+| What you edit | a layout | a document | a layout | a layout | a layout |
+| Drag & drop canvas | ✅ nested, free-form | ❌ slash commands, preset splits | ✅ | ✅ | insert menus only |
+| **Exports editable code** | ✅ react-email JSX/TSX | ✅ react-email | ❌ HTML only | ❌ HTML only | ❌ |
+| **Reads an existing email back in** | ✅ tables → blocks, with a confidence report | parses HTML into its prose model | ❌ | ❌ | ❌ |
 | Deliverability linter | ✅ 17 rules | ❌ | ❌ | ❌ | ❌ |
-| Typed merge variables | ✅ | partial | ❌ | ❌ | via your own props |
-| Conditions & loops | ✅ real JSX expressions | ESP syntax baked into the HTML | ❌ | ❌ | write them yourself |
-| Self-hosted / offline | ✅ | ❌ hosted SaaS iframe | ✅ | ✅ | ✅ |
-| UI framework lock-in | none | n/a (iframe) | AntD/Arco | Material UI | none |
-| Runtime dependencies | 2 (dnd-kit) | iframe + service | many | MUI tree | few |
-| Document format | plain JSON you own | proprietary | MJML JSON | proprietary | n/a |
-| Licence | MIT | proprietary tiers | MIT | MIT | MIT |
+| Typed merge variables | ✅ sample object drives autocomplete, lint and props | not documented | partial | ❌ | ❌ |
+| Conditions & loops | ✅ real JSX expressions | ❌ | ESP syntax baked into the HTML | ❌ | ❌ |
+| Self-hosted / offline | ✅ | ✅ | ❌ hosted SaaS iframe | ✅ | ✅ |
+| UI framework lock-in | none | none | n/a (iframe) | AntD/Arco | Material UI |
+| Runtime dependencies | 2 (dnd-kit) | ~30 (TipTap/ProseMirror) | iframe + service | many | MUI tree |
+| Document format | plain JSON you own | TipTap JSON | proprietary | MJML JSON | proprietary |
+| Licence | MIT | MIT | proprietary tiers | MIT | MIT |
 
-Where the others are genuinely ahead: Unlayer has a template marketplace, AI copy tools and ESP integrations; easy-email has a mature MJML pipeline. mailkiln has none of those, on purpose (see [Not in v1](#not-in-v1)).
+`react-email` itself is not a row: it is the target every "exports editable code" cell above points at, and mailkiln is built to hand work to it rather than replace it.
+
+Where the others are genuinely ahead: `@react-email/editor` is far deeper at editing *prose* — tables, code blocks, bubble menus, an extension API — and ships inside an ecosystem doing millions of installs a week; Unlayer has a template marketplace, AI copy tools and ESP integrations; easy-email has a mature MJML pipeline. mailkiln has none of those, on purpose (see [Not in v1](#not-in-v1)).
 
 ## Known limitations
 
