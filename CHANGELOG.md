@@ -8,6 +8,30 @@ All notable changes to mailkiln are documented here. This project follows
 
 ### Added
 
+- **A new default palette: deep cerulean on cool graphite.** The chrome was Tailwind's
+  default indigo over Tailwind's default greys. The accent is now `#0f5a8f` — dark and
+  half-saturated, so it sits behind the artwork on the canvas instead of competing with
+  it, and far enough from the linter's red, amber and green that a badge never reads as
+  brand colour.
+
+  Three things changed beyond the hue:
+
+  - **Contrast is now measured, not assumed.** Subtle help text was `#9ca3af` — **2.6:1
+    on white, below WCAG AA for text at any size** — and a good share of the panel's
+    labels used it. The three text tokens are 17.8:1, 6.6:1 and 4.6:1. The error colour
+    moved from `#dc2626` (3.9:1) to `#b3261e` (4.6:1); an error message cannot afford to
+    be the least readable text on screen.
+  - **Dark mode inverts the accent relationship** rather than darkening the light one: a
+    deep blue is unreadable on a dark ground, so the accent lifts to `#7fc0ec` and
+    `--mk-accent-contrast` flips to `#04283f`. That token had no dark override before, so
+    white text was sitting on light blue at 1.5:1 wherever a filled accent surface
+    appeared.
+  - **Dark mode gained its own semantic colours.** It had been inheriting the light
+    theme's, which is how a `#b3261e` error ended up on a `#191c20` panel.
+
+  Every tint is still derived from `--mk-accent` with `color-mix`, so `theme={{ accent }}`
+  recolours the whole editor exactly as before.
+
 - **A responsive editor.** The chrome was three fixed columns and did not survive a
   narrow window, let alone a tablet. It is now width-driven at every size:
 

@@ -25,7 +25,7 @@
 @source "./**/*.{js,jsx}";
 
 @theme {
-  --color-mk-accent: #4f46e5;
+  --color-mk-accent: #0f5a8f;
 }
 
 /* --- unlayered from here down: see the note above --- */
@@ -40,32 +40,45 @@
    =========================================================================== */
 
 .mk-root {
-  --mk-accent: #4f46e5;
-  --mk-accent-hover: #4338ca;
+  /* Deep cerulean on cool graphite. The canvas holds whatever colours the
+     customer's brand uses, so the chrome's job is to sit behind that artwork
+     rather than compete with it: a dark, half-saturated blue recedes where a
+     bright one pulls the eye off the document. It also stays clear of the
+     linter's red, amber and green, so a badge never reads as brand colour. */
+  --mk-accent: #0f5a8f;
+  --mk-accent-hover: #0b4770;
   --mk-accent-contrast: #ffffff;
-  --mk-accent-soft: color-mix(in srgb, var(--mk-accent) 8%, transparent);
-  --mk-accent-softer: color-mix(in srgb, var(--mk-accent) 4%, transparent);
-  --mk-accent-ring: color-mix(in srgb, var(--mk-accent) 22%, transparent);
+  /* Derived, never hardcoded: a consumer passing `theme={{ accent }}` gets the
+     tonal fills in their own hue for free. */
+  --mk-accent-soft: color-mix(in srgb, var(--mk-accent) 12%, transparent);
+  --mk-accent-softer: color-mix(in srgb, var(--mk-accent) 6%, transparent);
+  --mk-accent-ring: color-mix(in srgb, var(--mk-accent) 26%, transparent);
 
   --mk-bg: #ffffff;
-  --mk-bg-subtle: #f9fafb;
-  --mk-bg-sunken: #eef0f4;
-  --mk-bg-hover: #f3f4f6;
+  --mk-bg-subtle: #f8fafc;
+  --mk-bg-sunken: #eef1f5;
+  --mk-bg-hover: #f4f6f9;
 
-  --mk-border: #e7e9ee;
-  --mk-border-strong: #d3d7e0;
+  --mk-border: #dfe3ea;
+  --mk-border-strong: #bfc6d1;
 
-  --mk-fg: #111827;
-  --mk-fg-muted: #6b7280;
-  --mk-fg-subtle: #9ca3af;
+  /* Contrast, measured on white: 17.8:1, 6.6:1 and 4.6:1. The old subtle grey
+     was #9ca3af — 2.6:1, below WCAG AA for text at any size, and half the
+     panel's labels and help text used it. */
+  --mk-fg: #16181c;
+  --mk-fg-muted: #565d68;
+  --mk-fg-subtle: #6e7681;
 
-  --mk-danger: #dc2626;
-  --mk-danger-soft: color-mix(in srgb, #dc2626 10%, transparent);
-  --mk-warn: #d97706;
-  --mk-warn-soft: color-mix(in srgb, #d97706 12%, transparent);
-  --mk-info: #2563eb;
-  --mk-info-soft: color-mix(in srgb, #2563eb 10%, transparent);
-  --mk-success: #059669;
+  /* Semantic colours are deliberately outside the accent's family, and darker
+     than the old set: #dc2626 was 3.9:1 on white, which an error message
+     cannot afford. */
+  --mk-danger: #b3261e;
+  --mk-danger-soft: color-mix(in srgb, #b3261e 10%, transparent);
+  --mk-warn: #9a5b00;
+  --mk-warn-soft: color-mix(in srgb, #9a5b00 12%, transparent);
+  --mk-info: #0f5a8f;
+  --mk-info-soft: color-mix(in srgb, #0f5a8f 10%, transparent);
+  --mk-success: #146c2e;
 
   --mk-radius: 12px;
   --mk-radius-md: 9px;
@@ -112,22 +125,38 @@
 }
 
 .mk-root[data-mk-theme='dark'] {
-  --mk-accent: #6366f1;
-  --mk-accent-hover: #818cf8;
-  --mk-accent-soft: color-mix(in srgb, var(--mk-accent) 16%, transparent);
-  --mk-accent-softer: color-mix(in srgb, var(--mk-accent) 8%, transparent);
+  /* Dark inverts the accent relationship rather than darkening the light one:
+     a deep blue is unreadable on a dark ground, so the accent lifts and the
+     label on top of it goes dark. Without `--mk-accent-contrast` here, white
+     text sat on light blue at 1.5:1. */
+  --mk-accent: #7fc0ec;
+  --mk-accent-hover: #a3d3f2;
+  --mk-accent-contrast: #04283f;
+  --mk-accent-soft: color-mix(in srgb, var(--mk-accent) 22%, transparent);
+  --mk-accent-softer: color-mix(in srgb, var(--mk-accent) 12%, transparent);
+  --mk-accent-ring: color-mix(in srgb, var(--mk-accent) 40%, transparent);
 
-  --mk-bg: #171a21;
-  --mk-bg-subtle: #1c2028;
-  --mk-bg-sunken: #0f1116;
-  --mk-bg-hover: #232833;
+  --mk-bg: #191c20;
+  --mk-bg-subtle: #1e2226;
+  --mk-bg-sunken: #101215;
+  --mk-bg-hover: #23272c;
 
-  --mk-border: #262b35;
-  --mk-border-strong: #383f4d;
+  --mk-border: #333840;
+  --mk-border-strong: #464d57;
 
-  --mk-fg: #e8eaf0;
-  --mk-fg-muted: #9aa2b1;
-  --mk-fg-subtle: #6b7382;
+  --mk-fg: #e4e6e9;
+  --mk-fg-muted: #b3bac2;
+  --mk-fg-subtle: #949ca6;
+
+  /* These were inherited from the light theme, which is how a #b3261e error
+     ended up on a #191c20 panel. */
+  --mk-danger: #f2b8b5;
+  --mk-danger-soft: color-mix(in srgb, #f2b8b5 16%, transparent);
+  --mk-warn: #ffb95c;
+  --mk-warn-soft: color-mix(in srgb, #ffb95c 16%, transparent);
+  --mk-info: #7fc0ec;
+  --mk-info-soft: color-mix(in srgb, #7fc0ec 16%, transparent);
+  --mk-success: #6dd58c;
 
   --mk-shadow-paper: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
   --mk-shadow-lg: 0 12px 32px rgb(0 0 0 / 45%);

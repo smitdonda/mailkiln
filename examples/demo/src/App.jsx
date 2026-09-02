@@ -117,7 +117,6 @@ export function App() {
           // Shows `position` and `usageLimit` without removing anything from the
           // palette — the playground exists to let you try every block.
           tools={{ countdown: { position: 0, usageLimit: 1 } }}
-          theme={{ accent: '#6366f1' }}
           locale="en"
           onImageUpload={async (file) => {
             // A real app uploads here. The object URL is enough to see the flow.
