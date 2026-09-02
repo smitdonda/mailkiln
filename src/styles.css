@@ -610,14 +610,6 @@
   white-space: nowrap;
 }
 
-.mk-panel-kind {
-  color: var(--mk-fg-subtle);
-  font-size: var(--mk-text-sm);
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .mk-panel-body {
   flex: 1;
   min-height: 0;
@@ -1909,18 +1901,6 @@
   font-weight: 600;
 }
 
-/* --- image field -------------------------------------------------------- */
-
-.mk-image-preview {
-  display: block;
-  width: 100%;
-  max-height: 132px;
-  object-fit: contain;
-  border: 1px solid var(--mk-border);
-  border-radius: var(--mk-radius-md);
-  background: var(--mk-bg-sunken);
-}
-
 /* --- rich-text field ------------------------------------------------------
    The formatting bar sits directly on top of the textarea and shares its border
    radius, so the two read as one control rather than a toolbar that happens to
@@ -2204,15 +2184,6 @@
   color: var(--mk-info);
 }
 
-.mk-badge-count {
-  min-width: 18px;
-  justify-content: center;
-  padding: 0 5px;
-  background: var(--mk-accent);
-  color: var(--mk-accent-contrast);
-  line-height: 17px;
-}
-
 .mk-empty {
   display: flex;
   flex-direction: column;
@@ -2236,7 +2207,10 @@
 }
 
 /* ===========================================================================
-   Dialog
+   Overlay
+   ===========================================================================
+   Quick insert is the only thing left inside it; the import dialog it was
+   built for came out with that panel.
    =========================================================================== */
 
 .mk-overlay {
@@ -2249,67 +2223,6 @@
   padding: 28px;
   background: rgb(16 24 40 / 55%);
   backdrop-filter: blur(2px);
-}
-
-.mk-dialog {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: min(680px, 100%);
-  max-height: 100%;
-  padding: 20px;
-  overflow-y: auto;
-  border-radius: var(--mk-radius);
-  background: var(--mk-bg);
-  box-shadow: var(--mk-shadow-lg);
-}
-
-.mk-dialog h2 {
-  margin: 0;
-  font-size: var(--mk-text-lg);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.mk-dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding-top: 4px;
-}
-
-.mk-report {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid var(--mk-border);
-  border-radius: var(--mk-radius-md);
-  background: var(--mk-bg-subtle);
-  font-size: var(--mk-text-sm);
-}
-
-.mk-report-stat {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-size: var(--mk-text-base);
-  font-weight: 600;
-}
-
-.mk-meter {
-  height: 6px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--mk-bg-sunken);
-}
-
-.mk-meter > span {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--mk-success);
-  transition: width 220ms ease;
 }
 
 /* ===========================================================================

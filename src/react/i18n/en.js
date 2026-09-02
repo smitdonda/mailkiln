@@ -167,9 +167,8 @@ export const en = {
   'field.addItem': 'Add item',
   'field.removeItem': 'Remove',
   'field.vars': 'Merge variables',
-  'field.varsHint': 'Type {{ to insert a variable',
 
-  // code panel
+  // preview devices
   'code.text': 'Text',
 
   // lint
@@ -182,8 +181,6 @@ export const en = {
   'lint.infos': '{count} notes',
   'lint.size': 'Rendered size: {size}',
   'lint.goto': 'Show the block this affects',
-
-  // import
 
   // dnd announcements
   'dnd.instructions':
