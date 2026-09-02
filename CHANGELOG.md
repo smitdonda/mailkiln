@@ -9,12 +9,19 @@ All notable changes to mailkiln are documented here. This project follows
 ### Added
 
 - **`views` on `<MailKiln>`** — which toolbar tabs to offer, in the order given.
-  `views={['design', 'preview', 'checks']}` drops the code panel for an app whose
-  users are not developers, without unregistering anything: `renderToJsx` and the
-  other exporters stay callable from `mailkiln/core`, and `onExport` still hands
-  over all six formats. An empty or unrecognised list falls back to `['design']`,
-  and a view that disappears while it is open falls back too rather than stranding
-  the canvas on a tab with no button to leave by.
+  An empty or unrecognised list falls back to `['design']`, and a view that
+  disappears while it is open falls back too, rather than stranding the canvas on
+  a tab with no button to leave by.
+
+### Changed
+
+- **The Code tab is no longer in the toolbar by default.** It is the eject-to-JSX
+  surface, and most apps embedding the editor are not showing their users JSX, so
+  the default is now `['design', 'preview', 'checks']`. Pass
+  `views={['design', 'preview', 'code', 'checks']}` to put it back. Nothing was
+  unregistered: `renderToJsx` and the other exporters stay callable from
+  `mailkiln/core`, the Export button still hands `onExport` all six formats, and
+  `CodePanel` is still exported for anyone assembling their own layout.
 
 ### Fixed
 

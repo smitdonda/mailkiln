@@ -39,6 +39,9 @@ function renderEditor(props = {}) {
   return { get: () => current, rerender, utils, onChange }
 }
 
+// The Code tab is opt-in, so any test that drives the code view asks for it.
+const withCode = /** @type {const} */ (['design', 'preview', 'code', 'checks'])
+
 /**
  * The action strip inside a canvas node. Section, row and block actions share
  * their labels with the panel header on purpose — two routes to the same thing —
@@ -874,7 +877,7 @@ describe('MailKiln', () => {
       const onExport = vi.fn()
       const doc = kitchenSinkDocument()
       doc.settings.name = 'Order shipped'
-      renderEditor({ value: doc, vars: sampleVars, onExport })
+      renderEditor({ value: doc, vars: sampleVars, onExport, views: withCode })
 
       fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
       expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
@@ -886,7 +889,7 @@ describe('MailKiln', () => {
     })
 
     it('falls back to the subject when unnamed', () => {
-      renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
+      renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, views: withCode })
       fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
       expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
         'export function YourOrderIsOnItsWay(',
@@ -988,7 +991,7 @@ describe('MailKiln', () => {
   })
 
   it('switches to the code view and shows the emitted component', () => {
-    renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
+    renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, views: withCode })
     fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
     const code = /** @type {Element} */ (document.querySelector('.mk-code'))
     expect(code.textContent).toContain("from '@react-email/components'")
@@ -997,7 +1000,7 @@ describe('MailKiln', () => {
   })
 
   it('offers every export format in the code view, including TSX', () => {
-    renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
+    renderEditor({ value: kitchenSinkDocument(), vars: sampleVars, views: withCode })
     fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
     fireEvent.click(screen.getByRole('tab', { name: 'TSX' }))
     expect(/** @type {Element} */ (document.querySelector('.mk-code')).textContent).toContain(
@@ -1006,7 +1009,7 @@ describe('MailKiln', () => {
   })
 
   it('warns about the MJML caveat where the user will see it', () => {
-    renderEditor()
+    renderEditor({ views: withCode })
     fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
     fireEvent.click(screen.getByRole('tab', { name: 'MJML' }))
     expect(document.body.textContent).toMatch(/does not bundle the MJML compiler/)
@@ -1356,15 +1359,22 @@ describe('MailKiln', () => {
         .getAllByRole('tab')
         .map((tab) => (tab.textContent ?? '').replace(/\d+$/, '').trim())
 
-    it('offers all four by default', () => {
+    it('leaves the code panel out by default', () => {
       renderEditor()
+      expect(tabs()).toEqual(['Design', 'Preview', 'Checks'])
+      expect(
+        within(screen.getByRole('tablist', { name: 'View' })).queryByRole('tab', { name: /Code/ }),
+      ).toBeNull()
+    })
+
+    it('puts the Code tab back when a consumer asks for it', () => {
+      renderEditor({ views: withCode })
       expect(tabs()).toEqual(['Design', 'Preview', 'Code', 'Checks'])
     })
 
     it('drops the tabs a consumer leaves out', () => {
-      renderEditor({ views: ['design', 'preview', 'checks'] })
-      expect(tabs()).toEqual(['Design', 'Preview', 'Checks'])
-      expect(within(screen.getByRole('tablist', { name: 'View' })).queryByRole('tab', { name: /Code/ })).toBeNull()
+      renderEditor({ views: ['design', 'checks'] })
+      expect(tabs()).toEqual(['Design', 'Checks'])
     })
 
     it('keeps the order the consumer asked for, and opens on the first tab', () => {
@@ -1379,7 +1389,7 @@ describe('MailKiln', () => {
     })
 
     it('leaves a view that disappears from the list', () => {
-      const { rerender } = renderEditor()
+      const { rerender } = renderEditor({ views: withCode })
       fireEvent.click(within(screen.getByRole('tablist', { name: 'View' })).getByRole('tab', { name: /Code/ }))
       expect(document.querySelector('.mk-code')).not.toBeNull()
       rerender({ views: ['design', 'preview'] })

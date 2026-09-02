@@ -49,10 +49,13 @@ import { QuickInsert } from './panels/QuickInsert.jsx'
  *   everywhere in this document.
  * @param {(bundle: import('../core/types.js').ExportBundle) => void} [props.onExport]
  * @param {Array<'design' | 'preview' | 'code' | 'checks'>} [props.views] Which view tabs
- *   the toolbar offers, in the order given. Defaults to all four. `['design', 'preview',
- *   'checks']` drops the code panel without unregistering the exporters — `renderToJsx`
- *   and friends stay callable from `mailkiln/core`. An empty or unrecognised list falls
- *   back to `['design']`, so the editor always has something to show.
+ *   the toolbar offers, in the order given. Defaults to `['design', 'preview', 'checks']`:
+ *   the code panel is opt-in, because most apps embedding the editor are not showing
+ *   their users JSX. Pass `['design', 'preview', 'code', 'checks']` to put the Code tab
+ *   back. Nothing is unregistered either way — `renderToJsx` and friends stay callable
+ *   from `mailkiln/core`, `onExport` still hands over all six formats, and `CodePanel`
+ *   is still exported for a custom layout. An empty or unrecognised list falls back to
+ *   `['design']`, so the editor always has something to show.
  * @param {boolean} [props.showPalette]
  * @param {boolean} [props.showInspector]
  * @param {string} [props.className]
@@ -87,7 +90,10 @@ export function MailKiln({
   const viewKey = views?.join(',')
   const availableViews = useMemo(() => {
     const known = /** @type {const} */ (['design', 'preview', 'code', 'checks'])
-    const picked = (views ?? known).filter((v) => known.includes(/** @type {any} */ (v)))
+    // The code panel is not in the default set: it is the eject-to-JSX surface,
+    // and an app embedding the editor for non-developers does not want it.
+    const fallback = /** @type {const} */ (['design', 'preview', 'checks'])
+    const picked = (views ?? fallback).filter((v) => known.includes(/** @type {any} */ (v)))
     return picked.length ? picked : ['design']
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewKey])

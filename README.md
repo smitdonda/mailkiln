@@ -206,7 +206,7 @@ if (errors > 0) {
 | `messages` | `Record<string, string>` | Per-key string overrides. |
 | `onImageUpload` | `(file: File) => Promise<string>` | Enables the upload button. A URL field is always available regardless. |
 | `onExport` | `(bundle) => void` | Called by the Export button with all six formats. |
-| `views` | `Array<'design' \| 'preview' \| 'code' \| 'checks'>` | Which toolbar tabs to offer, in the order given. Defaults to all four; `['design', 'preview', 'checks']` drops the code panel. |
+| `views` | `Array<'design' \| 'preview' \| 'code' \| 'checks'>` | Which toolbar tabs to offer, in the order given. Defaults to `['design', 'preview', 'checks']` — the Code tab is opt-in; add `'code'` to show it. |
 | `showPalette` / `showInspector` | `boolean` | Hide either panel to build your own layout. |
 | `className` / `style` | — | Applied to the root element. |
 
