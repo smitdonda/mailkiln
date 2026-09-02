@@ -23,6 +23,13 @@ export const en = {
   'view.preview': 'Preview',
   'view.checks': 'Checks',
 
+  // structure pane
+  'structure.title': 'Structure',
+  'structure.add': 'Add block',
+  'structure.collapse': 'Collapse structure',
+  'structure.expand': 'Expand structure',
+  'structure.repeats': 'each {path}',
+
   // side panel
   'panel.content': 'Content',
   'panel.rows': 'Rows',
@@ -167,8 +174,11 @@ export const en = {
 
   // lint
   'lint.clean': 'No issues found.',
+  'lint.error': '{count} error',
   'lint.errors': '{count} errors',
+  'lint.warning': '{count} warning',
   'lint.warnings': '{count} warnings',
+  'lint.info': '{count} note',
   'lint.infos': '{count} notes',
   'lint.size': 'Rendered size: {size}',
   'lint.goto': 'Show the block this affects',

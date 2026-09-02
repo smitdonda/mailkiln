@@ -14,6 +14,9 @@ tests/types/dist/
 # Playwright MCP artefacts
 .playwright-mcp/
 
+# Design canvas working files (mockups; the published canvas is the record)
+design/
+
 # Built templates and tour artefacts
 out/
 .vercel

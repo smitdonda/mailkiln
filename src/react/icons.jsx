@@ -187,6 +187,8 @@ export const IconSearch = icon(
 
 export const IconChevronRight = icon(<path d="m9 5 7 7-7 7" />)
 
+export const IconChevronLeft = icon(<path d="m15 5-7 7 7 7" />)
+
 export const IconArrowLeft = icon(<path d="M19 12H5m6-6-6 6 6 6" />)
 
 /** The Rows tab: stacked layout bands. */

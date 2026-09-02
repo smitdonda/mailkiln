@@ -33,15 +33,19 @@ export function LintPanel({ onShowBlock } = {}) {
       <div className="mk-lint-summary">
         {errors ? (
           <span className="mk-badge" data-level="error">
-            {t('lint.errors', { count: errors })}
+            {t(errors === 1 ? 'lint.error' : 'lint.errors', { count: errors })}
           </span>
         ) : null}
         {warnings ? (
           <span className="mk-badge" data-level="warn">
-            {t('lint.warnings', { count: warnings })}
+            {t(warnings === 1 ? 'lint.warning' : 'lint.warnings', { count: warnings })}
           </span>
         ) : null}
-        {infos ? <span className="mk-badge">{t('lint.infos', { count: infos })}</span> : null}
+        {infos ? (
+          <span className="mk-badge">
+            {t(infos === 1 ? 'lint.info' : 'lint.infos', { count: infos })}
+          </span>
+        ) : null}
         <span className="mk-spacer-flex" />
         <span className="mk-help">
           {t('lint.size', { size: `${(sizeBytes / 1024).toFixed(1)}KB` })}

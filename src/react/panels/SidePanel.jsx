@@ -20,15 +20,7 @@ import { useI18n } from '../i18n/index.jsx'
 import { BlockPalette } from './BlockPalette.jsx'
 import { RowLayouts } from './RowLayouts.jsx'
 import { DocumentFields, NodeFields } from './Inspector.jsx'
-import {
-  IconArrowLeft,
-  IconClose,
-  IconCopy,
-  IconGrid,
-  IconRows,
-  IconSliders,
-  IconTrash,
-} from '../icons.jsx'
+import { IconArrowLeft, IconClose, IconCopy, IconTrash } from '../icons.jsx'
 
 /** @typedef {'content' | 'rows' | 'settings'} PanelTab */
 
@@ -112,10 +104,12 @@ export function SidePanel({ onClose }) {
     )
   }
 
+  // Text, no icons: three words fit, and an icon beside each one only makes the
+  // tab row louder than the panel underneath it.
   const tabs = /** @type {const} */ ([
-    ['content', 'panel.content', IconGrid],
-    ['rows', 'panel.rows', IconRows],
-    ['settings', 'panel.settings', IconSliders],
+    ['content', 'panel.content'],
+    ['rows', 'panel.rows'],
+    ['settings', 'panel.settings'],
   ])
 
   return (
@@ -124,7 +118,7 @@ export function SidePanel({ onClose }) {
       aria-label={tab === 'content' ? t('palette.title') : t(`panel.${tab}`)}
     >
       <div className="mk-panel-tabs" role="tablist" aria-label={t('inspector.title')}>
-        {tabs.map(([id, key, Icon]) => (
+        {tabs.map(([id, key]) => (
           <button
             key={id}
             type="button"
@@ -133,7 +127,6 @@ export function SidePanel({ onClose }) {
             aria-selected={tab === id}
             onClick={() => setTab(id)}
           >
-            <Icon />
             {t(key)}
           </button>
         ))}
