@@ -17,6 +17,7 @@ export { MailKilnProvider, useMailKilnContext, useStore } from './react/context.
 export { Toolbar } from './react/panels/Toolbar.jsx'
 export { BlockPalette } from './react/panels/BlockPalette.jsx'
 export { Canvas } from './react/panels/Canvas.jsx'
+export { StructureTree } from './react/panels/StructureTree.jsx'
 export { SidePanel } from './react/panels/SidePanel.jsx'
 export { RowLayouts } from './react/panels/RowLayouts.jsx'
 export { LayoutPicker } from './react/panels/LayoutPicker.jsx'

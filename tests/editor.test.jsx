@@ -14,7 +14,11 @@ import {
 } from '../src/index.js'
 import {
   builtinBlocks,
+  createBlock,
+  createColumn,
   createDocument,
+  createRow,
+  createSection,
   defineBlock,
   listBlocks,
   normalize,
@@ -769,6 +773,113 @@ describe('MailKiln', () => {
       const list = screen.getByRole('listbox', { name: 'Quick insert' })
       expect(within(list).queryByText('Button')).toBeNull()
       expect(within(list).getByText('Text')).toBeTruthy()
+    })
+  })
+
+  describe('structure pane', () => {
+    /**
+     * A document with something for the linter to complain about, so the dot on
+     * the offending node has a reason to be there.
+     *
+     * @returns {import('../src/core/types.js').EmailDocument}
+     */
+    function documentWithABadImage() {
+      return normalize(
+        createDocument({
+          sections: [
+            createSection({
+              rows: [
+                createRow({
+                  children: [
+                    createColumn({
+                      width: 100,
+                      blocks: [
+                        createBlock('heading', { text: 'Your order is on its way' }),
+                        createBlock('image', { src: '', alt: '' }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      )
+    }
+
+    it('lists the document, and names a block by its own content', () => {
+      renderEditor()
+      const tree = screen.getByLabelText('Structure')
+
+      expect(within(tree).getByText('Section 1')).toBeTruthy()
+      // Two columns, so both are worth a line of their own; a single-column row
+      // is not, and its blocks hang off the row directly.
+      expect(within(tree).getByText('Column 1')).toBeTruthy()
+      expect(within(tree).getByText('Column 2')).toBeTruthy()
+      // "Text — A" beats two rows both reading "Text".
+      expect(within(tree).getByText('Text — A')).toBeTruthy()
+      expect(within(tree).getByText('Text — B')).toBeTruthy()
+    })
+
+    it('selects the node you click, including a row the canvas leaves nothing to click', () => {
+      renderEditor()
+      const tree = screen.getByLabelText('Structure')
+
+      fireEvent.click(within(tree).getByText(/^Row/))
+      const inspector = screen.getByLabelText('Properties')
+      expect(within(inspector).getByLabelText('Stack on mobile')).toBeTruthy()
+    })
+
+    it('marks the block a rule is complaining about', () => {
+      renderEditor({ value: documentWithABadImage() })
+      const tree = screen.getByLabelText('Structure')
+
+      const image = /** @type {HTMLElement} */ (within(tree).getByText('Image').closest('button'))
+      expect(image.querySelector('.mk-tree-dot')).toBeTruthy()
+      // The heading is fine, and says so by carrying nothing.
+      const heading = /** @type {HTMLElement} */ (
+        within(tree).getByText(/^Heading/).closest('button')
+      )
+      expect(heading.querySelector('.mk-tree-dot')).toBeNull()
+    })
+
+    it('folds a section away without selecting it', () => {
+      renderEditor()
+      const tree = screen.getByLabelText('Structure')
+      const section = /** @type {HTMLElement} */ (
+        within(tree).getByText('Section 1').closest('button')
+      )
+
+      fireEvent.keyDown(section, { key: 'ArrowLeft' })
+      expect(within(tree).queryByText('Text — A')).toBeNull()
+      // Folding is navigation, not selection: the panel stayed where it was.
+      expect(screen.getByLabelText('Blocks')).toBeTruthy()
+
+      fireEvent.keyDown(section, { key: 'ArrowRight' })
+      expect(within(tree).getByText('Text — A')).toBeTruthy()
+    })
+
+    it('adds a block into the column the row named, not one the palette guessed', () => {
+      const editor = renderEditor()
+      const tree = screen.getByLabelText('Structure')
+
+      // The second column's own "Add block" row.
+      const adders = within(tree).getAllByText('Add block')
+      fireEvent.click(/** @type {HTMLElement} */ (adders[1].closest('button')))
+
+      const list = screen.getByRole('listbox', { name: 'Quick insert' })
+      // Quick insert commits on mousedown, so the click never has to land.
+      fireEvent.mouseDown(within(list).getByText('Divider'))
+      editor.rerender()
+
+      const columns = editor.get().sections[0].rows[0].columns
+      expect(columns[0].blocks.map((b) => b.type)).toEqual(['text'])
+      expect(columns[1].blocks.map((b) => b.type)).toEqual(['text', 'divider'])
+    })
+
+    it('can be turned off by a consumer building their own layout', () => {
+      renderEditor({ showStructure: false })
+      expect(screen.queryByLabelText('Structure')).toBeNull()
     })
   })
 

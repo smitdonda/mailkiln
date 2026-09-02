@@ -80,8 +80,12 @@
   --mk-info-soft: color-mix(in srgb, #0f5a8f 10%, transparent);
   --mk-success: #146c2e;
 
-  --mk-radius: 12px;
-  --mk-radius-md: 9px;
+  /* Two radii with a visible difference between them, spread over the three
+     token names so nothing has to be swept: controls are 6px, anything that
+     floats above the page is 14px. Three radii three pixels apart read as one
+     radius plus noise. */
+  --mk-radius: 14px;
+  --mk-radius-md: 6px;
   --mk-radius-sm: 6px;
 
   --mk-shadow-sm: 0 1px 2px rgb(16 24 40 / 6%);
@@ -89,11 +93,46 @@
   --mk-shadow-lg: 0 12px 32px rgb(16 24 40 / 14%);
   --mk-shadow-paper: 0 1px 2px rgb(16 24 40 / 5%), 0 8px 24px rgb(16 24 40 / 8%);
 
+  /* Type. Six steps, each carrying the leading it needs — a size and its
+     line-height are one decision, not two. This replaces eleven hand-written
+     sizes between 9.5px and 19px, four of which differed from a neighbour by
+     half a pixel: a difference no reader perceives as hierarchy, and one more
+     number to keep in your head on every edit. */
+  --mk-text-xs: 11px;
+  --mk-leading-xs: 1.4;
+  --mk-text-sm: 12px;
+  --mk-leading-sm: 1.45;
+  --mk-text-base: 13px;
+  --mk-leading-base: 1.5;
+  --mk-text-md: 15px;
+  --mk-leading-md: 1.4;
+  --mk-text-lg: 19px;
+  --mk-leading-lg: 1.3;
+  --mk-text-xl: 26px;
+  --mk-leading-xl: 1.2;
+
+  /* Space. A 4px grid. The old set ran 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14 —
+     eleven values, most of them the residue of nudging one element at a time. */
+  --mk-space-1: 4px;
+  --mk-space-2: 8px;
+  --mk-space-3: 12px;
+  --mk-space-4: 16px;
+  --mk-space-5: 24px;
+  --mk-space-6: 32px;
+
+  /* Size is an emphasis lever, so there are three control heights rather than
+     one: the button that produces the artefact should not be the same size as
+     an undo arrow. */
+  --mk-control-icon: 26px;
+  --mk-control: 32px;
+  --mk-control-primary: 36px;
+
   --mk-ui-font:
     ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --mk-ui-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --mk-panel-width: 320px;
+  --mk-tree-width: 248px;
 
   box-sizing: border-box;
   display: flex;
@@ -106,8 +145,8 @@
   background: var(--mk-bg-sunken);
   color: var(--mk-fg);
   font-family: var(--mk-ui-font);
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: var(--mk-text-base);
+  line-height: var(--mk-leading-base);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizelegibility;
 }
@@ -232,10 +271,10 @@
 .mk-toolbar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--mk-space-4);
   flex-wrap: wrap;
   height: 56px;
-  padding: 0 12px;
+  padding: 0 var(--mk-space-4);
   border-bottom: 1px solid var(--mk-border);
   background: var(--mk-bg);
   flex-shrink: 0;
@@ -244,23 +283,23 @@
 .mk-toolbar-group {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--mk-space-1);
 }
 
 /* The template name: reads as a title until you interact with it, which is what
    makes it discoverable as editable without adding a field to the panel. */
 .mk-title {
   flex: 0 1 auto;
-  width: 168px;
+  width: 176px;
   min-width: 84px;
-  height: 32px;
-  padding: 0 8px;
+  height: var(--mk-control);
+  padding: 0 var(--mk-space-2);
   border: 1px solid transparent;
   border-radius: var(--mk-radius-sm);
   background: transparent;
   color: var(--mk-fg);
   font: inherit;
-  font-size: 13.5px;
+  font-size: var(--mk-text-md);
   font-weight: 600;
   letter-spacing: -0.01em;
   text-overflow: ellipsis;
@@ -287,50 +326,77 @@
 
 .mk-toolbar-sep {
   width: 1px;
-  height: 22px;
+  height: var(--mk-space-5);
   background: var(--mk-border);
 }
 
-/* Segmented control — views, devices, code languages */
+/* Two controls, one class, told apart by the role they already carry: the views
+   are a `tablist`, the device widths a `group`. The views are the editor's
+   primary navigation, so they read as tabs — selection carried by weight and a
+   rule under the label. The device toggle is a preference, so it stays a pair of
+   quiet icon buttons. Neither is a filled pill any more: the accent is spent on
+   the selected node and on Export, and a tab that borrows it competes with the
+   document for the eye. */
 .mk-segmented {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 3px;
-  border-radius: var(--mk-radius-md);
-  background: var(--mk-bg-sunken);
+  gap: var(--mk-space-1);
 }
 
 .mk-segmented > button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 11px;
+  justify-content: center;
+  gap: var(--mk-space-2);
+  height: var(--mk-control-icon);
+  padding: 0 var(--mk-space-2);
   border: 0;
-  border-radius: var(--mk-radius-sm);
+  border-radius: var(--mk-radius-md);
   background: transparent;
   color: var(--mk-fg-muted);
   font: inherit;
-  font-size: 12.5px;
-  font-weight: 500;
+  font-size: var(--mk-text-base);
+  font-weight: 400;
   cursor: pointer;
   white-space: nowrap;
   transition:
     background 130ms ease,
     color 130ms ease,
-    box-shadow 130ms ease;
+    border-color 130ms ease;
+}
+
+/* Views: full-height tabs with a rule under the selected one. */
+.mk-segmented[role='tablist'] {
+  align-self: stretch;
+  gap: var(--mk-space-5);
+}
+
+.mk-segmented[role='tablist'] > button {
+  height: 100%;
+  padding: 0;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+}
+
+.mk-segmented[role='tablist'] > button[aria-selected='true'] {
+  border-bottom-color: var(--mk-fg);
+  color: var(--mk-fg);
+  font-weight: 600;
+}
+
+/* Devices: square icon buttons, the smallest of the three control heights. */
+.mk-segmented[role='group'] > button {
+  width: var(--mk-control-icon);
+  padding: 0;
 }
 
 .mk-segmented > button:hover:not([aria-selected='true']):not([aria-pressed='true']) {
   color: var(--mk-fg);
 }
 
-.mk-segmented > button[aria-selected='true'],
 .mk-segmented > button[aria-pressed='true'] {
-  background: var(--mk-bg);
+  background: var(--mk-bg-sunken);
   color: var(--mk-fg);
-  box-shadow: var(--mk-shadow-sm);
 }
 
 .mk-segmented > button:focus-visible {
@@ -339,8 +405,8 @@
 }
 
 .mk-segmented svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
 }
 
@@ -352,15 +418,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 12px;
+  gap: var(--mk-space-2);
+  height: var(--mk-control);
+  padding: 0 var(--mk-space-3);
   border: 1px solid transparent;
   border-radius: var(--mk-radius-md);
   background: transparent;
   color: var(--mk-fg);
   font: inherit;
-  font-size: 12.5px;
+  font-size: var(--mk-text-base);
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
@@ -372,8 +438,8 @@
 }
 
 .mk-btn svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
 }
 
@@ -400,10 +466,14 @@
   color: var(--mk-accent);
 }
 
+/* The one control on screen that produces the artefact, and the only one at
+   the tallest of the three heights. */
 .mk-btn-primary {
+  height: var(--mk-control-primary);
+  padding: 0 var(--mk-space-4);
   background: var(--mk-accent);
   color: var(--mk-accent-contrast);
-  box-shadow: var(--mk-shadow-sm);
+  font-weight: 600;
 }
 
 .mk-btn-primary:hover:not(:disabled) {
@@ -421,14 +491,16 @@
 }
 
 .mk-btn-icon {
-  width: 32px;
+  width: var(--mk-control-icon);
+  height: var(--mk-control-icon);
   padding: 0;
+  color: var(--mk-fg-muted);
 }
 
 .mk-btn-sm {
-  height: 28px;
-  padding: 0 9px;
-  font-size: 12px;
+  height: var(--mk-control-icon);
+  padding: 0 var(--mk-space-2);
+  font-size: var(--mk-text-sm);
 }
 
 /* ===========================================================================
@@ -447,44 +519,36 @@
 
 .mk-panel-tabs {
   display: flex;
-  gap: 2px;
-  padding: 10px 10px 0;
+  align-items: stretch;
+  gap: var(--mk-space-5);
+  height: 44px;
+  padding: 0 var(--mk-space-4);
+  border-bottom: 1px solid var(--mk-border);
   flex-shrink: 0;
 }
 
 .mk-panel-tab {
-  flex: 1;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 34px;
   border: 0;
-  border-radius: var(--mk-radius-sm);
+  border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--mk-fg-muted);
   font: inherit;
-  font-size: 12.5px;
-  font-weight: 500;
+  font-size: var(--mk-text-base);
+  font-weight: 400;
   cursor: pointer;
-  transition:
-    background 130ms ease,
-    color 130ms ease;
-}
-
-.mk-panel-tab svg {
-  width: 15px;
-  height: 15px;
+  transition: color 130ms ease;
 }
 
 .mk-panel-tab:hover {
   color: var(--mk-fg);
-  background: var(--mk-bg-hover);
 }
 
 .mk-panel-tab[aria-selected='true'] {
-  background: var(--mk-accent-soft);
-  color: var(--mk-accent);
+  border-bottom-color: var(--mk-fg);
+  color: var(--mk-fg);
+  font-weight: 600;
 }
 
 .mk-panel-tab:focus-visible {
@@ -495,10 +559,9 @@
 .mk-panel-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 46px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--mk-border);
+  gap: var(--mk-space-2);
+  min-height: 44px;
+  padding: var(--mk-space-3) var(--mk-space-4) var(--mk-space-1);
   flex-shrink: 0;
 }
 
@@ -509,7 +572,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 2px;
-  padding: 6px 12px;
+  padding: 0 var(--mk-space-4) var(--mk-space-3);
   border-bottom: 1px solid var(--mk-border);
   flex-shrink: 0;
 }
@@ -520,7 +583,7 @@
   padding: 2px 4px;
   border-radius: 4px;
   font: inherit;
-  font-size: 11px;
+  font-size: var(--mk-text-sm);
   color: var(--mk-fg-muted);
   cursor: pointer;
 }
@@ -539,20 +602,12 @@
 .mk-panel-title {
   flex: 1;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--mk-text-md);
   font-weight: 600;
   letter-spacing: -0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.mk-panel-kind {
-  color: var(--mk-fg-subtle);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .mk-panel-body {
@@ -561,13 +616,14 @@
   overflow-y: auto;
 }
 
+/* Sentence case, at the size the panel actually reads at. Uppercase 10px grey
+   is the most-used pattern in every admin template ever shipped, and it was
+   also the least legible text in this UI. */
 .mk-section-label {
-  padding: 14px 14px 6px;
-  color: var(--mk-fg-subtle);
-  font-size: 10.5px;
+  padding: var(--mk-space-4) var(--mk-space-4) var(--mk-space-2);
+  color: var(--mk-fg-muted);
+  font-size: var(--mk-text-sm);
   font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
 }
 
 /* ===========================================================================
@@ -575,14 +631,14 @@
    =========================================================================== */
 
 .mk-search {
-  padding: 10px 12px;
+  padding: var(--mk-space-4) var(--mk-space-4) 0;
 }
 
 .mk-tiles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 0 12px 12px;
+  gap: var(--mk-space-1);
+  padding: 0 var(--mk-space-4) var(--mk-space-4);
 }
 
 .mk-tile {
@@ -590,31 +646,29 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  aspect-ratio: 1 / 0.92;
-  padding: 8px 4px;
-  border: 1px solid var(--mk-border);
+  gap: var(--mk-space-2);
+  height: 64px;
+  padding: var(--mk-space-2) var(--mk-space-1);
+  border: 0;
   border-radius: var(--mk-radius-md);
-  background: var(--mk-bg);
-  color: var(--mk-fg-muted);
+  background: transparent;
+  color: var(--mk-fg);
   font: inherit;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: var(--mk-text-sm);
+  font-weight: 400;
   text-align: center;
   cursor: grab;
   touch-action: none;
   transition:
-    border-color 130ms ease,
-    color 130ms ease,
-    box-shadow 130ms ease,
-    transform 130ms ease;
+    background 130ms ease,
+    color 130ms ease;
 }
 
+/* A fill on hover, not a box at rest. Border, radius and shadow each say
+   "separate object"; ten identical boxes say it ten times and leave nothing
+   for the canvas to say. */
 .mk-tile:hover:not(:disabled) {
-  border-color: var(--mk-accent);
-  color: var(--mk-accent);
-  box-shadow: var(--mk-shadow-md);
-  transform: translateY(-1px);
+  background: var(--mk-bg-hover);
 }
 
 /* A tool at its `usageLimit`. It keeps its tooltip — a tile that greys out with
@@ -626,37 +680,28 @@
 
 .mk-tile:focus-visible {
   outline: none;
-  border-color: var(--mk-accent);
   box-shadow: 0 0 0 3px var(--mk-accent-ring);
 }
 
 .mk-tile[data-dragging='true'] {
   opacity: 0.35;
-  border-style: dashed;
 }
 
 .mk-tile-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: var(--mk-bg-sunken);
   color: var(--mk-fg-muted);
-  transition:
-    background 130ms ease,
-    color 130ms ease;
+  transition: color 130ms ease;
 }
 
 .mk-tile-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
 }
 
 .mk-tile:hover .mk-tile-icon {
-  background: var(--mk-accent-soft);
-  color: var(--mk-accent);
+  color: var(--mk-fg);
 }
 
 /* ===========================================================================
@@ -680,7 +725,7 @@
   background: var(--mk-bg);
   color: var(--mk-fg-muted);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--mk-text-sm);
   font-weight: 500;
   cursor: pointer;
   transition:
@@ -768,7 +813,11 @@
   height: 56px;
   margin-bottom: 14px;
   border-radius: 16px;
-  background: linear-gradient(140deg, var(--mk-accent), color-mix(in srgb, var(--mk-accent) 62%, #ec4899));
+  background: linear-gradient(
+    140deg,
+    var(--mk-accent),
+    color-mix(in srgb, var(--mk-accent) 62%, #ec4899)
+  );
   color: #fff;
   /* The glow is what makes this read as an illustration rather than a stray
      button on an otherwise blank page. */
@@ -785,7 +834,7 @@
 .mk-blank-title {
   margin: 0;
   color: #0f172a;
-  font-size: 19px;
+  font-size: var(--mk-text-lg);
   font-weight: 600;
   letter-spacing: -0.015em;
 }
@@ -794,7 +843,7 @@
   max-width: 330px;
   margin: 0;
   color: #64748b;
-  font-size: 13px;
+  font-size: var(--mk-text-base);
   line-height: 1.55;
 }
 
@@ -810,7 +859,7 @@
   background: #f8fafc;
   color: #475569;
   font-family: var(--mk-ui-mono);
-  font-size: 11px;
+  font-size: var(--mk-text-xs);
   line-height: 17px;
   text-align: center;
 }
@@ -876,7 +925,7 @@
   height: 36px;
   padding-left: 32px;
   border-color: transparent;
-  font-size: 13.5px;
+  font-size: var(--mk-text-md);
 }
 
 .mk-quick-search .mk-input:focus {
@@ -930,13 +979,13 @@
 
 .mk-quick-label {
   flex: 1;
-  font-size: 13px;
+  font-size: var(--mk-text-base);
   font-weight: 500;
 }
 
 .mk-quick-group {
   color: var(--mk-fg-subtle);
-  font-size: 11px;
+  font-size: var(--mk-text-sm);
 }
 
 /* ===========================================================================
@@ -947,15 +996,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 28px 24px 120px;
+  gap: var(--mk-space-3);
+  padding: var(--mk-space-6) var(--mk-space-6) 120px;
 }
 
 .mk-canvas {
   position: relative;
   width: 100%;
   min-height: 180px;
-  border-radius: 4px;
+  border-radius: var(--mk-radius-sm);
   box-shadow: var(--mk-shadow-paper);
   transition: max-width 220ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1074,7 +1123,7 @@
      never reaches the output, so covering the section colour here is free. */
   background: rgb(255 255 255 / 86%);
   color: var(--mk-accent);
-  font-size: 11.5px;
+  font-size: var(--mk-text-sm);
   font-weight: 500;
   text-align: center;
   /* Chrome text should not be selectable — double-clicking it looked like a
@@ -1206,7 +1255,7 @@
   border-radius: var(--mk-radius-sm) var(--mk-radius-sm) 0 0;
   background: var(--mk-accent);
   color: var(--mk-accent-contrast);
-  font-size: 10px;
+  font-size: var(--mk-text-xs);
   font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 17px;
@@ -1254,7 +1303,7 @@
   background: var(--mk-accent);
   color: var(--mk-accent-contrast);
   font-family: var(--mk-ui-mono);
-  font-size: 10px;
+  font-size: var(--mk-text-xs);
   line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1410,11 +1459,11 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 8px 12px;
-  border-radius: var(--mk-radius-md);
+  padding: var(--mk-space-2) var(--mk-space-3);
+  border-radius: var(--mk-radius);
   background: var(--mk-accent);
   color: var(--mk-accent-contrast);
-  font-size: 12px;
+  font-size: var(--mk-text-sm);
   font-weight: 500;
   box-shadow: var(--mk-shadow-lg);
   pointer-events: none;
@@ -1433,8 +1482,8 @@
 .mk-fields {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 14px;
+  gap: var(--mk-space-4);
+  padding: var(--mk-space-4);
 }
 
 .mk-group {
@@ -1448,17 +1497,15 @@
 .mk-group-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--mk-space-2);
   width: 100%;
-  padding: 12px 14px;
+  padding: var(--mk-space-3) var(--mk-space-4);
   border: 0;
   background: transparent;
-  color: var(--mk-fg);
+  color: var(--mk-fg-muted);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--mk-text-sm);
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   cursor: pointer;
 }
 
@@ -1480,14 +1527,14 @@
 .mk-group-body {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 0 14px 16px;
+  gap: var(--mk-space-4);
+  padding: 0 var(--mk-space-4) var(--mk-space-4);
 }
 
 .mk-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--mk-space-1);
   min-width: 0;
 }
 
@@ -1495,18 +1542,18 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--mk-space-3);
 }
 
 .mk-label {
   color: var(--mk-fg-muted);
-  font-size: 11.5px;
+  font-size: var(--mk-text-sm);
   font-weight: 500;
 }
 
 .mk-help {
   color: var(--mk-fg-subtle);
-  font-size: 11px;
+  font-size: var(--mk-text-sm);
   line-height: 1.4;
 }
 
@@ -1515,14 +1562,14 @@
 .mk-textarea {
   width: 100%;
   min-width: 0;
-  height: 32px;
-  padding: 0 10px;
+  height: var(--mk-control);
+  padding: 0 var(--mk-space-3);
   border: 1px solid var(--mk-border-strong);
   border-radius: var(--mk-radius-sm);
   background: var(--mk-bg);
   color: var(--mk-fg);
   font: inherit;
-  font-size: 12.5px;
+  font-size: var(--mk-text-base);
   transition:
     border-color 130ms ease,
     box-shadow 130ms ease;
@@ -1534,14 +1581,15 @@
   padding: 8px 10px;
   resize: vertical;
   font-family: var(--mk-ui-mono);
-  font-size: 12px;
+  font-size: var(--mk-text-sm);
   line-height: 1.55;
 }
 
 .mk-select {
   padding-right: 26px;
   appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, currentcolor 50%),
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentcolor 50%),
     linear-gradient(135deg, currentcolor 50%, transparent 50%);
   background-position:
     calc(100% - 14px) calc(50% - 1px),
@@ -1649,7 +1697,7 @@
 
 .mk-color .mk-input {
   font-family: var(--mk-ui-mono);
-  font-size: 12px;
+  font-size: var(--mk-text-base);
 }
 
 /* --- spacing ------------------------------------------------------------ */
@@ -1675,7 +1723,7 @@
 
 .mk-spacing-cell span {
   color: var(--mk-fg-subtle);
-  font-size: 9.5px;
+  font-size: var(--mk-text-xs);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-align: center;
@@ -1774,7 +1822,7 @@
 
 .mk-value {
   color: var(--mk-fg);
-  font-size: 11.5px;
+  font-size: var(--mk-text-sm);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -1801,7 +1849,7 @@
   background: transparent;
   color: var(--mk-fg-muted);
   font: inherit;
-  font-size: 11.5px;
+  font-size: var(--mk-text-sm);
   font-weight: 500;
   cursor: pointer;
   transition:
@@ -1849,20 +1897,8 @@
 }
 
 .mk-list-item-title {
-  font-size: 12px;
+  font-size: var(--mk-text-sm);
   font-weight: 600;
-}
-
-/* --- image field -------------------------------------------------------- */
-
-.mk-image-preview {
-  display: block;
-  width: 100%;
-  max-height: 132px;
-  object-fit: contain;
-  border: 1px solid var(--mk-border);
-  border-radius: var(--mk-radius-md);
-  background: var(--mk-bg-sunken);
 }
 
 /* --- rich-text field ------------------------------------------------------
@@ -1947,7 +1983,7 @@
   border-radius: var(--mk-radius-sm);
   cursor: pointer;
   font-family: var(--mk-ui-mono);
-  font-size: 12px;
+  font-size: var(--mk-text-base);
 }
 
 .mk-var-item[data-active='true'] {
@@ -1957,7 +1993,7 @@
 
 .mk-var-sample {
   color: var(--mk-fg-subtle);
-  font-size: 10.5px;
+  font-size: var(--mk-text-xs);
   max-width: 45%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2002,24 +2038,17 @@
   background: #fff;
 }
 
-
 .mk-code {
   margin: 0;
   padding: 16px 18px;
   overflow: auto;
   color: var(--mk-fg);
   font-family: var(--mk-ui-mono);
-  font-size: 12px;
+  font-size: var(--mk-text-sm);
   line-height: 1.6;
   tab-size: 2;
   white-space: pre;
 }
-
-
-
-
-
-
 
 .mk-lint-summary {
   display: flex;
@@ -2052,7 +2081,7 @@
   background: var(--mk-bg);
   color: var(--mk-fg);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--mk-text-base);
   text-align: left;
   cursor: pointer;
   transition:
@@ -2123,7 +2152,7 @@
   background: var(--mk-bg-sunken);
   color: var(--mk-fg-subtle);
   font-family: var(--mk-ui-mono);
-  font-size: 10px;
+  font-size: var(--mk-text-xs);
 }
 
 .mk-badge {
@@ -2134,7 +2163,7 @@
   border-radius: 999px;
   background: var(--mk-bg-sunken);
   color: var(--mk-fg-muted);
-  font-size: 10.5px;
+  font-size: var(--mk-text-xs);
   font-weight: 600;
   line-height: 19px;
   font-variant-numeric: tabular-nums;
@@ -2155,15 +2184,6 @@
   color: var(--mk-info);
 }
 
-.mk-badge-count {
-  min-width: 18px;
-  justify-content: center;
-  padding: 0 5px;
-  background: var(--mk-accent);
-  color: var(--mk-accent-contrast);
-  line-height: 17px;
-}
-
 .mk-empty {
   display: flex;
   flex-direction: column;
@@ -2171,7 +2191,7 @@
   gap: 10px;
   padding: 48px 20px;
   color: var(--mk-fg-subtle);
-  font-size: 12.5px;
+  font-size: var(--mk-text-base);
   text-align: center;
 }
 
@@ -2187,7 +2207,10 @@
 }
 
 /* ===========================================================================
-   Dialog
+   Overlay
+   ===========================================================================
+   Quick insert is the only thing left inside it; the import dialog it was
+   built for came out with that panel.
    =========================================================================== */
 
 .mk-overlay {
@@ -2202,68 +2225,240 @@
   backdrop-filter: blur(2px);
 }
 
-.mk-dialog {
+/* ===========================================================================
+   Structure pane
+   ===========================================================================
+   The document as a tree, on the left. It is the same JSON the consumer owns,
+   so nothing here is invented for the editor: a section is a section, a repeat
+   is the repeat that will become a `.map()` on export.
+
+   It earns its width by answering three questions the canvas cannot. Where am
+   I, in a document long enough to scroll? How do I reach a row whose columns
+   fill it, leaving nothing of the row itself to click? And which block is the
+   linter actually complaining about — answered here by a dot on the node,
+   rather than by reading an issue list and hunting for the block it names.
+   =========================================================================== */
+
+.mk-tree {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  width: min(680px, 100%);
-  max-height: 100%;
-  padding: 20px;
-  overflow-y: auto;
-  border-radius: var(--mk-radius);
+  width: var(--mk-tree-width);
+  flex-shrink: 0;
+  border-right: 1px solid var(--mk-border);
   background: var(--mk-bg);
-  box-shadow: var(--mk-shadow-lg);
-}
-
-.mk-dialog h2 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.mk-dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding-top: 4px;
-}
-
-.mk-report {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid var(--mk-border);
-  border-radius: var(--mk-radius-md);
-  background: var(--mk-bg-subtle);
-  font-size: 12px;
-}
-
-.mk-report-stat {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.mk-meter {
-  height: 6px;
   overflow: hidden;
-  border-radius: 999px;
-  background: var(--mk-bg-sunken);
 }
 
-.mk-meter > span {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--mk-success);
-  transition: width 220ms ease;
+.mk-tree-head {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-space-2);
+  height: 44px;
+  padding: 0 var(--mk-space-2) 0 var(--mk-space-4);
+  border-bottom: 1px solid var(--mk-border);
+  flex-shrink: 0;
 }
 
+.mk-tree-title {
+  flex: 1;
+  min-width: 0;
+  color: var(--mk-fg-muted);
+  font-size: var(--mk-text-sm);
+  font-weight: 600;
+}
 
+.mk-tree-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--mk-space-2);
+}
+
+.mk-tree-node {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-space-2);
+  width: 100%;
+  height: 28px;
+  padding: 0 var(--mk-space-2);
+  border: 0;
+  border-radius: var(--mk-radius-md);
+  background: transparent;
+  color: var(--mk-fg-muted);
+  font: inherit;
+  font-size: var(--mk-text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 130ms ease,
+    color 130ms ease;
+}
+
+/* Indent by depth rather than by nesting the markup: a flat list of buttons is
+   one tab stop each, in document order, which is what arrow keys and screen
+   readers both want out of a tree. */
+.mk-tree-body [data-depth='1'] {
+  padding-left: var(--mk-space-5);
+}
+
+.mk-tree-body [data-depth='2'] {
+  padding-left: 38px;
+}
+
+.mk-tree-body [data-depth='3'] {
+  padding-left: 52px;
+}
+
+.mk-tree-node[data-kind='section'] {
+  color: var(--mk-fg);
+  font-weight: 600;
+}
+
+.mk-tree-node:hover {
+  background: var(--mk-bg-hover);
+  color: var(--mk-fg);
+}
+
+/* The accent is spent in two places on this screen: the selected node, here and
+   on the canvas, and the button that produces the artefact. */
+.mk-tree-node[data-selected='true'] {
+  background: var(--mk-accent-soft);
+  color: var(--mk-accent);
+  font-weight: 600;
+}
+
+.mk-tree-node:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--mk-accent-ring);
+}
+
+.mk-tree-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mk-tree-twist {
+  display: flex;
+  width: 12px;
+  flex-shrink: 0;
+  color: var(--mk-fg-subtle);
+}
+
+.mk-tree-twist svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 130ms ease;
+}
+
+.mk-tree-node[aria-expanded='true'] .mk-tree-twist svg {
+  transform: rotate(90deg);
+}
+
+.mk-tree-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  background: var(--mk-warn);
+}
+
+.mk-tree-dot[data-level='error'] {
+  background: var(--mk-danger);
+}
+
+/* Insert where the cursor already is. The palette appends to a column it has to
+   guess at; this one names the column it will use. */
+.mk-tree-add {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-space-2);
+  width: 100%;
+  height: var(--mk-control-icon);
+  padding: 0 var(--mk-space-2);
+  border: 0;
+  background: transparent;
+  color: var(--mk-accent);
+  font: inherit;
+  font-size: var(--mk-text-sm);
+  text-align: left;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 130ms ease;
+}
+
+.mk-tree-add svg {
+  width: 13px;
+  height: 13px;
+}
+
+.mk-tree-body:hover .mk-tree-add,
+.mk-tree-add:focus-visible {
+  opacity: 1;
+}
+
+.mk-tree-add:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--mk-accent-ring);
+  border-radius: var(--mk-radius-md);
+}
+
+.mk-tree-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-space-4);
+  padding: var(--mk-space-3) var(--mk-space-4);
+  border-top: 1px solid var(--mk-border);
+  color: var(--mk-fg-muted);
+  font-size: var(--mk-text-sm);
+  flex-shrink: 0;
+}
+
+.mk-tree-count {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-space-2);
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--mk-text-sm);
+  color: inherit;
+  cursor: pointer;
+}
+
+.mk-tree-count:hover {
+  color: var(--mk-fg);
+}
+
+/* Collapsed: a rail wide enough for the button that brings it back. A pane you
+   can close and not reopen is a pane you lose. */
+.mk-tree[data-collapsed='true'] {
+  width: 40px;
+}
+
+.mk-tree[data-collapsed='true'] .mk-tree-title,
+.mk-tree[data-collapsed='true'] .mk-tree-body,
+.mk-tree[data-collapsed='true'] .mk-tree-foot,
+.mk-tree[data-collapsed='true'] .mk-tree-new {
+  display: none;
+}
+
+.mk-tree[data-collapsed='true'] .mk-tree-head {
+  padding: 0 var(--mk-space-2);
+  justify-content: center;
+}
+
+.mk-tree-toggle svg {
+  transition: transform 130ms ease;
+}
+
+.mk-tree[data-collapsed='true'] .mk-tree-toggle svg {
+  transform: rotate(180deg);
+}
 
 /* ===========================================================================
    Responsive layout
@@ -2296,9 +2491,22 @@
   }
 }
 
+@media (max-width: 1100px) {
+  .mk-root {
+    --mk-tree-width: 216px;
+  }
+}
+
 @media (max-width: 1024px) {
   .mk-root {
     --mk-panel-width: 264px;
+  }
+
+  /* Three columns of chrome around a 600px document does not fit here, and the
+     panel is the one you cannot work without. The tree hides; the breadcrumbs
+     in the panel header remain the route up the document. */
+  .mk-tree {
+    display: none;
   }
 }
 
@@ -2440,13 +2648,13 @@
      segmented controls fits the views, the devices and Export onto one. */
   .mk-segmented button {
     padding: 0 8px;
-    font-size: 12px;
+    font-size: var(--mk-text-sm);
     gap: 4px;
   }
 
   .mk-btn {
     padding: 0 10px;
-    font-size: 12px;
+    font-size: var(--mk-text-sm);
   }
 
   .mk-toolbar-group {
@@ -2457,7 +2665,7 @@
      whole one to itself: on a 390px screen every toolbar row costs canvas. */
   .mk-title {
     flex: 1 1 96px;
-    font-size: 13px;
+    font-size: var(--mk-text-base);
   }
 
   /* The phone frame is wider than the phone. Drop it and let the document

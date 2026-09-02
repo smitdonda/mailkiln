@@ -212,6 +212,7 @@ if (errors > 0) {
 | `onImageUpload` | `(file: File) => Promise<string>` | Enables the upload button. A URL field is always available regardless. |
 | `onExport` | `(bundle) => void` | Called by the Export button with all six formats. |
 | `showPalette` / `showInspector` | `boolean` | Hide either panel to build your own layout. |
+| `showStructure` | `boolean` | The document outline on the left. Hidden below 1024px whatever this says. |
 | `className` / `style` | — | Applied to the root element. |
 
 ## Starter documents
@@ -225,6 +226,28 @@ const doc = getTemplate('welcome').create() // fresh node ids on every call
 ```
 
 They bundle no images and no ESP-specific markup, and every one passes this package's own linter with **zero errors** — enforced by a test, because shipping a starter that trips the deliverability rules we advertise would be indefensible.
+
+## The structure pane
+
+Down the left of the editor is the document as a tree — the same JSON you own, so nothing in
+it is invented for the editor: a section is a section, and a row marked `repeat` says which
+path it repeats over, because that is the `.map()` it will export as.
+
+It answers three things the canvas cannot:
+
+- **Where am I**, in a template long enough to scroll.
+- **How do I reach a row** whose columns fill it, leaving none of the row itself to click.
+- **Which block is the linter talking about** — a dot on the node, coloured by the worst level
+  reported against it, rather than an issue list you read and then hunt through the canvas for
+  the block it names.
+
+Each column ends with an **Add block** row that opens quick insert against *that* column, so an
+insert lands where you asked rather than where the palette guessed. Arrow keys fold and unfold;
+the header collapses the whole pane to a rail. Below 1024px it hides itself — three columns of
+chrome around a 600px document do not fit, and the properties panel is the one you cannot work
+without.
+
+Pass `showStructure={false}` to leave it out entirely.
 
 ## Editing text
 

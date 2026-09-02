@@ -20,6 +20,7 @@ import { DndRoot } from './dnd/DndRoot.jsx'
 import { Toolbar } from './panels/Toolbar.jsx'
 import { targetColumnId } from './panels/BlockPalette.jsx'
 import { Canvas } from './panels/Canvas.jsx'
+import { StructureTree } from './panels/StructureTree.jsx'
 import { SidePanel } from './panels/SidePanel.jsx'
 import { PreviewFrame } from './panels/PreviewFrame.jsx'
 import { LintPanel } from './panels/LintPanel.jsx'
@@ -48,6 +49,10 @@ import { QuickInsert } from './panels/QuickInsert.jsx'
  * @param {(bundle: import('../core/types.js').ExportBundle) => void} [props.onExport]
  * @param {boolean} [props.showPalette]
  * @param {boolean} [props.showInspector]
+ * @param {boolean} [props.showStructure] The document outline on the left. Hidden
+ *   below 1024px whatever this says — three columns of chrome around a 600px
+ *   document do not fit there, and the properties panel is the one you cannot
+ *   work without.
  * @param {string} [props.className]
  * @param {import('react').CSSProperties} [props.style]
  * @returns {import('react').ReactElement}
@@ -69,6 +74,7 @@ export function MailKiln({
   onExport,
   showPalette = true,
   showInspector = true,
+  showStructure = true,
   className,
   style,
 }) {
@@ -252,6 +258,13 @@ export function MailKiln({
             />
 
             <div className="mk-shell" data-panel-open={showPanel && panelOpen ? 'true' : undefined}>
+              {showStructure && view === 'design' ? (
+                <StructureTree
+                  onQuickInsert={() => setQuickOpen(true)}
+                  onShowChecks={() => setView('checks')}
+                />
+              ) : null}
+
               <main className="mk-main">
                 {view === 'design' ? (
                   <Canvas device={device} onQuickInsert={() => setQuickOpen(true)} />

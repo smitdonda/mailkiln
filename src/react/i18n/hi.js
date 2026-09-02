@@ -21,6 +21,12 @@ export const hi = {
   'view.preview': 'पूर्वावलोकन',
   'view.checks': 'जाँच',
 
+  'structure.title': 'संरचना',
+  'structure.add': 'ब्लॉक जोड़ें',
+  'structure.collapse': 'संरचना छिपाएँ',
+  'structure.expand': 'संरचना दिखाएँ',
+  'structure.repeats': 'प्रत्येक {path}',
+
   'panel.content': 'सामग्री',
   'panel.rows': 'पंक्तियाँ',
   'panel.settings': 'सेटिंग्स',
@@ -141,8 +147,6 @@ export const hi = {
   'field.addItem': 'आइटम जोड़ें',
   'field.removeItem': 'हटाएँ',
 
-
   'lint.clean': 'कोई समस्या नहीं मिली।',
   'lint.size': 'रेंडर आकार: {size}',
-
 }
