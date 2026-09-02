@@ -378,7 +378,7 @@ export function renderToHtml(doc, options = {}) {
 <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no" />
 <meta name="color-scheme" content="${settings.darkModeAware ? 'light dark' : 'light only'}" />
 <meta name="supported-color-schemes" content="${settings.darkModeAware ? 'light dark' : 'light only'}" />
-<title>${escapeHtml(settings.subject ?? '')}</title>
+<title>${escapeHtml(ctx.resolve(settings.subject ?? ''))}</title>
 ${mso('<noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>')}
 ${headStyles(ctx)}
 </head>

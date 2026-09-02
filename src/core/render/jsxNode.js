@@ -9,7 +9,7 @@
  * @module mailkiln/core/render/jsxNode
  */
 
-import { VAR_PATTERN } from '../vars.js'
+import { optionalChain, VAR_PATTERN } from '../vars.js'
 
 /** @typedef {import('../types.js').JsxElement} JsxElement */
 /** @typedef {import('../types.js').JsxRaw} JsxRaw */
@@ -128,7 +128,7 @@ export function varsToChildren(text) {
   for (const match of src.matchAll(VAR_PATTERN)) {
     const at = /** @type {number} */ (match.index)
     if (at > last) out.push(literal(src.slice(last, at)))
-    out.push(raw(`{${match[1]}}`))
+    out.push(raw(`{${optionalChain(match[1])}}`))
     last = at + match[0].length
   }
   if (last < src.length) out.push(literal(src.slice(last)))
@@ -149,7 +149,7 @@ export function varsToTemplate(text) {
     .replace(/\\/g, '\\\\')
     .replace(/`/g, '\\`')
     .replace(/\$\{/g, '\\${')
-    .replace(VAR_PATTERN, (_whole, path) => `\${${path}}`)
+    .replace(VAR_PATTERN, (_whole, path) => `\${${optionalChain(path)}}`)
   return raw(`\`${escaped}\``)
 }
 
@@ -164,7 +164,7 @@ export function varsToAttr(text) {
   const src = typeof text === 'string' ? text : ''
   if (!src.includes('{{')) return src
   const only = src.match(new RegExp(`^\\s*${VAR_PATTERN.source}\\s*$`))
-  if (only) return raw(`{${only[1]}}`)
+  if (only) return raw(`{${optionalChain(only[1])}}`)
   const tpl = varsToTemplate(src)
   return raw(`{${tpl.__raw}}`)
 }

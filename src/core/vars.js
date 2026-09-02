@@ -76,6 +76,27 @@ export function walkSample(sample) {
 /**
  * Read a dotted/indexed path out of an object.
  *
+ * Turn a merge path into an optional-chained JS expression:
+ * `order.items[0].title` becomes `order?.items?.[0]?.title`.
+ *
+ * @param {string} path
+ * @returns {string}
+ */
+export function optionalChain(path) {
+  // `getPath` walks the same path at runtime and stops at the first `null`.
+  // Ejected code has no such walker — it dereferences directly — so every step
+  // after the first is made optional, and a missing branch renders nothing
+  // instead of throwing `Cannot read properties of undefined`. Emails are
+  // rendered against live data, where one absent optional field must not be
+  // able to fail the whole send.
+  return String(path ?? '')
+    .replace(/\.(?=[A-Za-z_$])/g, '?.')
+    .replace(/\[/g, '?.[')
+}
+
+/**
+ * Read `path` out of `obj`.
+ *
  * @param {any} obj
  * @param {string} path
  * @returns {any}

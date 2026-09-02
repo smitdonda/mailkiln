@@ -101,6 +101,16 @@ describe('renderToHtml', () => {
     expect(html).toContain('MK-2291')
   })
 
+  it('interpolates the subject into the title, like every other string', () => {
+    // The title used to be the one string emitted raw, so a subject written
+    // with a merge variable shipped `{{product.name}}` to the inbox.
+    const doc = kitchenSinkDocument()
+    doc.settings.subject = 'Order {{order.id}} is on its way'
+    expect(renderToHtml(doc, { vars: sampleVars })).toContain(
+      '<title>Order MK-2291 is on its way</title>',
+    )
+  })
+
   it('renders the preheader hidden, with zero-width padding', () => {
     expect(html).toContain('mso-hide:all')
     expect(html).toContain('Arriving Thursday')
@@ -411,14 +421,16 @@ describe('renderToJsx', () => {
 
   it('turns merge tags into real prop references', () => {
     expect(jsx).toContain('export function OrderShipped({ order, unsubscribe_url, user })')
-    expect(jsx).toContain('Thanks, {user.name}!')
+    // Optional past the first step: a prop that arrives without `name`
+    // renders nothing rather than throwing inside the send.
+    expect(jsx).toContain('Thanks, {user?.name}!')
   })
 
   it('keeps mixed text and expressions on one line', () => {
     // JSX condenses a newline next to text into a space, so splitting
-    // `Thanks, {user.name}!` across lines would export "Smit !".
-    expect(jsx).toMatch(/Thanks, \{user\.name\}!/)
-    expect(jsx).not.toMatch(/\{user\.name\}\s*\n\s*!/)
+    // `Thanks, {user?.name}!` across lines would export "Smit !".
+    expect(jsx).toMatch(/Thanks, \{user\?\.name\}!/)
+    expect(jsx).not.toMatch(/\{user\?\.name\}\s*\n\s*!/)
   })
 
   it('documents the props with JSDoc in the plain-JSX flavour', () => {
@@ -432,7 +444,9 @@ describe('renderToJsx', () => {
   })
 
   it('falls back to dangerouslySetInnerHTML for text containing markup', () => {
-    expect(jsx).toContain('dangerouslySetInnerHTML={{ __html: `Order <b>${order.id}</b> is packed.` }}')
+    expect(jsx).toContain(
+      'dangerouslySetInnerHTML={{ __html: `Order <b>${order?.id}</b> is packed.` }}',
+    )
   })
 
   it('indents nested style objects under their own tag', () => {

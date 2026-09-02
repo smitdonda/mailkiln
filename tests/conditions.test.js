@@ -136,17 +136,23 @@ describe('evaluateCondition', () => {
 
 describe('conditionExpression', () => {
   it('emits real JavaScript, not template syntax', () => {
-    expect(conditionExpression({ path: 'user.isPro', op: 'truthy' })).toBe('user.isPro')
-    expect(conditionExpression({ path: 'user.isPro', op: 'falsy' })).toBe('!user.isPro')
+    // Every step past the first is optional: the ejected component dereferences
+    // the path directly, and a condition on data that never arrived has to pick
+    // a branch rather than throw.
+    expect(conditionExpression({ path: 'user.isPro', op: 'truthy' })).toBe('user?.isPro')
+    expect(conditionExpression({ path: 'user.isPro', op: 'falsy' })).toBe('!user?.isPro')
     expect(conditionExpression({ path: 'user.plan', op: 'eq', value: 'pro' })).toBe(
-      'user.plan === "pro"',
+      'user?.plan === "pro"',
     )
     expect(conditionExpression({ path: 'order.total', op: 'gt', value: '100' })).toBe(
-      'order.total > 100',
+      'order?.total > 100',
     )
     expect(conditionExpression({ path: 'order.items', op: 'notEmpty' })).toBe(
-      'order.items.length > 0',
+      'order?.items?.length > 0',
     )
+    // Absent reads as empty, which is what `evaluateCondition` decides too.
+    expect(conditionExpression({ path: 'order.items', op: 'empty' })).toBe('!order?.items?.length')
+    expect(conditionExpression({ path: 'unsubscribe_url', op: 'truthy' })).toBe('unsubscribe_url')
     expect(conditionExpression(null)).toBe('')
   })
 
@@ -253,7 +259,7 @@ describe('rendering a display condition', () => {
 
   it('emits a JSX conditional rather than ESP template syntax', () => {
     const jsx = renderToJsx(proDoc(), { vars })
-    expect(jsx).toContain('{user.isPro && (')
+    expect(jsx).toContain('{user?.isPro && (')
     expect(jsx).toContain('Pro only')
     // No `{% if %}`, and no unresolved merge tags left behind.
     expect(jsx).not.toContain('{%')
@@ -335,9 +341,9 @@ describe('repeat', () => {
 
   it('emits a .map() with a key', () => {
     const jsx = renderToJsx(itemsDoc(), { vars })
-    expect(jsx).toContain('{order.items.map((item, itemIndex) => (')
+    expect(jsx).toContain('{order?.items?.map((item, itemIndex) => (')
     expect(jsx).toContain('key={itemIndex}')
-    expect(jsx).toContain('{item.title}')
+    expect(jsx).toContain('{item?.title}')
     // `item` is a loop variable, not a prop.
     expect(jsx).toContain('({ order })')
     expect(jsx).not.toContain('({ item')
@@ -355,8 +361,8 @@ describe('repeat', () => {
     let doc = itemsDoc()
     doc = setCondition(doc, doc.sections[0].rows[0].id, { path: 'order.items', op: 'notEmpty' })
     const jsx = renderToJsx(doc, { vars })
-    expect(jsx).toContain('{order.items.length > 0 && (')
-    expect(jsx).toContain('{order.items.map((item, itemIndex) => (')
+    expect(jsx).toContain('{order?.items?.length > 0 && (')
+    expect(jsx).toContain('{order?.items?.map((item, itemIndex) => (')
   })
 
   it('clears cleanly', () => {

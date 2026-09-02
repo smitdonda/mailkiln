@@ -7,6 +7,7 @@ import {
   findVarPaths,
   foreignVarsToMailkiln,
   getPath,
+  optionalChain,
   interpolate,
   kindOf,
   tsTypeForRoot,
@@ -73,6 +74,28 @@ describe('getPath', () => {
     expect(getPath({}, 'a.b.c')).toBeUndefined()
     expect(getPath(null, 'a')).toBeUndefined()
     expect(getPath({ a: 1 }, '')).toBeUndefined()
+  })
+})
+
+describe('optionalChain', () => {
+  it('makes every step after the first optional', () => {
+    expect(optionalChain('user.name')).toBe('user?.name')
+    expect(optionalChain('order.items[0].title')).toBe('order?.items?.[0]?.title')
+    // A root path has nothing to guard: it is a prop, and destructuring it
+    // already gave it a binding.
+    expect(optionalChain('unsubscribe_url')).toBe('unsubscribe_url')
+    expect(optionalChain('')).toBe('')
+  })
+
+  it('guards exactly the reads that `getPath` survives at runtime', () => {
+    // The ejected component has no path walker, so the two have to agree about
+    // a missing branch: `getPath` returns undefined, and this must too.
+    const expression = optionalChain('a.b.c')
+    const evaluate = new Function('a', `return ${expression}`)
+    expect(evaluate(undefined)).toBeUndefined()
+    expect(evaluate({})).toBeUndefined()
+    expect(evaluate({ b: { c: 7 } })).toBe(7)
+    expect(getPath({}, 'a.b.c')).toBeUndefined()
   })
 })
 
