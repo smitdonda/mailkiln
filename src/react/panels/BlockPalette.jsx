@@ -1,9 +1,17 @@
 /**
- * The content palette: a grid of block tiles, grouped and searchable.
+ * The content palette: a category rail, and the blocks in the category you are
+ * standing in.
  *
- * Tiles rather than a list because that is what people recognise from every
- * other builder, and because an icon + short label is faster to scan than a row
- * of text when you already know what you want.
+ * It used to be one long scroll of grouped tiles, which had two problems worth
+ * fixing. Eleven blocks in a three-up grid is taller than the panel, so the last
+ * group was cut off before anyone had added anything; and every group ended on a
+ * ragged row, because block counts are not multiples of three.
+ *
+ * A rail solves both by showing one category at a time — and it is the only
+ * arrangement that still works for a consumer who registers a dozen custom
+ * blocks, which is the case this panel has to survive. Search stays global: a
+ * query looks across every category, because somebody typing "video" should not
+ * have to know which drawer it lives in.
  *
  * @module mailkiln/react/panels/BlockPalette
  */
@@ -14,7 +22,21 @@ import { useI18n } from '../i18n/index.jsx'
 import { PaletteDraggable } from '../dnd/PaletteDraggable.jsx'
 import { findNode, listColumns } from '../../core/index.js'
 import { exhaustedTools } from '../tools.js'
-import { IconSearch } from '../icons.jsx'
+import { BLOCK_ICONS, IconCode, IconImage, IconRows, IconSearch, IconText } from '../icons.jsx'
+
+/**
+ * Icons for the group names the built-in blocks use. Anything else — a group a
+ * consumer invented — falls back to the icon of the first block in it, which is
+ * always more meaningful than a generic placeholder.
+ *
+ * @type {Record<string, import('../icons.jsx').IconComponent>}
+ */
+const GROUP_ICONS = {
+  content: IconText,
+  media: IconImage,
+  layout: IconRows,
+  advanced: IconCode,
+}
 
 /**
  * @returns {import('react').ReactElement}
@@ -23,27 +45,39 @@ export function BlockPalette() {
   const t = useI18n()
   const { blocks, store, tools } = useMailKilnContext()
   const [query, setQuery] = useState('')
+  const [picked, setPicked] = useState(/** @type {string | null} */ (null))
 
   const exhausted = useMemo(() => exhaustedTools(store.doc, tools), [store.doc, tools])
 
+  // Categories come from the block definitions, in the order the palette is
+  // already sorted into — so a `tools` position still decides which leads.
   const groups = useMemo(() => {
-    const needle = query.trim().toLowerCase()
-    const filtered = needle
-      ? blocks.filter(
-          (def) =>
-            def.label.toLowerCase().includes(needle) || def.type.toLowerCase().includes(needle),
-        )
-      : blocks
     /** @type {Map<string, import('../../core/types.js').BlockDef[]>} */
     const map = new Map()
-    for (const def of filtered) {
+    for (const def of blocks) {
       const key = def.group ?? 'Blocks'
       const list = map.get(key)
       if (list) list.push(def)
       else map.set(key, [def])
     }
     return [...map.entries()]
-  }, [blocks, query])
+  }, [blocks])
+
+  // A category that stops existing — its last block disabled through `tools` —
+  // falls back to the first rather than leaving an empty pane behind.
+  const active = groups.some(([name]) => name === picked) ? picked : (groups[0]?.[0] ?? null)
+
+  const needle = query.trim().toLowerCase()
+  const searching = needle.length > 0
+
+  const visible = useMemo(() => {
+    if (searching) {
+      return blocks.filter(
+        (def) => def.label.toLowerCase().includes(needle) || def.type.toLowerCase().includes(needle),
+      )
+    }
+    return groups.find(([name]) => name === active)?.[1] ?? []
+  }, [blocks, groups, active, needle, searching])
 
   /**
    * Click / Enter appends to the selected column, or to the last column when
@@ -59,52 +93,72 @@ export function BlockPalette() {
   }
 
   return (
-    <>
-      <div className="mk-search">
-        <div className="mk-search-wrap">
-          <IconSearch />
-          <input
-            className="mk-input"
-            type="search"
-            value={query}
-            placeholder={t('palette.search')}
-            aria-label={t('palette.search')}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </div>
+    <div className="mk-palette">
+      <div className="mk-rail" role="group" aria-label={t('palette.categories')}>
+        {groups.map(([name, defs]) => {
+          const Icon =
+            GROUP_ICONS[name.toLowerCase()] ?? BLOCK_ICONS[String(defs[0]?.icon ?? '')] ?? IconCode
+          return (
+            <button
+              key={name}
+              type="button"
+              className="mk-rail-btn"
+              // Nothing reads as selected while a search is running: the results
+              // span every category, so claiming one of them is current is a lie.
+              aria-pressed={!searching && name === active}
+              title={name}
+              onClick={() => {
+                setPicked(name)
+                setQuery('')
+              }}
+            >
+              <Icon />
+              <span className="mk-rail-label">{name}</span>
+            </button>
+          )
+        })}
       </div>
 
-      {groups.length === 0 ? (
-        <p className="mk-empty">
-          <IconSearch />
-          {t('palette.empty', { query })}
-        </p>
-      ) : (
-        groups.map(([group, defs]) => (
-          <div key={group}>
-            <div className="mk-section-label">{group}</div>
-            <div className="mk-tiles">
-              {defs.map((def) => (
-                <PaletteDraggable
-                  key={def.type}
-                  def={def}
-                  disabled={exhausted.has(def.type)}
-                  disabledReason={t('palette.limit', {
-                    limit: String(tools?.[def.type]?.usageLimit ?? ''),
-                    label: def.label,
-                  })}
-                  onActivate={() => append(def.type)}
-                />
-              ))}
-            </div>
+      <div className="mk-palette-body">
+        <div className="mk-search">
+          <div className="mk-search-wrap">
+            <IconSearch />
+            <input
+              className="mk-input"
+              type="search"
+              value={query}
+              placeholder={t('palette.search')}
+              aria-label={t('palette.search')}
+              onChange={(event) => setQuery(event.target.value)}
+            />
           </div>
-        ))
-      )}
+        </div>
 
-      <p className="mk-help" style={{ padding: '0 14px 16px' }}>
-        {t('panel.contentHint')}
-      </p>
-    </>
+        {visible.length === 0 ? (
+          <p className="mk-empty">
+            <IconSearch />
+            {t('palette.empty', { query })}
+          </p>
+        ) : (
+          <div className="mk-tiles">
+            {visible.map((def) => (
+              <PaletteDraggable
+                key={def.type}
+                def={def}
+                disabled={exhausted.has(def.type)}
+                disabledReason={t('palette.limit', {
+                  limit: String(tools?.[def.type]?.usageLimit ?? ''),
+                  label: def.label,
+                })}
+                onActivate={() => append(def.type)}
+              />
+            ))}
+          </div>
+        )}
+
+        <p className="mk-help mk-palette-hint">{t('panel.contentHint')}</p>
+      </div>
+    </div>
   )
 }
 

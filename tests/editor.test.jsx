@@ -57,6 +57,21 @@ function strip(selector) {
   return /** @type {HTMLElement} */ (found)
 }
 
+/**
+ * Click a palette tile, switching to its category first. The palette shows one
+ * category at a time, so a test that wants Divider has to go to Layout — which
+ * is exactly what a user does.
+ *
+ * @param {string} label
+ * @param {string} [category]
+ * @returns {void}
+ */
+function pickBlock(label, category) {
+  const palette = screen.getByLabelText('Blocks')
+  if (category) fireEvent.click(within(palette).getByRole('button', { name: category }))
+  fireEvent.click(within(palette).getByText(label))
+}
+
 describe('MailKiln', () => {
   it('renders the toolbar, palette, canvas and inspector', () => {
     renderEditor()
@@ -65,18 +80,47 @@ describe('MailKiln', () => {
     expect(screen.getByRole('tab', { name: /Design/ })).toBeTruthy()
   })
 
-  it('lists every built-in block in the palette, grouped', () => {
+  it('puts every built-in block in a category, and opens on the first', () => {
     renderEditor()
     const palette = screen.getByLabelText('Blocks')
-    for (const label of ['Text', 'Heading', 'Image', 'Button', 'Divider', 'Spacer', 'Social', 'Video', 'HTML']) {
+    const rail = within(palette).getByRole('group', { name: 'Block categories' })
+
+    expect(within(rail).getByRole('button', { name: 'Content' })).toBeTruthy()
+    expect(within(rail).getByRole('button', { name: 'Layout' })).toBeTruthy()
+    expect(within(rail).getByRole('button', { name: 'Advanced' })).toBeTruthy()
+
+    // Content leads because its blocks come first in the palette order, and it
+    // is what an email is mostly made of.
+    expect(within(rail).getByRole('button', { name: 'Content' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    )
+    for (const label of ['Text', 'Heading', 'Image', 'Button', 'Social', 'Video']) {
       expect(within(palette).getByText(label), `missing "${label}"`).toBeTruthy()
     }
-    // Group headings, scoped to the section labels — "Content" is also the name
-    // of the tab that contains them.
-    const groups = [...palette.querySelectorAll('.mk-section-label')].map((el) => el.textContent)
-    expect(groups).toContain('Content')
-    expect(groups).toContain('Layout')
-    expect(groups).toContain('Advanced')
+    // One category at a time: Layout's blocks are a click away, not below.
+    expect(within(palette).queryByText('Divider')).toBeNull()
+
+    fireEvent.click(within(rail).getByRole('button', { name: 'Layout' }))
+    expect(within(palette).getByText('Divider')).toBeTruthy()
+    expect(within(palette).getByText('Spacer')).toBeTruthy()
+    expect(within(palette).queryByText('Heading')).toBeNull()
+  })
+
+  it('searches across every category, not just the open one', () => {
+    renderEditor()
+    const palette = screen.getByLabelText('Blocks')
+    const rail = within(palette).getByRole('group', { name: 'Block categories' })
+
+    // Divider lives in Layout while Content is open. Nobody typing "divider"
+    // should have to know which drawer it is in.
+    fireEvent.change(within(palette).getByLabelText('Search blocks'), {
+      target: { value: 'divi' },
+    })
+    expect(within(palette).getByText('Divider')).toBeTruthy()
+    // And no category claims to be the current one while results span them all.
+    for (const name of ['Content', 'Layout', 'Advanced']) {
+      expect(within(rail).getByRole('button', { name }).getAttribute('aria-pressed')).toBe('false')
+    }
   })
 
   it('offers Content, Rows and Settings tabs, and adds a row layout', () => {
@@ -227,7 +271,7 @@ describe('MailKiln', () => {
     // And a second append still goes there, not to the end of the document.
     fireEvent.click(screen.getByLabelText('Back to content'))
     editor.rerender()
-    fireEvent.click(within(screen.getByLabelText('Blocks')).getByText('Divider'))
+    pickBlock('Divider', 'Layout')
     editor.rerender()
 
     const after = editor.get().sections[0].rows[0].columns
@@ -1023,7 +1067,7 @@ describe('MailKiln', () => {
 
   it('undoes and redoes with the keyboard', () => {
     const editor = renderEditor()
-    fireEvent.click(within(screen.getByLabelText('Blocks')).getByText('Divider'))
+    pickBlock('Divider', 'Layout')
     expect(listBlocks(editor.get())).toHaveLength(3)
     editor.rerender()
 
@@ -1344,8 +1388,9 @@ describe('MailKiln', () => {
 
     try {
       const editor = renderEditor({ blocks: [custom] })
-      const palette = screen.getByLabelText('Blocks')
-      fireEvent.click(within(palette).getByText('Countdown'))
+      // A custom block brings its own category with it, and the rail lists it
+      // beside the built-in ones.
+      pickBlock('Countdown', 'Advanced')
       expect(listBlocks(editor.get()).some((b) => b.type === 'test-countdown')).toBe(true)
 
       editor.rerender()

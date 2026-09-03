@@ -347,6 +347,25 @@ An unfinished condition — the switch is on but you have not typed a path yet �
 you edit and treated as "always show" by every renderer. `exportDocument` strips it, so it
 never reaches a saved template.
 
+## The block palette
+
+Blocks are reached through a **category rail** down the left of the Content tab — one
+category open at a time, its blocks in a two-up grid beside it.
+
+That is a deliberate trade. The previous arrangement stacked every group in one scroll,
+which meant eleven blocks in a three-up grid was taller than the panel: the last group was
+cut off before anyone had added anything, and every group ended on a ragged row. A rail
+shows one category at a time, so nothing scrolls, and it is the only arrangement that still
+works when a consumer registers a dozen custom blocks.
+
+Categories are the `group` on each block definition, in palette order — so `tools` position
+config still decides which one leads. A group mailkiln does not recognise gets the icon of
+its first block, so a custom category never looks like a placeholder.
+
+**Search spans every category.** Somebody typing "video" should not have to know which
+drawer it lives in, so a query searches all blocks and no category claims to be the current
+one while it runs.
+
 ## Configuring the palette
 
 ```jsx
