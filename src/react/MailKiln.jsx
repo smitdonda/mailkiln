@@ -108,6 +108,14 @@ export function MailKiln({
 
   const store = useMailKiln({ value, defaultValue, onChange, vars: vars ?? null, lintDisable })
 
+  // `text` is a preview width, not a design one — the toolbar hides it outside
+  // the Preview view. Leaving it *set* when the view changes put the canvas in a
+  // mode the design view has no concept of, and left the device toggle showing
+  // nothing selected at all, which reads as a broken control.
+  useEffect(() => {
+    if (view !== 'preview' && device === 'text') setDevice('desktop')
+  }, [view, device])
+
   useEffect(() => {
     if (appearance !== 'auto' || typeof window === 'undefined' || !window.matchMedia) return
     const query = window.matchMedia('(prefers-color-scheme: dark)')
@@ -218,13 +226,18 @@ export function MailKiln({
         return
       }
       if (key === 'escape') {
-        // Closing the overlay panel first: on a narrow viewport it covers the
-        // canvas, so dismissing it is what Escape most obviously means there.
-        if (panelOpen) setPanelOpen(false)
+        // Topmost surface first. Quick insert closes itself when the keystroke
+        // lands on its own input, which is where focus starts — but it is not a
+        // focus trap, so one Tab is enough to leave Escape with nothing to
+        // close. From out here it is still the thing covering the canvas.
+        if (quickOpen) setQuickOpen(false)
+        // Then the overlay panel: on a narrow viewport it covers the canvas, so
+        // dismissing it is what Escape most obviously means there.
+        else if (panelOpen) setPanelOpen(false)
         else store.select(null)
       }
     },
-    [store, panelOpen],
+    [store, panelOpen, quickOpen],
   )
 
   return (

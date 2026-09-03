@@ -1214,6 +1214,33 @@ describe('MailKiln', () => {
     )
   })
 
+  it('leaves the text width behind when you go back to designing', () => {
+    // `text` is a preview width, and the toolbar hides it outside Preview. Left
+    // set, it put the canvas in a mode the design view has no concept of and the
+    // device toggle showed nothing selected at all.
+    renderEditor({ value: kitchenSinkDocument(), vars: sampleVars })
+    fireEvent.click(screen.getByRole('tab', { name: /Preview/ }))
+    fireEvent.click(screen.getByLabelText('Text'))
+
+    fireEvent.click(screen.getByRole('tab', { name: /Design/ }))
+    expect(document.querySelector('.mk-canvas')?.getAttribute('data-device')).toBe('desktop')
+    expect(screen.getByLabelText('Desktop').getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('closes quick insert on Escape even when focus has wandered off it', () => {
+    // The dialog handles Escape on its own input, which is where focus starts —
+    // but it is not a focus trap, so one Tab is enough to leave Escape with
+    // nothing to close.
+    renderEditor()
+    const root = /** @type {Element} */ (document.querySelector('.mk-root'))
+    fireEvent.keyDown(root, { key: '/' })
+    expect(screen.getByRole('listbox', { name: 'Quick insert' })).toBeTruthy()
+
+    screen.getByLabelText('Template name').focus()
+    fireEvent.keyDown(root, { key: 'Escape' })
+    expect(screen.queryByRole('listbox', { name: 'Quick insert' })).toBeNull()
+  })
+
   it('offers no HTML import in the toolbar', () => {
     renderEditor()
     expect(screen.queryByText('Import HTML')).toBeNull()
