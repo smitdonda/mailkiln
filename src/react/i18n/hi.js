@@ -43,6 +43,7 @@ export const hi = {
 
   'palette.title': 'ब्लॉक',
   'palette.search': 'ब्लॉक खोजें',
+  'palette.categories': 'ब्लॉक श्रेणियाँ',
   'palette.empty': '“{query}” से मेल खाता कोई ब्लॉक नहीं।',
   'palette.hint': 'कैनवास पर खींचें, या जोड़ने के लिए Enter दबाएँ।',
   'palette.limit': '{label}: इस टेम्पलेट के लिए {limit} की सीमा पूरी हो चुकी है।',

@@ -53,6 +53,7 @@ export const en = {
   // palette
   'palette.title': 'Blocks',
   'palette.search': 'Search blocks',
+  'palette.categories': 'Block categories',
   'palette.empty': 'No blocks match “{query}”.',
   'palette.hint': 'Drag onto the canvas, or press Enter to append.',
   'palette.limit': '{label}: limit of {limit} reached for this template.',
