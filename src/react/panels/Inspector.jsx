@@ -202,6 +202,9 @@ function BlockFields({ location }) {
   )
 }
 
+/** The narrowest a column may be squeezed, matching the Width % field's own min. */
+const MIN_WIDTH = 5
+
 /**
  * @param {object} props
  * @param {import('../../core/types.js').ColumnLocation} props.location
@@ -211,6 +214,52 @@ function ColumnFields({ location }) {
   const t = useI18n()
   const { store } = useMailKilnContext()
   const column = location.node
+  const row = location.parent
+
+  /**
+   * Width is the one field on a column that is not the column's own business:
+   * the row has to keep summing to 100, so setting one width is really setting
+   * every width.
+   *
+   * Patching this like any other prop left the document at 120% for an instant,
+   * and `normalize` repairs that by scaling *everything* proportionally — which
+   * is right for a malformed import and wrong for a deliberate edit. Typing 70
+   * beside a 50 gave you 58, and typing it again gave 62. The number you asked
+   * for was never the number you got.
+   *
+   * So the siblings absorb the remainder instead, in proportion to what they
+   * had, and `setColumnWidths` writes the whole row at once.
+   *
+   * @param {number} next
+   * @returns {void}
+   */
+  const setWidth = (next) => {
+    const columns = row.columns ?? []
+    if (columns.length < 2) return
+    const others = columns.filter((c) => c.id !== column.id)
+    // Every sibling keeps the field's own minimum, so asking for 100 in a
+    // two-column row means 95. A column at 0 is one you cannot see, let alone
+    // click on to undo what you just did.
+    const value = Math.max(MIN_WIDTH, Math.min(100 - MIN_WIDTH * others.length, Math.round(Number(next) || 0)))
+    const spare = 100 - value
+    const othersTotal = others.reduce((sum, c) => sum + (Number(c.props?.width) || 0), 0)
+    const widths = columns.map((c) => {
+      if (c.id === column.id) return value
+      const share = othersTotal > 0 ? (Number(c.props?.width) || 0) / othersTotal : 1 / others.length
+      return Math.max(MIN_WIDTH, Math.round(spare * share))
+    })
+    // Rounding drift lands on the widest sibling, which can always afford it.
+    const total = widths.reduce((a, b) => a + b, 0)
+    if (total !== 100) {
+      let widest = -1
+      columns.forEach((c, index) => {
+        if (c.id === column.id) return
+        if (widest === -1 || widths[index] > widths[widest]) widest = index
+      })
+      if (widest >= 0) widths[widest] = Math.max(MIN_WIDTH, widths[widest] + (100 - total))
+    }
+    store.setColumnWidths(row.id, widths)
+  }
 
   /** @type {import('../../core/types.js').FieldDef[]} */
   const schema = [
@@ -239,7 +288,17 @@ function ColumnFields({ location }) {
     <FieldGroups
       groups={groupFields(schema)}
       values={column.props ?? {}}
-      onChange={(patch, tagKey) => store.patch(column.id, patch, tagKey)}
+      onChange={(patch, tagKey) => {
+        if ('width' in patch) {
+          setWidth(patch.width)
+          const rest = { ...patch }
+          delete rest.width
+          if (Object.keys(rest).length === 0) return
+          store.patch(column.id, rest, tagKey)
+          return
+        }
+        store.patch(column.id, patch, tagKey)
+      }}
     />
   )
 }
