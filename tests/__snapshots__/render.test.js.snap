@@ -30,7 +30,7 @@ export function OrderShipped({ order, unsubscribe_url, user }) {
   return (
     <Html lang="en">
       <Head />
-      <Preview>Arriving {order.eta}</Preview>
+      <Preview>Arriving {order?.eta}</Preview>
       <Body
         style={{
           backgroundColor: "#f4f5f7",
@@ -57,7 +57,7 @@ export function OrderShipped({ order, unsubscribe_url, user }) {
                   msoLineHeightRule: "exactly",
                 }}
               >
-                Thanks, {user.name}!
+                Thanks, {user?.name}!
               </Heading>
             </Section>
             <Section style={{ padding: "8px 24px 8px 24px" }}>
@@ -72,7 +72,7 @@ export function OrderShipped({ order, unsubscribe_url, user }) {
                   textAlign: "left",
                   msoLineHeightRule: "exactly",
                 }}
-                dangerouslySetInnerHTML={{ __html: \`Order <b>\${order.id}</b> is packed.\` }}
+                dangerouslySetInnerHTML={{ __html: \`Order <b>\${order?.id}</b> is packed.\` }}
               />
             </Section>
             <Section style={{ padding: "16px 24px 16px 24px", textAlign: "center" }}>
@@ -298,7 +298,7 @@ export function OrderShipped({ order, unsubscribe_url, user }: OrderShippedProps
   return (
     <Html lang="en">
       <Head />
-      <Preview>Arriving {order.eta}</Preview>
+      <Preview>Arriving {order?.eta}</Preview>
       <Body
         style={{
           backgroundColor: "#f4f5f7",
@@ -325,7 +325,7 @@ export function OrderShipped({ order, unsubscribe_url, user }: OrderShippedProps
                   msoLineHeightRule: "exactly",
                 }}
               >
-                Thanks, {user.name}!
+                Thanks, {user?.name}!
               </Heading>
             </Section>
             <Section style={{ padding: "8px 24px 8px 24px" }}>
@@ -340,7 +340,7 @@ export function OrderShipped({ order, unsubscribe_url, user }: OrderShippedProps
                   textAlign: "left",
                   msoLineHeightRule: "exactly",
                 }}
-                dangerouslySetInnerHTML={{ __html: \`Order <b>\${order.id}</b> is packed.\` }}
+                dangerouslySetInnerHTML={{ __html: \`Order <b>\${order?.id}</b> is packed.\` }}
               />
             </Section>
             <Section style={{ padding: "16px 24px 16px 24px", textAlign: "center" }}>

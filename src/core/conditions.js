@@ -20,7 +20,7 @@
  * @module mailkiln/core/conditions
  */
 
-import { getPath } from './vars.js'
+import { getPath, optionalChain } from './vars.js'
 
 /** @typedef {import('./types.js').Condition} Condition */
 
@@ -162,16 +162,20 @@ export function evaluateCondition(condition, scope) {
 export function conditionExpression(condition) {
   const normalized = normalizeCondition(condition)
   if (!normalized) return ''
-  const { path, op, value } = normalized
+  const { op, value } = normalized
+  // Optional-chained, so a condition on data that never arrived decides the
+  // branch instead of throwing. The results line up with `evaluateCondition`:
+  // absent reads as empty, and as not-notEmpty.
+  const path = optionalChain(normalized.path)
   const literal = JSON.stringify(value)
 
   switch (op) {
     case 'falsy':
       return `!${path}`
     case 'notEmpty':
-      return `${path}.length > 0`
+      return `${path}?.length > 0`
     case 'empty':
-      return `${path}.length === 0`
+      return `!${path}?.length`
     case 'eq':
       return `${path} === ${literal}`
     case 'ne':

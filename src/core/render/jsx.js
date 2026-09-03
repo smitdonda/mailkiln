@@ -26,6 +26,7 @@ import { spacingToCss } from './inline.js'
 import { createRenderContext } from './context.js'
 import { el, guard, isElement, isGuard, isLoop, isRaw, loop, raw, varsToChildren } from './jsxNode.js'
 import { conditionExpression, normalizeRepeat } from '../conditions.js'
+import { optionalChain } from '../vars.js'
 import { renderBlockContent } from './html.js'
 import { HIDE_CLASS, blockClass, mobileFontSize, mobileMediaCss } from './mobile.js'
 
@@ -149,7 +150,7 @@ function printNode(node, depth, used) {
   }
   if (isLoop(node)) {
     const inner = printNode(node.child, depth + 1, used)
-    return inner ? `${pad}{${node.__loop}.map((${node.params}) => (\n${inner}\n${pad}))}` : ''
+    return inner ? `${pad}{${node.__loop}?.map((${node.params}) => (\n${inner}\n${pad}))}` : ''
   }
 
   if (typeof node === 'string' || typeof node === 'number') return pad + String(node)
@@ -296,7 +297,7 @@ function rowNode(row, ctx) {
     // else — the emitter already turns every `{{path}}` into an expression, and
     // the loop variable is just another path once it is in scope.
     const inner = rowNodeOnce({ ...row, repeat: undefined }, ctx, { key: raw(`{${repeat.as}Index}`) })
-    return conditional(row, loop(repeat.path, `${repeat.as}, ${repeat.as}Index`, inner))
+    return conditional(row, loop(optionalChain(repeat.path), `${repeat.as}, ${repeat.as}Index`, inner))
   }
   return conditional(row, rowNodeOnce(row, ctx))
 }

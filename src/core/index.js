@@ -115,6 +115,7 @@ export {
   defineVars,
   walkSample,
   getPath,
+  optionalChain,
   findVarPaths,
   documentVarPaths,
   interpolate,

@@ -1152,7 +1152,7 @@ describe('MailKiln', () => {
     const bundle = onExport.mock.calls[0][0]
     expect(bundle.jsx).toContain("from '@react-email/components'")
     expect(bundle.jsx).toContain('export function YourOrderIsOnItsWay')
-    expect(bundle.jsx).toContain('{user.name}')
+    expect(bundle.jsx).toContain('{user?.name}')
   })
 
   it('exports every format, including TSX', () => {
