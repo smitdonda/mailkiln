@@ -195,6 +195,47 @@ describe('MailKiln', () => {
     expect(document.querySelectorAll('.mk-col')[1].getAttribute('data-selected')).toBe('true')
   })
 
+  it('gives a column the width you typed, and the row still totals 100', () => {
+    // Patching width like any other prop left the row at 120% for an instant,
+    // and `normalize` repairs that by scaling everything proportionally — so
+    // typing 70 beside a 50 used to give you 58, and typing it again gave 62.
+    const editor = renderEditor()
+    fireEvent.click(/** @type {Element} */ (document.querySelectorAll('.mk-col')[0]))
+    editor.rerender()
+
+    const width = within(screen.getByLabelText('Properties')).getByLabelText('Width %')
+    fireEvent.change(width, { target: { value: '70' } })
+    editor.rerender()
+
+    const columns = editor.get().sections[0].rows[0].columns
+    expect(columns.map((c) => c.props.width)).toEqual([70, 30])
+
+    // And it is stable: asking for the same number again does not creep.
+    fireEvent.change(
+      within(screen.getByLabelText('Properties')).getByLabelText('Width %'),
+      { target: { value: '70' } },
+    )
+    editor.rerender()
+    expect(editor.get().sections[0].rows[0].columns.map((c) => c.props.width)).toEqual([70, 30])
+  })
+
+  it('never squeezes a sibling column out of existence', () => {
+    const editor = renderEditor()
+    fireEvent.click(/** @type {Element} */ (document.querySelectorAll('.mk-col')[0]))
+    editor.rerender()
+
+    fireEvent.change(within(screen.getByLabelText('Properties')).getByLabelText('Width %'), {
+      target: { value: '100' },
+    })
+    editor.rerender()
+
+    const columns = editor.get().sections[0].rows[0].columns
+    // 5 is the field's own minimum. A column at 0 is one you cannot see, let
+    // alone click to fix.
+    expect(Math.min(...columns.map((c) => c.props.width))).toBeGreaterThanOrEqual(5)
+    expect(columns.reduce((sum, c) => sum + c.props.width, 0)).toBe(100)
+  })
+
   it('takes you to the block when a check is clicked', () => {
     // The properties panel only exists in the design view, so selecting the node
     // without switching back left the button — "Show the block this affects" —
