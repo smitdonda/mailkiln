@@ -11,7 +11,6 @@ export default defineConfig({
     // Node consumers actually use.
     environment: 'node',
     include: ['tests/**/*.test.{js,jsx}'],
-    setupFiles: ['tests/setup.js'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{js,jsx}'],
