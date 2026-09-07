@@ -17,6 +17,8 @@ export const en = {
   'toolbar.theme': 'Toggle dark mode',
   'toolbar.name': 'Template name',
   'toolbar.untitled': 'Untitled email',
+  'toolbar.size': '{size} KB',
+  'toolbar.sizeHint': 'Rendered size. Gmail clips a message over 100 KB.',
 
   // views
   'view.design': 'Design',
@@ -26,6 +28,10 @@ export const en = {
   // structure pane
   'structure.title': 'Structure',
   'structure.add': 'Add block',
+  'structure.addTo': 'Add block to {name}',
+  'structure.clean': 'No issues',
+  'structure.empty': 'Nothing here yet. Press / to add a block.',
+  'structure.nodes': '{count} nodes',
   'structure.collapse': 'Collapse structure',
   'structure.expand': 'Expand structure',
   'structure.repeats': 'each {path}',
@@ -70,6 +76,9 @@ export const en = {
   // quick insert
   'quick.title': 'Quick insert',
   'quick.placeholder': 'Search blocks…',
+  'quick.move': 'Move',
+  'quick.insert': 'Insert',
+  'quick.close': 'Close',
   'quick.empty': 'No blocks match “{query}”.',
 
   // canvas
@@ -182,6 +191,12 @@ export const en = {
   'lint.infos': '{count} notes',
   'lint.size': 'Rendered size: {size}',
   'lint.goto': 'Show the block this affects',
+  'lint.all': 'All',
+  'lint.show': 'Show block',
+  'lint.document': 'Document',
+  'lint.sizeLabel': 'Rendered size',
+  'lint.sizeOf': '{size} / {limit} KB',
+  'lint.limit': 'Gmail clips whatever follows the cut.',
 
   // dnd announcements
   'dnd.instructions':

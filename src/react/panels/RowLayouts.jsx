@@ -37,7 +37,8 @@ export function RowLayouts() {
 
   return (
     <>
-      <div className="mk-section-label">{t('panel.rows')}</div>
+      {/* No heading: the tab above already says Rows, and repeating it costs a
+          line of a 264px panel to tell you where you just clicked. */}
       <LayoutPicker onPick={addRow} />
       <p className="mk-help" style={{ padding: '0 14px 16px' }}>
         {t('panel.rowsHint')}

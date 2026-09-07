@@ -62,7 +62,9 @@ export function QuickInsert({ onClose }) {
       setActiveIndex((index) => (matches.length ? (index + 1) % matches.length : 0))
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
-      setActiveIndex((index) => (matches.length ? (index - 1 + matches.length) % matches.length : 0))
+      setActiveIndex((index) =>
+        matches.length ? (index - 1 + matches.length) % matches.length : 0,
+      )
     } else if (event.key === 'Enter') {
       event.preventDefault()
       insert(matches[activeIndex])
@@ -128,6 +130,24 @@ export function QuickInsert({ onClose }) {
             })}
           </ul>
         )}
+
+        {/* `/` is advertised on the blank canvas and nowhere else, so the rest of
+            the keyboard contract was something you had to guess at. */}
+        <div className="mk-quick-foot">
+          <span>
+            <kbd className="mk-kbd">&uarr;</kbd>
+            <kbd className="mk-kbd">&darr;</kbd>
+            {t('quick.move')}
+          </span>
+          <span>
+            <kbd className="mk-kbd">&crarr;</kbd>
+            {t('quick.insert')}
+          </span>
+          <span>
+            <kbd className="mk-kbd">esc</kbd>
+            {t('quick.close')}
+          </span>
+        </div>
       </div>
     </div>
   )

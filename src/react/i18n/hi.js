@@ -16,6 +16,8 @@ export const hi = {
   'toolbar.theme': 'डार्क मोड बदलें',
   'toolbar.name': 'टेम्पलेट नाम',
   'toolbar.untitled': 'बिना नाम का ईमेल',
+  'toolbar.size': '{size} KB',
+  'toolbar.sizeHint': 'रेंडर आकार। 100 KB से बड़ा संदेश Gmail काट देता है।',
 
   'view.design': 'डिज़ाइन',
   'view.preview': 'पूर्वावलोकन',
@@ -23,6 +25,10 @@ export const hi = {
 
   'structure.title': 'संरचना',
   'structure.add': 'ब्लॉक जोड़ें',
+  'structure.addTo': '{name} में ब्लॉक जोड़ें',
+  'structure.clean': 'कोई समस्या नहीं',
+  'structure.empty': 'अभी कुछ नहीं। ब्लॉक जोड़ने के लिए / दबाएँ।',
+  'structure.nodes': '{count} नोड',
   'structure.collapse': 'संरचना छिपाएँ',
   'structure.expand': 'संरचना दिखाएँ',
   'structure.repeats': 'प्रत्येक {path}',
@@ -58,6 +64,9 @@ export const hi = {
 
   'quick.title': 'त्वरित जोड़ें',
   'quick.placeholder': 'ब्लॉक खोजें…',
+  'quick.move': 'चुनें',
+  'quick.insert': 'जोड़ें',
+  'quick.close': 'बंद करें',
   'quick.empty': '“{query}” से मेल खाता कोई ब्लॉक नहीं।',
 
   'inspector.layout': 'लेआउट',
@@ -150,4 +159,10 @@ export const hi = {
 
   'lint.clean': 'कोई समस्या नहीं मिली।',
   'lint.size': 'रेंडर आकार: {size}',
+  'lint.all': 'सभी',
+  'lint.show': 'ब्लॉक दिखाएँ',
+  'lint.document': 'दस्तावेज़',
+  'lint.sizeLabel': 'रेंडर आकार',
+  'lint.sizeOf': '{size} / {limit} KB',
+  'lint.limit': 'कट के बाद का हिस्सा Gmail काट देता है।',
 }
