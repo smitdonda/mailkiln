@@ -105,7 +105,14 @@ export const buttonBlock = defineBlock({
     { key: 'color', type: 'color', label: 'Text colour' },
     { key: 'backgroundColor', type: 'color', label: 'Row background', group: 'Layout' },
     { key: 'borderColor', type: 'color', label: 'Border', group: 'Layout' },
-    { key: 'borderRadius', type: 'number', label: 'Corner radius', min: 0, max: 40, group: 'Layout' },
+    {
+      key: 'borderRadius',
+      type: 'number',
+      label: 'Corner radius',
+      min: 0,
+      max: 40,
+      group: 'Layout',
+    },
     { key: 'paddingX', type: 'number', label: 'Inner padding X', min: 0, max: 80, group: 'Layout' },
     { key: 'paddingY', type: 'number', label: 'Inner padding Y', min: 0, max: 60, group: 'Layout' },
     { key: 'fullWidth', type: 'toggle', label: 'Full width', group: 'Layout' },
@@ -280,5 +287,5 @@ function parsePaddingAxis(shorthand, axis) {
     .filter((n) => Number.isFinite(n))
   if (!parts.length) return null
   const [a, b = a, , d = b] = parts
-  return axis === 'y' ? a : (parts.length >= 4 ? Math.max(b, d) : b)
+  return axis === 'y' ? a : parts.length >= 4 ? Math.max(b, d) : b
 }

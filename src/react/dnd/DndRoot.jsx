@@ -70,11 +70,14 @@ export function DndRoot({ children }) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
-  const collisionDetection = useCallback(/** @param {any} args */ (args) => {
-    const withinPointer = pointerWithin(args)
-    if (withinPointer.length > 0) return withinPointer
-    return closestCenter(args)
-  }, [])
+  const collisionDetection = useCallback(
+    /** @param {any} args */ (args) => {
+      const withinPointer = pointerWithin(args)
+      if (withinPointer.length > 0) return withinPointer
+      return closestCenter(args)
+    },
+    [],
+  )
 
   /**
    * @param {any} event
@@ -98,9 +101,12 @@ export function DndRoot({ children }) {
     [store.doc],
   )
 
-  const handleDragStart = useCallback(/** @param {any} event */ (event) => {
-    setActive(event.active?.data?.current ?? null)
-  }, [])
+  const handleDragStart = useCallback(
+    /** @param {any} event */ (event) => {
+      setActive(event.active?.data?.current ?? null)
+    },
+    [],
+  )
 
   const handleDragOver = useCallback(
     /** @param {any} event */

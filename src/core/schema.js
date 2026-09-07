@@ -283,7 +283,9 @@ function isPlainObject(v) {
 function isSpacing(v) {
   return (
     isPlainObject(v) &&
-    ['top', 'right', 'bottom', 'left'].every((k) => typeof v[k] === 'number' && Number.isFinite(v[k]))
+    ['top', 'right', 'bottom', 'left'].every(
+      (k) => typeof v[k] === 'number' && Number.isFinite(v[k]),
+    )
   )
 }
 
@@ -365,7 +367,8 @@ export function validateDocument(doc, options = {}) {
         }
         checkId(col.id, cw)
         if (col.type !== 'column') problems.push(`${cw}.type must be "column".`)
-        if (typeof col.props?.width !== 'number') problems.push(`${cw}.props.width must be a number.`)
+        if (typeof col.props?.width !== 'number')
+          problems.push(`${cw}.props.width must be a number.`)
         else total += col.props.width
         if (!Array.isArray(col.blocks)) {
           problems.push(`${cw}.blocks must be an array.`)

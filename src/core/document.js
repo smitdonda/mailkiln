@@ -22,12 +22,7 @@ import {
   reserveIds,
   spacing,
 } from './schema.js'
-import {
-  conditionDraft,
-  normalizeCondition,
-  normalizeRepeat,
-  repeatDraft,
-} from './conditions.js'
+import { conditionDraft, normalizeCondition, normalizeRepeat, repeatDraft } from './conditions.js'
 
 /** @typedef {import('./types.js').EmailDocument} EmailDocument */
 /** @typedef {import('./types.js').Section} Section */
@@ -299,7 +294,9 @@ export function moveBlock(doc, { blockId, toColumnId, toIndex }) {
     })
   }
 
-  const without = updateBlocks(doc, fromColumnId, (blocks) => blocks.filter((b) => b.id !== blockId))
+  const without = updateBlocks(doc, fromColumnId, (blocks) =>
+    blocks.filter((b) => b.id !== blockId),
+  )
   return insertBlock(without, { columnId: toColumnId, index: toIndex, block })
 }
 
@@ -774,28 +771,26 @@ export function normalize(doc) {
       const rows = (section.rows ?? [])
         .filter((r) => r && Array.isArray(r.columns) && r.columns.length > 0)
         .map((row) => {
-          const columns = row.columns
-            .filter(Boolean)
-            .map((column) => ({
-              ...column,
-              id: uniqueId(column.id, 'col'),
-              type: /** @type {'column'} */ ('column'),
-              props: {
-                verticalAlign: 'top',
-                ...column.props,
-                width: Number(column.props?.width) || 0,
-                padding: asSpacing(column.props?.padding),
-              },
-              blocks: (column.blocks ?? [])
-                .filter((b) => b && typeof b.type === 'string')
-                .map((block) =>
-                  settled({
-                    ...block,
-                    id: uniqueId(block.id, 'blk'),
-                    props: block.props && typeof block.props === 'object' ? block.props : {},
-                  }),
-                ),
-            }))
+          const columns = row.columns.filter(Boolean).map((column) => ({
+            ...column,
+            id: uniqueId(column.id, 'col'),
+            type: /** @type {'column'} */ ('column'),
+            props: {
+              verticalAlign: 'top',
+              ...column.props,
+              width: Number(column.props?.width) || 0,
+              padding: asSpacing(column.props?.padding),
+            },
+            blocks: (column.blocks ?? [])
+              .filter((b) => b && typeof b.type === 'string')
+              .map((block) =>
+                settled({
+                  ...block,
+                  id: uniqueId(block.id, 'blk'),
+                  props: block.props && typeof block.props === 'object' ? block.props : {},
+                }),
+              ),
+          }))
           return settled({
             ...row,
             id: uniqueId(row.id, 'row'),
@@ -941,7 +936,9 @@ function normalizeWidths(columns) {
     total <= 0
       ? evenWidths(columns.length)
       : (() => {
-          const scaled = columns.map((c) => Math.round(((Number(c.props.width) || 0) / total) * 100))
+          const scaled = columns.map((c) =>
+            Math.round(((Number(c.props.width) || 0) / total) * 100),
+          )
           const drift = 100 - scaled.reduce((a, b) => a + b, 0)
           scaled[0] += drift
           return scaled

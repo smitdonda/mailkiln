@@ -51,4 +51,15 @@ export const builtinBlocks = [
   htmlBlock,
 ]
 
-export { PADDING_FIELD, ALIGN_FIELD, BACKGROUND_FIELD, FONT_FIELD, FONT_OPTIONS, WEIGHT_OPTIONS, commonProps, mjCommonAttrs, stripTags, widthValue } from './shared.js'
+export {
+  PADDING_FIELD,
+  ALIGN_FIELD,
+  BACKGROUND_FIELD,
+  FONT_FIELD,
+  FONT_OPTIONS,
+  WEIGHT_OPTIONS,
+  commonProps,
+  mjCommonAttrs,
+  stripTags,
+  widthValue,
+} from './shared.js'

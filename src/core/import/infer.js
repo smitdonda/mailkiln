@@ -16,7 +16,14 @@
  */
 
 import { parsableBlocks } from '../registry.js'
-import { createBlock, createColumn, createRow, createSection, evenWidths, spacing } from '../schema.js'
+import {
+  createBlock,
+  createColumn,
+  createRow,
+  createSection,
+  evenWidths,
+  spacing,
+} from '../schema.js'
 import { hasBlockLevelChildren } from '../blocks/shared.js'
 import { foreignVarsToMailkiln } from '../vars.js'
 import { collapsedText, parseStyleAttribute } from './parseAdapter.js'

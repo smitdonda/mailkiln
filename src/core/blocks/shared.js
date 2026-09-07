@@ -127,14 +127,17 @@ export const PARAGRAPH_SPACING_FIELD = {
  */
 export const FONT_OPTIONS = [
   { value: '', label: 'Document default' },
-  { value: "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", label: 'System sans' },
+  {
+    value: "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    label: 'System sans',
+  },
   { value: 'Arial, Helvetica, sans-serif', label: 'Arial' },
   { value: "'Helvetica Neue', Helvetica, Arial, sans-serif", label: 'Helvetica' },
   { value: "Georgia, 'Times New Roman', serif", label: 'Georgia' },
   { value: "'Times New Roman', Times, serif", label: 'Times' },
   { value: "'Courier New', Courier, monospace", label: 'Courier' },
   { value: 'Verdana, Geneva, sans-serif', label: 'Verdana' },
-  { value: "Tahoma, Verdana, Segoe, sans-serif", label: 'Tahoma' },
+  { value: 'Tahoma, Verdana, Segoe, sans-serif', label: 'Tahoma' },
 ]
 
 /** @type {FieldDef} */

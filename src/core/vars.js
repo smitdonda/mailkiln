@@ -249,9 +249,7 @@ export function documentVarPaths(doc) {
   // `{{item.title}}` inside a repeat resolves to the loop variable, not to a
   // declared root. Dropping those keeps them out of the props interface and out
   // of the linter's "undeclared" list — both correct.
-  return locals.size
-    ? found.filter((path) => !locals.has(String(path).split(/[.[]/)[0]))
-    : found
+  return locals.size ? found.filter((path) => !locals.has(String(path).split(/[.[]/)[0])) : found
 }
 
 /**

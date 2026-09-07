@@ -132,8 +132,8 @@ export function App() {
       </div>
       {lastExport ? (
         <p style={{ margin: 0, fontSize: 12, color: '#475569' }}>
-          Exported {Object.keys(lastExport).length} formats — {lastExport.jsx.split('\n').length} lines
-          of JSX, {(lastExport.html.length / 1024).toFixed(1)}KB of HTML. See the console.
+          Exported {Object.keys(lastExport).length} formats — {lastExport.jsx.split('\n').length}{' '}
+          lines of JSX, {(lastExport.html.length / 1024).toFixed(1)}KB of HTML. See the console.
         </p>
       ) : null}
     </div>

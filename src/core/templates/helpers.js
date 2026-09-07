@@ -7,7 +7,14 @@
  * @module mailkiln/core/templates/helpers
  */
 
-import { createBlock, createColumn, createDocument, createRow, createSection, spacing } from '../schema.js'
+import {
+  createBlock,
+  createColumn,
+  createDocument,
+  createRow,
+  createSection,
+  spacing,
+} from '../schema.js'
 import { normalize } from '../document.js'
 
 /** @typedef {import('../types.js').EmailDocument} EmailDocument */

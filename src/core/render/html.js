@@ -299,7 +299,7 @@ function headStyles(ctx) {
       : 'a{text-decoration:none}',
     '#outlook a{padding:0}',
     // iOS turns these into blue links otherwise.
-    "a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;font-size:inherit !important;font-family:inherit !important;font-weight:inherit !important;line-height:inherit !important}",
+    'a[x-apple-data-detectors]{color:inherit !important;text-decoration:none !important;font-size:inherit !important;font-family:inherit !important;font-weight:inherit !important;line-height:inherit !important}',
     `@media only screen and (max-width:${mobileBreakpoint(width)}px){`,
     `.${STACK_CLASS}{display:block !important;width:100% !important;max-width:100% !important;padding-left:0 !important;padding-right:0 !important}`,
     '.mk-container{width:100% !important}',

@@ -240,12 +240,16 @@ function ColumnFields({ location }) {
     // Every sibling keeps the field's own minimum, so asking for 100 in a
     // two-column row means 95. A column at 0 is one you cannot see, let alone
     // click on to undo what you just did.
-    const value = Math.max(MIN_WIDTH, Math.min(100 - MIN_WIDTH * others.length, Math.round(Number(next) || 0)))
+    const value = Math.max(
+      MIN_WIDTH,
+      Math.min(100 - MIN_WIDTH * others.length, Math.round(Number(next) || 0)),
+    )
     const spare = 100 - value
     const othersTotal = others.reduce((sum, c) => sum + (Number(c.props?.width) || 0), 0)
     const widths = columns.map((c) => {
       if (c.id === column.id) return value
-      const share = othersTotal > 0 ? (Number(c.props?.width) || 0) / othersTotal : 1 / others.length
+      const share =
+        othersTotal > 0 ? (Number(c.props?.width) || 0) / othersTotal : 1 / others.length
       return Math.max(MIN_WIDTH, Math.round(spare * share))
     })
     // Rounding drift lands on the widest sibling, which can always afford it.
@@ -278,10 +282,38 @@ function ColumnFields({ location }) {
     { key: 'backgroundColor', type: 'color', label: 'Background' },
     // Per side, not one shorthand: the common case is a single edge — the
     // hairline gutter between two cards — which a shorthand cannot express.
-    { key: 'borderTop', type: 'text', label: 'Border top', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
-    { key: 'borderRight', type: 'text', label: 'Border right', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
-    { key: 'borderBottom', type: 'text', label: 'Border bottom', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
-    { key: 'borderLeft', type: 'text', label: 'Border left', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
+    {
+      key: 'borderTop',
+      type: 'text',
+      label: 'Border top',
+      placeholder: '1px solid #eee',
+      vars: false,
+      group: 'Borders',
+    },
+    {
+      key: 'borderRight',
+      type: 'text',
+      label: 'Border right',
+      placeholder: '1px solid #eee',
+      vars: false,
+      group: 'Borders',
+    },
+    {
+      key: 'borderBottom',
+      type: 'text',
+      label: 'Border bottom',
+      placeholder: '1px solid #eee',
+      vars: false,
+      group: 'Borders',
+    },
+    {
+      key: 'borderLeft',
+      type: 'text',
+      label: 'Border left',
+      placeholder: '1px solid #eee',
+      vars: false,
+      group: 'Borders',
+    },
   ]
 
   return (
@@ -320,10 +352,38 @@ function RowFields({ location }) {
     { key: 'gap', type: 'range', label: t('inspector.gap'), min: 0, max: 40, step: 2 },
     { key: 'padding', type: 'spacing', label: 'Padding' },
     { key: 'backgroundColor', type: 'color', label: 'Background' },
-    { key: 'borderTop', type: 'text', label: 'Border top', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
-    { key: 'borderRight', type: 'text', label: 'Border right', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
-    { key: 'borderBottom', type: 'text', label: 'Border bottom', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
-    { key: 'borderLeft', type: 'text', label: 'Border left', placeholder: '1px solid #eee', vars: false, group: 'Borders' },
+    {
+      key: 'borderTop',
+      type: 'text',
+      label: 'Border top',
+      placeholder: '1px solid #eee',
+      vars: false,
+      group: 'Borders',
+    },
+    {
+      key: 'borderRight',
+      type: 'text',
+      label: 'Border right',
+      placeholder: '1px solid #eee',
+      vars: false,
+      group: 'Borders',
+    },
+    {
+      key: 'borderBottom',
+      type: 'text',
+      label: 'Border bottom',
+      placeholder: '1px solid #eee',
+      vars: false,
+      group: 'Borders',
+    },
+    {
+      key: 'borderLeft',
+      type: 'text',
+      label: 'Border left',
+      placeholder: '1px solid #eee',
+      vars: false,
+      group: 'Borders',
+    },
   ]
 
   return (
@@ -370,7 +430,12 @@ function SectionFields({ location }) {
   const schema = [
     { key: 'backgroundColor', type: 'color', label: 'Background' },
     { key: 'padding', type: 'spacing', label: 'Padding' },
-    { key: 'backgroundImage', type: 'image', label: t('inspector.backgroundImage'), group: 'Background' },
+    {
+      key: 'backgroundImage',
+      type: 'image',
+      label: t('inspector.backgroundImage'),
+      group: 'Background',
+    },
     { key: 'fullWidth', type: 'toggle', label: t('inspector.fullWidth'), group: 'Background' },
     {
       key: 'borderTop',
@@ -440,7 +505,14 @@ export function DocumentFields() {
       vars: true,
       help: 'The preview line after the subject in the inbox.',
     },
-    { key: 'width', type: 'number', label: t('inspector.width'), min: 320, max: 900, group: 'Layout' },
+    {
+      key: 'width',
+      type: 'number',
+      label: t('inspector.width'),
+      min: 320,
+      max: 900,
+      group: 'Layout',
+    },
     { key: 'backgroundColor', type: 'color', label: t('inspector.background'), group: 'Layout' },
     {
       key: 'contentBackgroundColor',
@@ -448,7 +520,13 @@ export function DocumentFields() {
       label: t('inspector.contentBackground'),
       group: 'Layout',
     },
-    { key: 'fontFamily', type: 'select', label: t('inspector.font'), options: FONT_OPTIONS, group: 'Type' },
+    {
+      key: 'fontFamily',
+      type: 'select',
+      label: t('inspector.font'),
+      options: FONT_OPTIONS,
+      group: 'Type',
+    },
     { key: 'textColor', type: 'color', label: t('inspector.textColor'), group: 'Type' },
     { key: 'linkColor', type: 'color', label: t('inspector.linkColor'), group: 'Type' },
     { key: 'darkModeAware', type: 'toggle', label: t('inspector.darkMode'), group: 'Type' },

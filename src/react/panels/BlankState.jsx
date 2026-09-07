@@ -102,7 +102,11 @@ export function BlankState({ onQuickInsert }) {
           </button>
         ) : null}
         {offers('button') ? (
-          <button type="button" className="mk-btn mk-btn-outline" onClick={run(() => add('button'))}>
+          <button
+            type="button"
+            className="mk-btn mk-btn-outline"
+            onClick={run(() => add('button'))}
+          >
             <IconButtonGlyph />
             {t('blank.addButton')}
           </button>

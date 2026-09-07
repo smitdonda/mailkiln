@@ -24,7 +24,17 @@ import { getBlockDef } from '../registry.js'
 import { documentVarPaths, emitPropsInterface, emitPropsJsdoc, varRoots } from '../vars.js'
 import { spacingToCss } from './inline.js'
 import { createRenderContext } from './context.js'
-import { el, guard, isElement, isGuard, isLoop, isRaw, loop, raw, varsToChildren } from './jsxNode.js'
+import {
+  el,
+  guard,
+  isElement,
+  isGuard,
+  isLoop,
+  isRaw,
+  loop,
+  raw,
+  varsToChildren,
+} from './jsxNode.js'
 import { conditionExpression, normalizeRepeat } from '../conditions.js'
 import { optionalChain } from '../vars.js'
 import { renderBlockContent } from './html.js'
@@ -296,8 +306,13 @@ function rowNode(row, ctx) {
     // Inside the loop `{{item.title}}` has to become `{item.title}` and nothing
     // else — the emitter already turns every `{{path}}` into an expression, and
     // the loop variable is just another path once it is in scope.
-    const inner = rowNodeOnce({ ...row, repeat: undefined }, ctx, { key: raw(`{${repeat.as}Index}`) })
-    return conditional(row, loop(optionalChain(repeat.path), `${repeat.as}, ${repeat.as}Index`, inner))
+    const inner = rowNodeOnce({ ...row, repeat: undefined }, ctx, {
+      key: raw(`{${repeat.as}Index}`),
+    })
+    return conditional(
+      row,
+      loop(optionalChain(repeat.path), `${repeat.as}, ${repeat.as}Index`, inner),
+    )
   }
   return conditional(row, rowNodeOnce(row, ctx))
 }
@@ -415,7 +430,9 @@ function sectionNode(section, ctx) {
  */
 export function documentName(doc) {
   const settings = doc?.settings ?? {}
-  return String(settings.name ?? '').trim() || String(settings.subject ?? '').trim() || 'EmailTemplate'
+  return (
+    String(settings.name ?? '').trim() || String(settings.subject ?? '').trim() || 'EmailTemplate'
+  )
 }
 
 /**
