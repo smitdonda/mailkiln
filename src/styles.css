@@ -56,7 +56,7 @@
 
   --mk-bg: #ffffff;
   --mk-bg-subtle: #f8fafc;
-  --mk-bg-sunken: #eef1f5;
+  --mk-bg-sunken: #e9edf2;
   --mk-bg-hover: #f4f6f9;
 
   --mk-border: #dfe3ea;
@@ -81,17 +81,25 @@
   --mk-success: #146c2e;
 
   /* Two radii with a visible difference between them, spread over the three
-     token names so nothing has to be swept: controls are 6px, anything that
+     token names so nothing has to be swept: controls are 7px, anything that
      floats above the page is 14px. Three radii three pixels apart read as one
-     radius plus noise. */
+     radius plus noise. `sm` stays at 6, for the things barely bigger than their
+     own corner: chips, swatches, badges. */
   --mk-radius: 14px;
-  --mk-radius-md: 6px;
+  --mk-radius-md: 7px;
   --mk-radius-sm: 6px;
+
+  /* The surface that sits *on top of* a sunken trough — the selected segment,
+     the selected panel tab, the tree's add button. In light that is simply the
+     page; in dark it has to be lighter than the panel behind it, because a chip
+     the same colour as its own background reads as a hole rather than a raised
+     face. */
+  --mk-raised: #ffffff;
 
   --mk-shadow-sm: 0 1px 2px rgb(16 24 40 / 6%);
   --mk-shadow-md: 0 2px 8px rgb(16 24 40 / 8%);
   --mk-shadow-lg: 0 12px 32px rgb(16 24 40 / 14%);
-  --mk-shadow-paper: 0 1px 2px rgb(16 24 40 / 5%), 0 8px 24px rgb(16 24 40 / 8%);
+  --mk-shadow-paper: 0 1px 2px rgb(16 24 40 / 5%), 0 14px 40px rgb(16 24 40 / 11%);
 
   /* Type. Six steps, each carrying the leading it needs — a size and its
      line-height are one decision, not two. This replaces eleven hand-written
@@ -132,7 +140,7 @@
   --mk-ui-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --mk-panel-width: 320px;
-  --mk-tree-width: 248px;
+  --mk-tree-width: 264px;
 
   box-sizing: border-box;
   display: flex;
@@ -197,7 +205,14 @@
   --mk-info-soft: color-mix(in srgb, #7fc0ec 16%, transparent);
   --mk-success: #6dd58c;
 
-  --mk-shadow-paper: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
+  --mk-raised: #2a2f37;
+
+  /* Both of these were inherited from the light theme, where they are 6% and 8%
+     of a blue-black. Over #191c20 that is nothing at all, which left every
+     raised chip in the editor with no elevation in dark. */
+  --mk-shadow-sm: 0 1px 2px rgb(0 0 0 / 45%);
+  --mk-shadow-md: 0 2px 8px rgb(0 0 0 / 45%);
+  --mk-shadow-paper: 0 2px 6px rgb(0 0 0 / 40%), 0 20px 50px rgb(0 0 0 / 45%);
   --mk-shadow-lg: 0 12px 32px rgb(0 0 0 / 45%);
 }
 
@@ -273,8 +288,8 @@
   align-items: center;
   gap: var(--mk-space-4);
   flex-wrap: wrap;
-  height: 56px;
-  padding: 0 var(--mk-space-4);
+  height: 52px;
+  padding: 0 var(--mk-space-3) 0 var(--mk-space-4);
   border-bottom: 1px solid var(--mk-border);
   background: var(--mk-bg);
   flex-shrink: 0;
@@ -284,6 +299,25 @@
   display: flex;
   align-items: center;
   gap: var(--mk-space-1);
+}
+
+/* The document's mark and its name, as one unit. The mark is a quiet outline
+   glyph rather than a filled tile: this editor sits inside somebody else's
+   product, where a coloured badge reads as branding, and the accent is already
+   spent on the selected node and on Export. */
+.mk-toolbar-doc {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-space-2);
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.mk-doc-mark {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  color: var(--mk-fg-subtle);
 }
 
 /* The template name: reads as a title until you interact with it, which is what
@@ -330,17 +364,72 @@
   background: var(--mk-border);
 }
 
+/* Rendered size, carried where you can see it rather than only in the Checks
+   view. The green dot is not "saved" — this component has no save, the consumer
+   owns persistence through `onChange`. It is the size, and the colour is how
+   close that size is to the point where Gmail truncates the message. */
+.mk-size {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--mk-control-icon);
+  padding: 0 10px;
+  border-radius: 13px;
+  background: var(--mk-bg-hover);
+  color: var(--mk-fg-muted);
+  font-size: var(--mk-text-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mk-size::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  background: var(--mk-success);
+}
+
+.mk-size[data-level='warn'] {
+  background: var(--mk-warn-soft);
+  color: var(--mk-warn);
+}
+
+.mk-size[data-level='warn']::before {
+  background: var(--mk-warn);
+}
+
+.mk-size[data-level='error'] {
+  background: var(--mk-danger-soft);
+  color: var(--mk-danger);
+}
+
+.mk-size[data-level='error']::before {
+  background: var(--mk-danger);
+}
+
 /* Two controls, one class, told apart by the role they already carry: the views
-   are a `tablist`, the device widths a `group`. The views are the editor's
-   primary navigation, so they read as tabs — selection carried by weight and a
-   rule under the label. The device toggle is a preference, so it stays a pair of
-   quiet icon buttons. Neither is a filled pill any more: the accent is spent on
-   the selected node and on Export, and a tab that borrows it competes with the
-   document for the eye. */
+   are a `tablist`, the device widths a `group`. Both are drawn as one physical
+   control — a sunken trough with the selected item raised out of it on its own
+   chip — because that is what reads as a switch at a glance, where an underlined
+   word reads as a link that happens to be bold.
+
+   The chip is `--mk-bg`, never the accent. That half of the earlier decision
+   stands: the accent is spent on the selected node and on Export, and a tab that
+   borrows it competes with the document for the eye. Only the execution changed. */
 .mk-segmented {
   display: inline-flex;
   align-items: center;
-  gap: var(--mk-space-1);
+  gap: 2px;
+  height: var(--mk-control);
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--mk-bg-sunken);
+  /* The trough shares a token with the canvas ground, so on the Checks view it
+     vanished into the page and left three loose buttons. */
+  box-shadow: inset 0 0 0 1px var(--mk-border);
 }
 
 .mk-segmented > button {
@@ -349,64 +438,46 @@
   justify-content: center;
   gap: var(--mk-space-2);
   height: var(--mk-control-icon);
-  padding: 0 var(--mk-space-2);
+  padding: 0 10px;
   border: 0;
   border-radius: var(--mk-radius-md);
   background: transparent;
   color: var(--mk-fg-muted);
   font: inherit;
-  font-size: var(--mk-text-base);
+  font-size: var(--mk-text-sm);
   font-weight: 400;
   cursor: pointer;
   white-space: nowrap;
   transition:
     background 130ms ease,
-    color 130ms ease,
-    border-color 130ms ease;
+    color 130ms ease;
 }
 
-/* Views: full-height tabs with a rule under the selected one. */
-.mk-segmented[role='tablist'] {
-  align-self: stretch;
-  gap: var(--mk-space-5);
-}
-
-.mk-segmented[role='tablist'] > button {
-  height: 100%;
-  padding: 0;
-  border-radius: 0;
-  border-bottom: 2px solid transparent;
-}
-
-.mk-segmented[role='tablist'] > button[aria-selected='true'] {
-  border-bottom-color: var(--mk-fg);
-  color: var(--mk-fg);
-  font-weight: 600;
-}
-
-/* Devices: square icon buttons, the smallest of the three control heights. */
+/* Devices carry no label, so they stay square. */
 .mk-segmented[role='group'] > button {
-  width: var(--mk-control-icon);
-  padding: 0;
+  padding: 0 var(--mk-space-2);
 }
 
 .mk-segmented > button:hover:not([aria-selected='true']):not([aria-pressed='true']) {
   color: var(--mk-fg);
 }
 
+.mk-segmented > button[aria-selected='true'],
 .mk-segmented > button[aria-pressed='true'] {
-  background: var(--mk-bg-sunken);
+  background: var(--mk-raised);
   color: var(--mk-fg);
+  font-weight: 600;
+  box-shadow: var(--mk-shadow-sm);
 }
 
 .mk-segmented > button:focus-visible {
-  outline: 2px solid var(--mk-accent);
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: 0 0 0 3px var(--mk-accent-ring);
 }
 
 .mk-segmented svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 
@@ -519,36 +590,71 @@
 
 .mk-panel-tabs {
   display: flex;
-  align-items: stretch;
-  gap: var(--mk-space-5);
-  height: 44px;
-  padding: 0 var(--mk-space-4);
+  align-items: center;
+  gap: var(--mk-space-2);
+  height: 48px;
+  padding: 0 var(--mk-space-3);
   border-bottom: 1px solid var(--mk-border);
   flex-shrink: 0;
 }
 
+/* The same physical control as the toolbar's view switch, for the same reason:
+   three faces of one panel is a switch, not three links.
+
+   The first attempt made these loose pills with no trough, and it failed twice
+   over. A selected pill filled with `--mk-bg-sunken` is the colour of the canvas
+   ground behind the panel, so it read as a hole punched in the header rather
+   than a selection — and `--mk-bg-hover` sits eleven units from it, so hover and
+   selected were the same grey and you could not tell the tab you were on from
+   the one you were pointing at. The trough is what was missing: it groups the
+   three, and the selected one is raised out of it in `--mk-bg`, which no other
+   state can be confused with. */
+.mk-panel-switch {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+  height: var(--mk-control);
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--mk-bg-sunken);
+}
+
+/* Equal thirds, and that is what makes the weight change on selection free: with
+   the widths fixed, a label can go semibold without the two tabs beside it
+   sliding out from under the pointer. */
 .mk-panel-tab {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  height: var(--mk-control-icon);
+  padding: 0 var(--mk-space-2);
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-radius: var(--mk-radius-md);
   background: transparent;
   color: var(--mk-fg-muted);
   font: inherit;
-  font-size: var(--mk-text-base);
+  font-size: var(--mk-text-sm);
   font-weight: 400;
   cursor: pointer;
-  transition: color 130ms ease;
+  white-space: nowrap;
+  transition:
+    background 130ms ease,
+    color 130ms ease;
 }
 
-.mk-panel-tab:hover {
+.mk-panel-tab:hover:not([aria-selected='true']) {
   color: var(--mk-fg);
 }
 
 .mk-panel-tab[aria-selected='true'] {
-  border-bottom-color: var(--mk-fg);
+  background: var(--mk-raised);
   color: var(--mk-fg);
   font-weight: 600;
+  box-shadow: var(--mk-shadow-sm);
 }
 
 .mk-panel-tab:focus-visible {
@@ -560,7 +666,7 @@
   display: flex;
   align-items: center;
   gap: var(--mk-space-2);
-  min-height: 44px;
+  min-height: 48px;
   padding: var(--mk-space-3) var(--mk-space-4) var(--mk-space-1);
   flex-shrink: 0;
 }
@@ -730,6 +836,9 @@
   padding: var(--mk-space-3) var(--mk-space-3) var(--mk-space-2);
 }
 
+/* A tile is a thing you pick up — `cursor: grab` said so and nothing else did.
+   Borderless on a plain panel they read as a list of words, and in dark they
+   lost their edges entirely. */
 .mk-tile {
   display: flex;
   flex-direction: column;
@@ -738,9 +847,9 @@
   gap: var(--mk-space-2);
   height: 64px;
   padding: var(--mk-space-2) var(--mk-space-1);
-  border: 0;
+  border: 1px solid var(--mk-border);
   border-radius: var(--mk-radius-md);
-  background: transparent;
+  background: var(--mk-bg);
   color: var(--mk-fg);
   font: inherit;
   font-size: var(--mk-text-sm);
@@ -902,17 +1011,16 @@
   height: 56px;
   margin-bottom: 14px;
   border-radius: 16px;
-  background: linear-gradient(
-    140deg,
-    var(--mk-accent),
-    color-mix(in srgb, var(--mk-accent) 62%, #ec4899)
-  );
-  color: #fff;
-  /* The glow is what makes this read as an illustration rather than a stray
-     button on an otherwise blank page. */
-  box-shadow:
-    0 8px 24px color-mix(in srgb, var(--mk-accent) 38%, transparent),
-    0 2px 6px color-mix(in srgb, var(--mk-accent) 28%, transparent);
+  /* Mixed against white rather than against the chrome, for the same reason the
+     type here is fixed slate: this sits on the email paper, not on the panel.
+
+     It was a gradient from the accent to #ec4899 under a coloured glow — the
+     only gradient in the editor, and a magenta that appears in no palette,
+     including a consumer's own once they pass `theme={{ accent }}`. A flat tint
+     of their accent says the same thing and belongs to the set. */
+  background: color-mix(in srgb, var(--mk-accent) 11%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--mk-accent) 18%, #ffffff);
+  color: var(--mk-accent);
 }
 
 .mk-blank-icon svg {
@@ -1044,6 +1152,24 @@
   background: var(--mk-accent-soft);
 }
 
+.mk-quick-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-space-4);
+  flex-shrink: 0;
+  padding: var(--mk-space-2) var(--mk-space-3);
+  border-top: 1px solid var(--mk-border);
+  background: var(--mk-bg-subtle);
+  color: var(--mk-fg-subtle);
+  font-size: var(--mk-text-xs);
+}
+
+.mk-quick-foot > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .mk-quick-icon {
   display: flex;
   align-items: center;
@@ -1093,7 +1219,7 @@
   position: relative;
   width: 100%;
   min-height: 180px;
-  border-radius: var(--mk-radius-sm);
+  border-radius: 8px;
   box-shadow: var(--mk-shadow-paper);
   transition: max-width 220ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1265,18 +1391,24 @@
 }
 
 /* The floating vertical action strip, on the block's outer edge. */
+/* Horizontal. Stacked, three icons had to share a 26px column, which is the
+   narrowest strip of targets in the editor and the hardest to hit.
+
+   The white ring is not decoration: both of these float over the document, and
+   the paper is always white whatever the chrome's theme is — so the ring is what
+   separates an accent-filled bar from whatever block it happens to cross. */
 .mk-node-tools {
   position: absolute;
   top: -1px;
   right: -1px;
   z-index: 6;
   display: flex;
-  flex-direction: column;
   gap: 1px;
   padding: 3px;
-  border-radius: var(--mk-radius-sm) 0 0 var(--mk-radius-sm);
+  border-radius: 0 var(--mk-radius-sm) 0 var(--mk-radius-sm);
   background: var(--mk-accent);
   box-shadow: var(--mk-shadow-md);
+  outline: 2px solid #ffffff;
 }
 
 /* Sections and rows carry four actions, which is too tall as a column. Only the
@@ -1438,6 +1570,7 @@
   border-radius: var(--mk-radius-sm) var(--mk-radius-sm) 0 0;
   background: var(--mk-accent);
   box-shadow: var(--mk-shadow-md);
+  outline: 2px solid #ffffff;
   user-select: none;
 }
 
@@ -1583,6 +1716,9 @@
   border-top: 0;
 }
 
+/* Same treatment as `.mk-label`. A group head at 12px sentence-case beside a
+   field label at 11px upper-case made one panel look like two, assembled from
+   different kits. */
 .mk-group-head {
   display: flex;
   align-items: center;
@@ -1593,8 +1729,10 @@
   background: transparent;
   color: var(--mk-fg-muted);
   font: inherit;
-  font-size: var(--mk-text-sm);
+  font-size: var(--mk-text-xs);
   font-weight: 600;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
@@ -1623,7 +1761,7 @@
 .mk-field {
   display: flex;
   flex-direction: column;
-  gap: var(--mk-space-1);
+  gap: var(--mk-space-2);
   min-width: 0;
 }
 
@@ -1634,10 +1772,26 @@
   gap: var(--mk-space-3);
 }
 
+/* Small, tracked and upper-case above a stacked control. It is the cheapest
+   change on this screen that makes a panel read as designed rather than
+   assembled: the label stops competing with the value it names, and the eye gets
+   one left edge to run down instead of two similar greys. */
 .mk-label {
   color: var(--mk-fg-muted);
-  font-size: var(--mk-text-sm);
-  font-weight: 500;
+  font-size: var(--mk-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+/* Not in a row, though: "Stack on mobile" beside its switch is a sentence, and a
+   sentence in caps is a shout. */
+.mk-field-row > .mk-label {
+  color: var(--mk-fg);
+  font-size: var(--mk-text-base);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .mk-help {
@@ -1995,16 +2149,44 @@
    radius, so the two read as one control rather than a toolbar that happens to
    float above a box. */
 
+/* One control. The format buttons were floating between the label and the
+   field, belonging to neither. */
 .mk-richtext-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
+  border: 1px solid var(--mk-border-strong);
+  border-radius: var(--mk-radius-md);
+  overflow: hidden;
+}
+
+.mk-richtext-field:focus-within {
+  border-color: var(--mk-accent);
+  box-shadow: 0 0 0 3px var(--mk-accent-ring);
 }
 
 .mk-richtext-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
+  padding: 3px 4px;
+  border-bottom: 1px solid var(--mk-border);
+  background: var(--mk-bg-subtle);
+}
+
+/* The control inside gives up its own frame to the wrapper, and its own
+   typeface with it: this field is prose. Monospace belongs to the HTML block,
+   where `.mk-textarea` keeps it. */
+.mk-richtext-field .mk-textarea {
+  border: 0;
+  border-radius: 0;
+  font-family: var(--mk-ui-font);
+  font-size: var(--mk-text-base);
+}
+
+.mk-richtext-field .mk-textarea:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 .mk-richtext-bar .mk-btn {
@@ -2099,10 +2281,29 @@
    =========================================================================== */
 
 .mk-preview-wrap {
+  position: relative;
   display: flex;
   justify-content: center;
   height: 100%;
   padding: 28px 24px;
+}
+
+/* Which width is on screen. Desktop and mobile renders of a 600px document can
+   look the same, and the device toggle alone never said which was which. */
+.mk-preview-width {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 8px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 9px;
+  border: 1px solid var(--mk-border);
+  background: var(--mk-raised);
+  color: var(--mk-fg-subtle);
+  font-family: var(--mk-ui-mono);
+  font-size: 10.5px;
 }
 
 .mk-preview-device {
@@ -2139,63 +2340,142 @@
   white-space: pre;
 }
 
+/* A measured column. Full-bleed, a twelve-word message ran the width of a 1440px
+   screen and the eye had to cross all of it to reach nothing. */
+.mk-lint {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: var(--mk-space-5) var(--mk-space-4) var(--mk-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--mk-space-4);
+}
+
 .mk-lint-summary {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: var(--mk-space-4);
   flex-wrap: wrap;
-  padding: 12px;
-  border-bottom: 1px solid var(--mk-border);
-  background: var(--mk-bg);
+}
+
+.mk-lint-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  background: var(--mk-warn);
+}
+
+.mk-lint-dot[data-level='error'] {
+  background: var(--mk-danger);
+}
+
+.mk-lint-dot[data-level='info'] {
+  background: var(--mk-info);
+}
+
+/* The number that decides whether the unsubscribe footer arrives at all, drawn
+   as a gauge. As a sentence in the far corner it answered "how big" but never
+   "how close". */
+.mk-lint-size {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 232px;
   flex-shrink: 0;
 }
 
+.mk-lint-size-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--mk-space-2);
+}
+
+.mk-lint-size-value {
+  font-family: var(--mk-ui-mono);
+  font-size: var(--mk-text-xs);
+  font-weight: 600;
+  color: var(--mk-success);
+}
+
+.mk-lint-size[data-level='warn'] .mk-lint-size-value {
+  color: var(--mk-warn);
+}
+
+.mk-lint-size[data-level='error'] .mk-lint-size-value {
+  color: var(--mk-danger);
+}
+
+.mk-lint-meter {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--mk-border);
+  overflow: hidden;
+}
+
+.mk-lint-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--mk-success);
+  transition: width 200ms ease;
+}
+
+.mk-lint-size[data-level='warn'] .mk-lint-meter > span {
+  background: var(--mk-warn);
+}
+
+.mk-lint-size[data-level='error'] .mk-lint-meter > span {
+  background: var(--mk-danger);
+}
+
+/* One card with rows in it. Separate cards, each with its own shadow and a
+   coloured left edge, made three issues look like nine objects. */
 .mk-lint-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
+  padding: 0;
   margin: 0;
   list-style: none;
+  border: 1px solid var(--mk-border);
+  border-radius: 11px;
+  background: var(--mk-bg);
+  overflow: hidden;
+}
+
+.mk-lint-list > li + li {
+  border-top: 1px solid var(--mk-border);
 }
 
 .mk-lint-item {
   display: flex;
-  gap: 10px;
+  align-items: flex-start;
+  gap: var(--mk-space-3);
   width: 100%;
-  padding: 11px 13px;
-  border: 1px solid var(--mk-border);
-  border-left-width: 3px;
-  border-radius: var(--mk-radius-md);
-  background: var(--mk-bg);
+  padding: 14px 14px 14px 16px;
+  border: 0;
+  background: transparent;
   color: var(--mk-fg);
   font: inherit;
   font-size: var(--mk-text-base);
   text-align: left;
   cursor: pointer;
-  transition:
-    box-shadow 130ms ease,
-    border-color 130ms ease;
+  transition: background 130ms ease;
 }
 
 .mk-lint-item:hover:not(:disabled) {
-  box-shadow: var(--mk-shadow-md);
+  background: var(--mk-bg-hover);
 }
 
 .mk-lint-item:disabled {
   cursor: default;
 }
 
-.mk-lint-item[data-level='error'] {
-  border-left-color: var(--mk-danger);
-}
-
-.mk-lint-item[data-level='warn'] {
-  border-left-color: var(--mk-warn);
-}
-
-.mk-lint-item[data-level='info'] {
-  border-left-color: var(--mk-info);
+.mk-lint-item:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--mk-accent-ring);
 }
 
 .mk-lint-icon {
@@ -2205,7 +2485,8 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  border-radius: 5px;
+  margin-top: 1px;
+  border-radius: 10px;
 }
 
 .mk-lint-icon svg {
@@ -2228,20 +2509,111 @@
   color: var(--mk-info);
 }
 
-.mk-lint-message {
+.mk-lint-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   flex: 1;
   min-width: 0;
 }
 
+.mk-lint-message {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--mk-fg);
+}
+
+.mk-lint-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--mk-space-2);
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.mk-lint-where {
+  font-size: var(--mk-text-xs);
+  color: var(--mk-fg-subtle);
+}
+
 .mk-lint-id {
-  display: inline-block;
-  margin-top: 5px;
-  padding: 1px 5px;
-  border-radius: 4px;
+  padding: 0 6px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: var(--mk-radius-sm);
   background: var(--mk-bg-sunken);
   color: var(--mk-fg-subtle);
   font-family: var(--mk-ui-mono);
-  font-size: var(--mk-text-xs);
+  font-size: 10.5px;
+}
+
+/* It was always clickable and nothing said so. */
+.mk-lint-goto {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  height: var(--mk-control-icon);
+  padding: 0 10px;
+  border: 1px solid var(--mk-border);
+  border-radius: var(--mk-radius-md);
+  background: var(--mk-raised);
+  color: var(--mk-accent);
+  font-size: var(--mk-text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Reserved, not removed: without the slot a document-level issue ran the width
+   of the card while the row under it stopped 120px short, and the list had two
+   right edges. */
+.mk-lint-goto[data-empty] {
+  visibility: hidden;
+}
+
+.mk-lint-goto svg {
+  width: 13px;
+  height: 13px;
+}
+
+.mk-lint-item:hover:not(:disabled) .mk-lint-goto {
+  border-color: var(--mk-border-strong);
+}
+
+.mk-lint-clean {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--mk-space-2);
+  padding: var(--mk-space-6) var(--mk-space-5);
+  border: 1px solid var(--mk-border);
+  border-radius: 11px;
+  background: var(--mk-bg);
+  text-align: center;
+}
+
+.mk-lint-clean-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--mk-success) 12%, transparent);
+  color: var(--mk-success);
+}
+
+.mk-lint-clean-mark svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+}
+
+.mk-lint-clean-title {
+  margin: 0;
+  font-size: var(--mk-text-md);
+  font-weight: 600;
+  color: var(--mk-fg);
 }
 
 .mk-badge {
@@ -2341,19 +2713,22 @@
 .mk-tree-head {
   display: flex;
   align-items: center;
-  gap: var(--mk-space-2);
-  height: 44px;
+  gap: 2px;
+  height: 48px;
   padding: 0 var(--mk-space-2) 0 var(--mk-space-4);
   border-bottom: 1px solid var(--mk-border);
   flex-shrink: 0;
 }
 
+/* The pane's own name, not a caption for it. At `--mk-fg-muted` and 12px this
+   sat quieter than the rows beneath it and read as leftover chrome. */
 .mk-tree-title {
   flex: 1;
   min-width: 0;
-  color: var(--mk-fg-muted);
-  font-size: var(--mk-text-sm);
+  color: var(--mk-fg);
+  font-size: var(--mk-text-base);
   font-weight: 600;
+  letter-spacing: -0.008em;
 }
 
 .mk-tree-body {
@@ -2361,60 +2736,90 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--mk-space-2);
+  padding: var(--mk-space-3) var(--mk-space-2);
+}
+
+.mk-tree-empty {
+  margin: 0;
+  padding: var(--mk-space-5) var(--mk-space-3);
+  color: var(--mk-fg-muted);
+  font-size: var(--mk-text-sm);
+  line-height: var(--mk-leading-sm);
+  text-align: center;
+}
+
+/* One section from the next. A document is a stack of sections before it is a
+   tree of nodes, and at fifteen rows of identical height that stack is
+   invisible without a rule to mark it. */
+.mk-tree-split {
+  height: 1px;
+  margin: 7px var(--mk-space-2);
+  background: color-mix(in srgb, var(--mk-border) 55%, transparent);
+}
+
+/* The row carries hover and selection; the node button inside it is only the
+   label. They are separate because the add button has to be a *sibling* of the
+   node — a button inside a button is not markup a browser will render. */
+.mk-tree-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: var(--mk-radius-md);
+  transition: background 130ms ease;
+}
+
+.mk-tree-row:hover {
+  background: var(--mk-bg-hover);
+}
+
+/* The accent is spent in two places on this screen: the selected node, here and
+   on the canvas, and the button that produces the artefact. */
+.mk-tree-row[data-selected='true'] {
+  background: var(--mk-accent-soft);
+}
+
+/* A bar, not a bolder label. Switching font-weight on selection reflows the
+   text under the cursor that just clicked it.
+
+   Drawn as an inset shadow rather than a pseudo-element: a 2px block against a
+   7px corner reads as a tick floating beside the row, where an inset shadow
+   follows the radius and belongs to it. */
+.mk-tree-row[data-selected='true'] {
+  box-shadow: inset 2px 0 0 var(--mk-accent);
 }
 
 .mk-tree-node {
   display: flex;
   align-items: center;
-  gap: var(--mk-space-2);
-  width: 100%;
-  height: 28px;
-  padding: 0 var(--mk-space-2);
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0;
   border: 0;
   border-radius: var(--mk-radius-md);
   background: transparent;
   color: var(--mk-fg-muted);
   font: inherit;
-  font-size: var(--mk-text-sm);
+  font-size: var(--mk-text-base);
+  letter-spacing: -0.003em;
   text-align: left;
   cursor: pointer;
-  transition:
-    background 130ms ease,
-    color 130ms ease;
+  transition: color 130ms ease;
 }
 
-/* Indent by depth rather than by nesting the markup: a flat list of buttons is
-   one tab stop each, in document order, which is what arrow keys and screen
-   readers both want out of a tree. */
-.mk-tree-body [data-depth='1'] {
-  padding-left: var(--mk-space-5);
+.mk-tree-node[data-kind='section'] .mk-tree-label {
+  font-weight: 650;
 }
 
-.mk-tree-body [data-depth='2'] {
-  padding-left: 38px;
-}
-
-.mk-tree-body [data-depth='3'] {
-  padding-left: 52px;
-}
-
-.mk-tree-node[data-kind='section'] {
-  color: var(--mk-fg);
-  font-weight: 600;
-}
-
-.mk-tree-node:hover {
-  background: var(--mk-bg-hover);
+/* Both of these are (0,3,0); selection is declared second so it wins on a
+   selected row the pointer happens to be over. */
+.mk-tree-row:hover .mk-tree-node {
   color: var(--mk-fg);
 }
 
-/* The accent is spent in two places on this screen: the selected node, here and
-   on the canvas, and the button that produces the artefact. */
-.mk-tree-node[data-selected='true'] {
-  background: var(--mk-accent-soft);
+.mk-tree-row[data-selected='true'] .mk-tree-node,
+.mk-tree-row[data-selected='true'] .mk-tree-label {
   color: var(--mk-accent);
-  font-weight: 600;
 }
 
 .mk-tree-node:focus-visible {
@@ -2422,17 +2827,31 @@
   box-shadow: 0 0 0 3px var(--mk-accent-ring);
 }
 
-.mk-tree-label {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* One hairline per level, drawn under the twisty column it descends from.
+   Indenting with padding alone left a ragged edge with nothing to follow down a
+   list forty rows long. */
+.mk-tree-rail {
+  width: 18px;
+  flex-shrink: 0;
+  align-self: stretch;
+  background: linear-gradient(
+    to right,
+    transparent 9px,
+    var(--mk-border) 9px,
+    var(--mk-border) 10px,
+    transparent 10px
+  );
+  opacity: 0.65;
 }
 
+/* 18 × 24 rather than 12 × 12: folding is a mouse action, and the old target was
+   smaller than anything else in the editor you are asked to hit. */
 .mk-tree-twist {
   display: flex;
-  width: 12px;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 24px;
   flex-shrink: 0;
   color: var(--mk-fg-subtle);
 }
@@ -2447,10 +2866,61 @@
   transform: rotate(90deg);
 }
 
+/* What the node *is*, read before its label. The glyphs are the palette's own,
+   so a Heading in the tree is the same mark as a Heading in the Content tab. */
+.mk-tree-type {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-right: 9px;
+  color: var(--mk-fg-subtle);
+}
+
+.mk-tree-row[data-selected='true'] .mk-tree-type {
+  color: currentcolor;
+}
+
+/* The name never truncates; the metadata beside it does. Welded into one string
+   they truncated together, and "Heading — Your order is on i…" spent half the
+   pane on a word the icon had already said. */
+.mk-tree-label {
+  flex-shrink: 0;
+  color: var(--mk-fg);
+}
+
+.mk-tree-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: var(--mk-space-2);
+  color: var(--mk-fg-subtle);
+  font-size: var(--mk-text-sm);
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+/* The repeat binding is a fact about the row, not a third clause of its name. */
+.mk-tree-repeat {
+  flex-shrink: 0;
+  height: 17px;
+  margin-left: 7px;
+  padding: 0 6px;
+  border-radius: var(--mk-radius-sm);
+  background: var(--mk-bg-sunken);
+  color: var(--mk-fg-subtle);
+  font-family: var(--mk-ui-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 17px;
+  white-space: nowrap;
+}
+
 .mk-tree-dot {
   width: 6px;
   height: 6px;
   flex-shrink: 0;
+  margin: 0 var(--mk-space-2) 0 7px;
   border-radius: 3px;
   background: var(--mk-warn);
 }
@@ -2459,23 +2929,33 @@
   background: var(--mk-danger);
 }
 
-/* Insert where the cursor already is. The palette appends to a column it has to
-   guess at; this one names the column it will use. */
+/* Insert where the pointer already is. Held in the layout rather than mounted on
+   hover, so the label beside it does not re-ellipsise as the mouse crosses the
+   row — and revealed per row, where the trailing "Add block" lines it replaces
+   were revealed by a hover anywhere in the body, all of them at once. */
+/* Out of flow. Held in the layout it reserved 32px on every row whether or not
+   anything was hovered, so a summary was cut a third of the way short on all
+   seventeen lines to spare one line the jitter. Absolute puts that width back;
+   the hovered row alone pads out from under the button. */
 .mk-tree-add {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: var(--mk-space-2);
-  width: 100%;
-  height: var(--mk-control-icon);
-  padding: 0 var(--mk-space-2);
-  border: 0;
-  background: transparent;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid var(--mk-border);
+  border-radius: var(--mk-radius-sm);
+  background: var(--mk-raised);
   color: var(--mk-accent);
-  font: inherit;
-  font-size: var(--mk-text-sm);
-  text-align: left;
   cursor: pointer;
   opacity: 0;
+  box-shadow: var(--mk-shadow-sm);
   transition: opacity 130ms ease;
 }
 
@@ -2484,32 +2964,52 @@
   height: 13px;
 }
 
-.mk-tree-body:hover .mk-tree-add,
+.mk-tree-row:hover .mk-tree-add,
 .mk-tree-add:focus-visible {
   opacity: 1;
+}
+
+.mk-tree-row:hover .mk-tree-node {
+  padding-right: 32px;
+}
+
+.mk-tree-add:hover {
+  border-color: var(--mk-border-strong);
 }
 
 .mk-tree-add:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--mk-accent-ring);
-  border-radius: var(--mk-radius-md);
 }
 
+/* Always present. Appearing only once a rule fired moved every row in the list
+   at the moment you were reading one. */
 .mk-tree-foot {
   display: flex;
   align-items: center;
   gap: var(--mk-space-4);
-  padding: var(--mk-space-3) var(--mk-space-4);
+  height: 40px;
+  padding: 0 var(--mk-space-4);
   border-top: 1px solid var(--mk-border);
   color: var(--mk-fg-muted);
   font-size: var(--mk-text-sm);
   flex-shrink: 0;
 }
 
+.mk-tree-clean {
+  color: var(--mk-fg-subtle);
+}
+
+.mk-tree-total {
+  margin-left: auto;
+  color: var(--mk-fg-subtle);
+  font-size: var(--mk-text-xs);
+}
+
 .mk-tree-count {
   display: flex;
   align-items: center;
-  gap: var(--mk-space-2);
+  gap: 7px;
   border: 0;
   background: none;
   padding: 0;
@@ -2519,21 +3019,93 @@
   cursor: pointer;
 }
 
+.mk-tree-count .mk-tree-dot {
+  margin: 0;
+}
+
 .mk-tree-count:hover {
   color: var(--mk-fg);
 }
 
-/* Collapsed: a rail wide enough for the button that brings it back. A pane you
-   can close and not reopen is a pane you lose. */
+/* ---------------------------------------------------------------------------
+   Folded — by the toggle, or by the viewport.
+
+   A rail whose only job is to reopen itself is 40px doing nothing. One stub per
+   section, each carrying that section's worst issue, keeps it a jump list. Both
+   bodies are always in the DOM and CSS picks between them, which is what lets
+   the pane fold below 1024px without the component knowing the window width.
+   --------------------------------------------------------------------------- */
+.mk-tree-stubs {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 9px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mk-tree-stub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--mk-radius-md);
+  background: transparent;
+  color: var(--mk-fg-subtle);
+  cursor: pointer;
+  transition:
+    background 130ms ease,
+    color 130ms ease;
+}
+
+.mk-tree-stub svg {
+  width: 15px;
+  height: 15px;
+}
+
+.mk-tree-stub:hover {
+  background: var(--mk-bg-hover);
+  color: var(--mk-fg);
+}
+
+.mk-tree-stub[data-selected='true'] {
+  background: var(--mk-accent-soft);
+  color: var(--mk-accent);
+}
+
+.mk-tree-stub:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--mk-accent-ring);
+}
+
+/* On a stub the dot is a badge rather than a trailing mark, so it has to survive
+   sitting on top of the glyph. */
+.mk-tree-stub .mk-tree-dot {
+  position: absolute;
+  top: 3px;
+  right: 2px;
+  margin: 0;
+  box-shadow: 0 0 0 1.5px var(--mk-bg);
+}
+
 .mk-tree[data-collapsed='true'] {
   width: 40px;
 }
 
 .mk-tree[data-collapsed='true'] .mk-tree-title,
 .mk-tree[data-collapsed='true'] .mk-tree-body,
-.mk-tree[data-collapsed='true'] .mk-tree-foot,
-.mk-tree[data-collapsed='true'] .mk-tree-new {
+.mk-tree[data-collapsed='true'] .mk-tree-foot {
   display: none;
+}
+
+.mk-tree[data-collapsed='true'] .mk-tree-stubs {
+  display: flex;
 }
 
 .mk-tree[data-collapsed='true'] .mk-tree-head {
@@ -2592,10 +3164,30 @@
   }
 
   /* Three columns of chrome around a 600px document does not fit here, and the
-     panel is the one you cannot work without. The tree hides; the breadcrumbs
-     in the panel header remain the route up the document. */
+     panel is the one you cannot work without. But the tree hiding outright took
+     its lint dots with it, and a warning you cannot see is a warning you ship —
+     so it folds to the rail instead. The stubs keep the sections reachable and
+     keep saying which one has a problem; the breadcrumbs in the panel header are
+     still the route up from a selected node. There is no room to unfold into
+     here, so the toggle goes with the body. */
   .mk-tree {
+    width: 40px;
+  }
+
+  .mk-tree-title,
+  .mk-tree-body,
+  .mk-tree-foot,
+  .mk-tree-toggle {
     display: none;
+  }
+
+  .mk-tree-stubs {
+    display: flex;
+  }
+
+  .mk-tree-head {
+    padding: 0 var(--mk-space-2);
+    justify-content: center;
   }
 }
 
@@ -2628,6 +3220,24 @@
   .mk-panel-close {
     display: inline-flex;
     margin-left: auto;
+  }
+
+  /* Matches the switches it stands beside, instead of being the one outlined
+     button in a row of pills. */
+  .mk-btn-panel {
+    height: var(--mk-control);
+    padding: 0 12px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--mk-bg-sunken);
+    color: var(--mk-fg-muted);
+    font-weight: 400;
+  }
+
+  .mk-btn-panel[data-open='true'] {
+    background: var(--mk-accent-soft);
+    color: var(--mk-accent);
+    font-weight: 600;
   }
 
   .mk-panel-tabs {
@@ -2680,9 +3290,15 @@
      be allowed to grow the moment its contents stop fitting on one line. */
   .mk-toolbar {
     height: auto;
-    min-height: 56px;
+    min-height: 52px;
     padding-top: 6px;
     padding-bottom: 6px;
+  }
+
+  /* First thing to go when the row gets tight: the Checks badge beside it
+     reports the same problem, and this is the quieter of the two. */
+  .mk-size {
+    display: none;
   }
 
   .mk-canvas-wrap {
@@ -2692,15 +3308,30 @@
 
 /* Phones and small tablets: the toolbar stops pretending to be one row. */
 @media (max-width: 640px) {
+  /* Above this the pane folds to a 40px rail rather than vanishing, so its lint
+     dots survive. Here 40px is a tenth of the screen and the rail's own header
+     band is taller than the one stub under it — so below 640 it goes entirely,
+     as it always did. */
+  .mk-tree {
+    display: none;
+  }
+
   .mk-toolbar {
     min-height: 52px;
     gap: 6px;
     padding: 8px 10px;
   }
 
-  /* The template name takes its own line rather than crushing the controls. */
-  .mk-title {
+  /* The name takes its own line rather than crushing the controls. This sits on
+     the wrapper, not the input: the input is no longer a direct child of the
+     toolbar's flex row. */
+  .mk-toolbar-doc {
     flex: 1 1 100%;
+  }
+
+  .mk-title {
+    flex: 1 1 auto;
+    width: auto;
     min-width: 0;
   }
 
@@ -2752,8 +3383,11 @@
 
   /* The name shares the first row with undo/redo here rather than taking a
      whole one to itself: on a 390px screen every toolbar row costs canvas. */
-  .mk-title {
+  .mk-toolbar-doc {
     flex: 1 1 96px;
+  }
+
+  .mk-title {
     font-size: var(--mk-text-base);
   }
 

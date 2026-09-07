@@ -63,9 +63,11 @@ export const IconButton = icon(
   </>,
 )
 
+/* One full rule with the content pulled back from it. The ghost lines used to
+   run to 12 units, which at 15px made this a third variant of Text's three. */
 export const IconDivider = icon(
   <>
-    <path d="M6 7h12M6 17h12" opacity="0.45" />
+    <path d="M9 7h6M9 17h6" opacity="0.38" />
     <path d="M3 12h18" />
   </>,
 )
@@ -270,6 +272,8 @@ export const IconMail = icon(
   </>,
 )
 
+export const IconArrowRight = icon(<path d="M5 12h14m-6-6 6 6-6 6" />)
+
 export const IconArrowUp = icon(<path d="M12 19V5m-6 6 6-6 6 6" />)
 
 export const IconArrowDown = icon(<path d="M12 5v14m6-6-6 6-6-6" />)
@@ -281,9 +285,22 @@ export const IconSection = icon(
   </>,
 )
 
+/** A row, in the structure pane: one band across the section. */
+export const IconRow = icon(<rect x="3" y="7" width="18" height="10" rx="1.5" />)
+
+/** A column, in the structure pane: that band, split. */
+export const IconColumns = icon(
+  <>
+    <rect x="4" y="4" width="7" height="16" rx="1.5" />
+    <rect x="13" y="4" width="7" height="16" rx="1.5" />
+  </>,
+)
+
 /* --- inline rich-text toolbar -------------------------------------------- */
 
-export const IconBold = icon(<path d="M7 5h5.2a3.5 3.5 0 0 1 0 7H7zm0 7h6.2a3.5 3.5 0 0 1 0 7H7z" />)
+export const IconBold = icon(
+  <path d="M7 5h5.2a3.5 3.5 0 0 1 0 7H7zm0 7h6.2a3.5 3.5 0 0 1 0 7H7z" />,
+)
 
 export const IconItalic = icon(<path d="M10 5h7M7 19h7M14.5 5 9.5 19" />)
 

@@ -117,19 +117,25 @@ export function SidePanel({ onClose }) {
       className="mk-panel"
       aria-label={tab === 'content' ? t('palette.title') : t(`panel.${tab}`)}
     >
-      <div className="mk-panel-tabs" role="tablist" aria-label={t('inspector.title')}>
-        {tabs.map(([id, key]) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            className="mk-panel-tab"
-            aria-selected={tab === id}
-            onClick={() => setTab(id)}
-          >
-            {t(key)}
-          </button>
-        ))}
+      <div className="mk-panel-tabs">
+        {/* The three tabs are their own element rather than the whole header
+            row: a `tablist` may only contain tabs, and below the panel
+            breakpoint the close button shares this row. It was inside the
+            tablist, which made it a non-tab child of one. */}
+        <div className="mk-panel-switch" role="tablist" aria-label={t('inspector.title')}>
+          {tabs.map(([id, key]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              className="mk-panel-tab"
+              aria-selected={tab === id}
+              onClick={() => setTab(id)}
+            >
+              {t(key)}
+            </button>
+          ))}
+        </div>
         {onClose ? (
           <button
             type="button"

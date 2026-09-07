@@ -6,7 +6,7 @@
  * @module mailkiln/react/panels/Toolbar
  */
 
-import { documentName, exportDocument, toComponentName } from '../../core/index.js'
+import { documentName, exportDocument, GMAIL_LIMIT, toComponentName } from '../../core/index.js'
 import { useI18n } from '../i18n/index.jsx'
 import { useMailKilnContext } from '../context.jsx'
 import {
@@ -14,6 +14,7 @@ import {
   IconDownload,
   IconEye,
   IconGrid,
+  IconMail,
   IconMobile,
   IconMoon,
   IconSliders,
@@ -54,8 +55,16 @@ export function Toolbar({
 }) {
   const t = useI18n()
   const { store } = useMailKilnContext()
-  const { errors, warnings } = store.lint
+  const { errors, warnings, sizeBytes } = store.lint
   const issues = errors + warnings
+
+  // The one number that decides whether the footer reaches the reader at all:
+  // Gmail cuts the message at 102KB and replaces the rest with a link. The
+  // linter already reports it, but only once you go and look, and by then the
+  // paragraph that pushed you over is three edits back. The 80% here is the
+  // rule's own `WARN_AT`, derived the same way.
+  const sizeLevel =
+    sizeBytes >= GMAIL_LIMIT ? 'error' : sizeBytes >= GMAIL_LIMIT * 0.8 ? 'warn' : undefined
 
   const views = /** @type {const} */ ([
     ['design', 'view.design', IconGrid],
@@ -73,15 +82,24 @@ export function Toolbar({
     <div className="mk-toolbar">
       {/* The template's own name, edited in place. Tagged for history coalescing
           so typing a title is one undo step, not one per keystroke. */}
-      <input
-        className="mk-title"
-        type="text"
-        value={store.doc.settings.name ?? ''}
-        placeholder={t('toolbar.untitled')}
-        aria-label={t('toolbar.name')}
-        title={t('toolbar.name')}
-        onChange={(event) => store.patchSettings({ name: event.target.value }, 'name')}
-      />
+      {/* A mark for the thing being edited, so the name has something to sit
+          against instead of starting at the window edge. Deliberately a quiet
+          outline glyph rather than a filled tile: this component is embedded in
+          somebody else's product, where a coloured badge reads as branding they
+          did not ask for — and the accent is already spent on the selected node
+          and on Export. */}
+      <div className="mk-toolbar-doc">
+        <IconMail className="mk-doc-mark" aria-hidden="true" />
+        <input
+          className="mk-title"
+          type="text"
+          value={store.doc.settings.name ?? ''}
+          placeholder={t('toolbar.untitled')}
+          aria-label={t('toolbar.name')}
+          title={t('toolbar.name')}
+          onChange={(event) => store.patchSettings({ name: event.target.value }, 'name')}
+        />
+      </div>
 
       <span className="mk-toolbar-sep" />
 
@@ -165,6 +183,12 @@ export function Toolbar({
       ) : null}
 
       <span className="mk-spacer-flex" />
+
+      {/* Ambient, not a control — the word count of an email. There is nothing
+          to click because the Checks tab beside it is already the way in. */}
+      <span className="mk-size" data-level={sizeLevel} title={t('toolbar.sizeHint')}>
+        {t('toolbar.size', { size: Math.round(sizeBytes / 1024) })}
+      </span>
 
       {onToggleAppearance ? (
         <button

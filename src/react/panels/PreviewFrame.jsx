@@ -56,6 +56,10 @@ export function PreviewFrame({ device }) {
             sandbox=""
           />
         </div>
+        {/* Three device buttons and no readout: the desktop and mobile renders
+            of a 600px document can look identical, and nothing said which one
+            was on screen. */}
+        <span className="mk-preview-width">{width}&thinsp;px</span>
       </div>
     </div>
   )
