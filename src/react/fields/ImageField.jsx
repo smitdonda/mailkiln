@@ -92,7 +92,11 @@ export function ImageField({ value, onChange, id }) {
         placeholder={t('field.url')}
         onChange={(event) => onChange(event.target.value)}
       />
-      {error ? <span className="mk-help" style={{ color: 'var(--mk-danger)' }}>{error}</span> : null}
+      {error ? (
+        <span className="mk-help" style={{ color: 'var(--mk-danger)' }}>
+          {error}
+        </span>
+      ) : null}
     </div>
   )
 }

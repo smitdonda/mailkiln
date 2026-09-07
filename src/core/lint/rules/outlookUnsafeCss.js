@@ -15,14 +15,26 @@ import { eachBlock } from '../walk.js'
 const UNSAFE = [
   { pattern: /display\s*:\s*flex/i, css: 'display:flex', effect: 'children stack in source order' },
   { pattern: /display\s*:\s*grid/i, css: 'display:grid', effect: 'children stack in source order' },
-  { pattern: /display\s*:\s*inline-flex/i, css: 'display:inline-flex', effect: 'falls back to inline' },
-  { pattern: /position\s*:\s*(absolute|fixed|sticky)/i, css: 'position', effect: 'element renders in flow' },
+  {
+    pattern: /display\s*:\s*inline-flex/i,
+    css: 'display:inline-flex',
+    effect: 'falls back to inline',
+  },
+  {
+    pattern: /position\s*:\s*(absolute|fixed|sticky)/i,
+    css: 'position',
+    effect: 'element renders in flow',
+  },
   { pattern: /float\s*:\s*(left|right)/i, css: 'float', effect: 'unreliable — often ignored' },
   { pattern: /(^|[^-])transform\s*:/i, css: 'transform', effect: 'ignored' },
   { pattern: /flex-direction\s*:/i, css: 'flex-direction', effect: 'ignored' },
   { pattern: /gap\s*:/i, css: 'gap', effect: 'ignored — use cell padding' },
   { pattern: /max-height\s*:/i, css: 'max-height', effect: 'ignored' },
-  { pattern: /background-size\s*:/i, css: 'background-size', effect: 'ignored — needs a VML fallback' },
+  {
+    pattern: /background-size\s*:/i,
+    css: 'background-size',
+    effect: 'ignored — needs a VML fallback',
+  },
 ]
 
 /** @type {import('../../types.js').LintRule} */

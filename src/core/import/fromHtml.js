@@ -9,7 +9,15 @@
  * @module mailkiln/core/import/fromHtml
  */
 
-import { DEFAULT_SETTINGS, createBlock, createColumn, createDocument, createRow, createSection, spacing } from '../schema.js'
+import {
+  DEFAULT_SETTINGS,
+  createBlock,
+  createColumn,
+  createDocument,
+  createRow,
+  createSection,
+  spacing,
+} from '../schema.js'
 import { normalize } from '../document.js'
 import { collapsedText, getParser, parseStyleAttribute } from './parseAdapter.js'
 import {
@@ -265,7 +273,11 @@ function collectWarnings(dom, body, warnings) {
     })
   }
 
-  if (!Array.from(body.querySelectorAll?.('a') ?? []).some((a) => /unsubscribe/i.test(a.textContent ?? ''))) {
+  if (
+    !Array.from(body.querySelectorAll?.('a') ?? []).some((a) =>
+      /unsubscribe/i.test(a.textContent ?? ''),
+    )
+  ) {
     warnings.push({
       code: 'no-unsubscribe',
       message: 'No unsubscribe link was found in the source.',

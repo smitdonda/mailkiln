@@ -141,8 +141,7 @@ export function MailKiln({
   // OS when set to 'auto'. There is no in-editor toggle — an editor that lets the
   // user flip its own chrome disagrees with the surrounding app the moment the two
   // are on different settings, and the app is the one that should win.
-  const resolvedAppearance =
-    appearance === 'auto' ? (systemDark ? 'dark' : 'light') : appearance
+  const resolvedAppearance = appearance === 'auto' ? (systemDark ? 'dark' : 'light') : appearance
 
   const contextValue = useMemo(
     () => ({

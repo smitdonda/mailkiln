@@ -213,12 +213,14 @@ export function SortableBlock({
       }}
       {...dragProps}
     >
-      {editing && editTarget ? (
-        <InlineToolbar target={editTarget} onCommit={commitEdit} />
-      ) : null}
+      {editing && editTarget ? <InlineToolbar target={editTarget} onCommit={commitEdit} /> : null}
 
       {condition ? (
-        <span className="mk-cond-badge" data-off={condition.hidden || undefined} title={condition.label}>
+        <span
+          className="mk-cond-badge"
+          data-off={condition.hidden || undefined}
+          title={condition.label}
+        >
           {condition.label}
         </span>
       ) : null}

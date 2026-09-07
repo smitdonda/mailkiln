@@ -43,10 +43,22 @@ export const videoThumbBlock = defineBlock({
     { key: 'thumbnailUrl', type: 'image', label: 'Thumbnail' },
     { key: 'videoUrl', type: 'url', label: 'Video URL', vars: true },
     { key: 'alt', type: 'text', label: 'Alt text' },
-    { key: 'caption', type: 'text', label: 'Caption', help: 'Leave empty to show the thumbnail only.' },
+    {
+      key: 'caption',
+      type: 'text',
+      label: 'Caption',
+      help: 'Leave empty to show the thumbnail only.',
+    },
     { key: 'captionColor', type: 'color', label: 'Caption colour', group: 'Type' },
     { key: 'width', type: 'text', label: 'Width', placeholder: '100% or 480' },
-    { key: 'borderRadius', type: 'number', label: 'Corner radius', min: 0, max: 40, group: 'Layout' },
+    {
+      key: 'borderRadius',
+      type: 'number',
+      label: 'Corner radius',
+      min: 0,
+      max: 40,
+      group: 'Layout',
+    },
     ALIGN_FIELD,
     PADDING_FIELD,
     HIDE_ON_MOBILE_FIELD,
@@ -68,8 +80,8 @@ export const videoThumbBlock = defineBlock({
             border: 0,
             borderRadius: p.borderRadius || '',
           })} />`
-        // Editor chrome only — see the note in the image block.
-        : ctx.options?.editable
+        : // Editor chrome only — see the note in the image block.
+          ctx.options?.editable
           ? `<div${styleAttr({ padding: 32, backgroundColor: '#111827', color: '#f9fafb', fontSize: 13, textAlign: 'center' })}>No thumbnail selected</div>`
           : ''
       const caption = p.caption

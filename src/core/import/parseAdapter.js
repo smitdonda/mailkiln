@@ -33,7 +33,7 @@ export function getParser(options = {}) {
       'In a browser this uses the built-in DOMParser. In Node, install linkedom and pass it in:',
       '',
       "  import { parseHTML } from 'linkedom'",
-      "  importFromHtml(html, { parseHtml: (h) => parseHTML(h).document })",
+      '  importFromHtml(html, { parseHtml: (h) => parseHTML(h).document })',
       '',
       'linkedom is an optional peer dependency — mailkiln never imports it for you.',
     ].join('\n'),

@@ -47,11 +47,9 @@ export const spacerBlock = defineBlock({
     },
     jsx(p) {
       const height = Math.max(1, Number(p.height) || 24)
-      return el(
-        'div',
-        { style: { height, lineHeight: `${height}px`, fontSize: 0 } },
-        [raw("{'\\u00a0'}")],
-      )
+      return el('div', { style: { height, lineHeight: `${height}px`, fontSize: 0 } }, [
+        raw("{'\\u00a0'}"),
+      ])
     },
     mjml(p) {
       // Background travels as `container-background-color`, the attribute every

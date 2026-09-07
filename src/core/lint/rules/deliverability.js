@@ -101,7 +101,9 @@ export const unsubscribeRule = {
   docs: 'Required by CAN-SPAM, GDPR and both Gmail and Yahoo bulk-sender rules.',
   check(ctx) {
     const haystack = `${ctx.html} ${ctx.text}`.toLowerCase()
-    if (/unsubscribe|opt.?out|manage (your )?(email )?preferences|{{\s*unsubscribe/i.test(haystack)) {
+    if (
+      /unsubscribe|opt.?out|manage (your )?(email )?preferences|{{\s*unsubscribe/i.test(haystack)
+    ) {
       return []
     }
     return [

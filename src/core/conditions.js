@@ -280,7 +280,10 @@ export function repeatScopes(repeat, scope) {
   if (!normalized) return [scope]
   const items = getPath(scope ?? {}, normalized.path)
   const list = Array.isArray(items) ? items : []
-  const count = Math.max(1, Math.min(list.length || 1, normalized.previewCount ?? DEFAULT_PREVIEW_COUNT))
+  const count = Math.max(
+    1,
+    Math.min(list.length || 1, normalized.previewCount ?? DEFAULT_PREVIEW_COUNT),
+  )
   return Array.from({ length: count }, (_unused, index) => ({
     ...(scope ?? {}),
     [normalized.as]: list[index],

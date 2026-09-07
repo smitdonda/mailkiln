@@ -235,7 +235,11 @@ export function InlineToolbar({ target, onCommit }) {
     >
       {button({ command: 'bold', label: t('richtext.bold'), children: <IconBold /> })}
       {button({ command: 'italic', label: t('richtext.italic'), children: <IconItalic /> })}
-      {button({ command: 'underline', label: t('richtext.underline'), children: <IconUnderline /> })}
+      {button({
+        command: 'underline',
+        label: t('richtext.underline'),
+        children: <IconUnderline />,
+      })}
 
       <span className="mk-rt-sep" />
 
@@ -284,15 +288,15 @@ export function InlineToolbar({ target, onCommit }) {
         <div className="mk-rt-popover">
           <label className="mk-rt-field">
             <span className="mk-label">{t('richtext.linkUrl')}</span>
-            <VarInput
-              value={linkHref}
-              onChange={setLinkHref}
-              placeholder="https://example.com"
-            />
+            <VarInput value={linkHref} onChange={setLinkHref} placeholder="https://example.com" />
           </label>
           <label className="mk-rt-field">
             <span className="mk-label">{t('richtext.linkText')}</span>
-            <VarInput value={linkText} onChange={setLinkText} placeholder={t('richtext.linkText')} />
+            <VarInput
+              value={linkText}
+              onChange={setLinkText}
+              placeholder={t('richtext.linkText')}
+            />
           </label>
           <div className="mk-rt-popover-actions">
             {existingAnchor.current ? (
@@ -303,11 +307,7 @@ export function InlineToolbar({ target, onCommit }) {
             ) : (
               <span />
             )}
-            <button
-              type="button"
-              className="mk-btn mk-btn-sm mk-btn-primary"
-              onClick={applyLink}
-            >
+            <button type="button" className="mk-btn mk-btn-sm mk-btn-primary" onClick={applyLink}>
               {t('richtext.apply')}
             </button>
           </div>

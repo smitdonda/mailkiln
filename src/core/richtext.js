@@ -89,7 +89,9 @@ const SAFE_HREF = /^(https?:|mailto:|tel:|sms:|#|\/|\{\{)/i
  * @returns {boolean}
  */
 function isBoldWeight(value) {
-  const weight = String(value ?? '').trim().toLowerCase()
+  const weight = String(value ?? '')
+    .trim()
+    .toLowerCase()
   return weight === 'bold' || weight === 'bolder' || Number(weight) >= 600
 }
 

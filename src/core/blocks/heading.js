@@ -78,7 +78,15 @@ export const headingBlock = defineBlock({
       options: [1, 2, 3, 4, 5, 6].map((n) => ({ value: n, label: `H${n}` })),
     },
     { key: 'fontSize', type: 'number', label: 'Size', min: 10, max: 72, group: 'Type' },
-    { key: 'lineHeight', type: 'number', label: 'Line height', min: 1, max: 2, step: 0.1, group: 'Type' },
+    {
+      key: 'lineHeight',
+      type: 'number',
+      label: 'Line height',
+      min: 1,
+      max: 2,
+      step: 0.1,
+      group: 'Type',
+    },
     // A heading carried `fontWeight` in its defaults from the start and had no
     // control for it, so every heading exported bold — a light or regular
     // display heading was unreachable from the editor.

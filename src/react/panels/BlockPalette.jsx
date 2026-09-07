@@ -73,7 +73,8 @@ export function BlockPalette() {
   const visible = useMemo(() => {
     if (searching) {
       return blocks.filter(
-        (def) => def.label.toLowerCase().includes(needle) || def.type.toLowerCase().includes(needle),
+        (def) =>
+          def.label.toLowerCase().includes(needle) || def.type.toLowerCase().includes(needle),
       )
     }
     return groups.find(([name]) => name === active)?.[1] ?? []

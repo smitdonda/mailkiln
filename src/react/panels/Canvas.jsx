@@ -54,7 +54,8 @@ export function Canvas({ device = 'desktop', onQuickInsert }) {
   // is what makes blocks mark their inline-editable element; no export path sets
   // it, so the marker never reaches a real email.
   const ctx = useMemo(
-    () => createRenderContext(doc, { vars: store.vars, target: 'html', options: { editable: true } }),
+    () =>
+      createRenderContext(doc, { vars: store.vars, target: 'html', options: { editable: true } }),
     [doc, store.vars],
   )
 
@@ -280,7 +281,9 @@ function RowView({ row, ctx, sectionId, index, count }) {
           label={t('inspector.row')}
           canMoveUp={index > 0}
           canMoveDown={index < count - 1}
-          onMoveUp={() => store.moveRow({ rowId: row.id, toSectionId: sectionId, toIndex: index - 1 })}
+          onMoveUp={() =>
+            store.moveRow({ rowId: row.id, toSectionId: sectionId, toIndex: index - 1 })
+          }
           onMoveDown={() =>
             store.moveRow({ rowId: row.id, toSectionId: sectionId, toIndex: index + 2 })
           }

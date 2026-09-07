@@ -143,7 +143,21 @@ defineBlock({ type: 'broken', label: 'Broken', defaultProps: {}, render: {} })
 
 void createBlock('countdown')
 void spacing(8, 16)
-void [width, badSections, badWidth, hasPath, jsxSource, tsxSource, alsoJsx, errorCount, firstMessage, badLevel, confidence, unrecognized, countdown]
+void [
+  width,
+  badSections,
+  badWidth,
+  hasPath,
+  jsxSource,
+  tsxSource,
+  alsoJsx,
+  errorCount,
+  firstMessage,
+  badLevel,
+  confidence,
+  unrecognized,
+  countdown,
+]
 
 // --- the React entry ------------------------------------------------------
 

@@ -51,8 +51,20 @@ export const imageBlock = defineBlock({
   }),
   schema: [
     { key: 'src', type: 'image', label: 'Image' },
-    { key: 'alt', type: 'text', label: 'Alt text', vars: true, help: 'Shown when images are blocked — never leave it empty.' },
-    { key: 'width', type: 'text', label: 'Width', placeholder: '100% or 480', help: 'A px value renders more predictably in Outlook.' },
+    {
+      key: 'alt',
+      type: 'text',
+      label: 'Alt text',
+      vars: true,
+      help: 'Shown when images are blocked — never leave it empty.',
+    },
+    {
+      key: 'width',
+      type: 'text',
+      label: 'Width',
+      placeholder: '100% or 480',
+      help: 'A px value renders more predictably in Outlook.',
+    },
     // A fluid image still needs a pixel width for Outlook, which cannot compute
     // a percentage against a table cell. Two fields rather than one because the
     // reference behaviour — `width="670"` plus `width:100%` — needs both at once.
@@ -66,7 +78,14 @@ export const imageBlock = defineBlock({
       help: 'Sent as the width attribute when Width is a percentage. Use the image’s display width.',
     },
     { key: 'href', type: 'url', label: 'Link', vars: true },
-    { key: 'borderRadius', type: 'number', label: 'Corner radius', min: 0, max: 80, group: 'Layout' },
+    {
+      key: 'borderRadius',
+      type: 'number',
+      label: 'Corner radius',
+      min: 0,
+      max: 80,
+      group: 'Layout',
+    },
     ALIGN_FIELD,
     PADDING_FIELD,
     BACKGROUND_FIELD,
