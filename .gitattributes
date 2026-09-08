@@ -1,0 +1,24 @@
+# Line endings are decided here rather than by each clone's `core.autocrlf`.
+#
+# Without this, a Windows checkout rewrites every file on disk on the way in
+# and out, and any tool that touches a file — Prettier, an editor, a script —
+# leaves git reporting the whole tree as modified when the content has not
+# changed. Every file in this repository is LF; pinning it keeps a diff about
+# the code.
+* text=auto eol=lf
+
+# Binary by nature: never converted, never diffed as text. None are tracked
+# today, but these are what an email builder's fixtures and docs attract.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Generated, and noisy in a review. Still diffable on request with `--text`.
+package-lock.json -diff linguist-generated
