@@ -16,7 +16,7 @@ export const hi = {
   'toolbar.theme': 'डार्क मोड बदलें',
   'toolbar.name': 'टेम्पलेट नाम',
   'toolbar.untitled': 'बिना नाम का ईमेल',
-  'toolbar.size': '{size} KB',
+  'toolbar.size': '{size} / {limit} KB',
   'toolbar.sizeHint': 'रेंडर आकार। 100 KB से बड़ा संदेश Gmail काट देता है।',
 
   'view.design': 'डिज़ाइन',
@@ -48,6 +48,7 @@ export const hi = {
   'rows.4': '4 कॉलम',
 
   'palette.title': 'ब्लॉक',
+  'palette.all': 'सभी',
   'palette.search': 'ब्लॉक खोजें',
   'palette.categories': 'ब्लॉक श्रेणियाँ',
   'palette.empty': '“{query}” से मेल खाता कोई ब्लॉक नहीं।',

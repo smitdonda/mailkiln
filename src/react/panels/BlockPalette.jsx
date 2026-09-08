@@ -22,7 +22,21 @@ import { useI18n } from '../i18n/index.jsx'
 import { PaletteDraggable } from '../dnd/PaletteDraggable.jsx'
 import { findNode, listColumns } from '../../core/index.js'
 import { exhaustedTools } from '../tools.js'
-import { BLOCK_ICONS, IconCode, IconImage, IconRows, IconSearch, IconText } from '../icons.jsx'
+import {
+  BLOCK_ICONS,
+  IconCode,
+  IconGrid,
+  IconImage,
+  IconRows,
+  IconSearch,
+  IconText,
+} from '../icons.jsx'
+
+/**
+ * The pseudo-category that shows every block. The leading space keeps it from
+ * colliding with a group name a consumer registered.
+ */
+const ALL = ' all'
 
 /**
  * Icons for the group names the built-in blocks use. Anything else — a group a
@@ -63,9 +77,18 @@ export function BlockPalette() {
     return [...map.entries()]
   }, [blocks])
 
+  // "All" leads, and it is where the palette opens.
+  //
+  // The default used to be `groups[0]` — the group of whichever block sorted
+  // first — so a consumer writing `tools: { countdown: { position: 0 } }` to
+  // order their palette silently decided that everyone lands in "Advanced",
+  // looking at the two blocks they need least while the other eight sit behind
+  // a click. Opening on everything is also the more honest first impression:
+  // this is what you can build with.
+  //
   // A category that stops existing — its last block disabled through `tools` —
-  // falls back to the first rather than leaving an empty pane behind.
-  const active = groups.some(([name]) => name === picked) ? picked : (groups[0]?.[0] ?? null)
+  // falls back to All rather than leaving an empty pane behind.
+  const active = picked && groups.some(([name]) => name === picked) ? picked : ALL
 
   const needle = query.trim().toLowerCase()
   const searching = needle.length > 0
@@ -77,6 +100,7 @@ export function BlockPalette() {
           def.label.toLowerCase().includes(needle) || def.type.toLowerCase().includes(needle),
       )
     }
+    if (active === ALL) return blocks
     return groups.find(([name]) => name === active)?.[1] ?? []
   }, [blocks, groups, active, needle, searching])
 
@@ -97,6 +121,22 @@ export function BlockPalette() {
   return (
     <div className="mk-palette">
       <div className="mk-rail" role="group" aria-label={t('palette.categories')}>
+        {/* Everything, and where the palette opens. A rail that only ever
+            shows one drawer at a time hides most of what the editor can do
+            from someone seeing it for the first time. */}
+        <button
+          type="button"
+          className="mk-rail-btn"
+          aria-pressed={!searching && active === ALL}
+          title={t('palette.all')}
+          onClick={() => {
+            setPicked(ALL)
+            setQuery('')
+          }}
+        >
+          <IconGrid />
+          <span className="mk-rail-label">{t('palette.all')}</span>
+        </button>
         {groups.map(([name, defs]) => {
           const Icon =
             GROUP_ICONS[name.toLowerCase()] ?? BLOCK_ICONS[String(defs[0]?.icon ?? '')] ?? IconCode

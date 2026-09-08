@@ -44,13 +44,15 @@ export function Canvas({ device = 'desktop', onQuickInsert }) {
   const { store } = useMailKilnContext()
   const { doc } = store
   const blank = isPristine(doc)
-  // The mobile frame narrows the paper, so chrome sized to the document width
-  // would hang off it. On desktop the paper fills the working area rather than
-  // sitting at `settings.width` — the narrow card left most of the screen as dead
-  // gutter. The trade-off: desktop blocks lay out wider than the email really is,
-  // so the Preview tab (a real iframe at `settings.width`) stays the honest check
-  // on line lengths before sending.
-  const width = device === 'mobile' ? 375 : null
+  // The paper is the width the email actually goes out at.
+  //
+  // It used to fill the working area instead, to avoid leaving a narrow card in
+  // a wide window — but that made every line length, image crop and column split
+  // on the canvas wrong by a third, in the one view people spend all their time
+  // in. The dead gutter that motivated it is now the workspace: it carries the
+  // email's own background colour, so what surrounds the paper is a real part of
+  // the design rather than empty chrome.
+  const width = device === 'mobile' ? 375 : (doc.settings.width ?? 600)
 
   // One render context per document version, shared by every block. `editable`
   // is what makes blocks mark their inline-editable element; no export path sets
@@ -62,7 +64,15 @@ export function Canvas({ device = 'desktop', onQuickInsert }) {
   )
 
   return (
-    <div className="mk-scroll" onClick={() => store.select(null)} role="presentation">
+    <div
+      className="mk-scroll"
+      onClick={() => store.select(null)}
+      role="presentation"
+      // The ground around the paper is the email's own background, not editor
+      // chrome — so the framing colour an author picked is visible where it will
+      // actually be seen, instead of only in Preview.
+      style={{ background: doc.settings.backgroundColor || undefined }}
+    >
       <div className="mk-canvas-wrap">
         <div
           className="mk-canvas"

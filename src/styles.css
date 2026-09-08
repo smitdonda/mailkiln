@@ -3405,3 +3405,51 @@
     transition: none;
   }
 }
+
+/* --- chrome that answers the pointer -----------------------------------
+   Block chrome is mounted for every block and revealed on hover, rather than
+   appearing only once a block is selected. A canvas where nothing responds to
+   the pointer reads as a preview, not an editor — and finding out that a block
+   is draggable by clicking it first is a step nobody should have to take.
+
+   `:focus-within` matters as much as `:hover`: the strip holds real buttons,
+   and a keyboard user tabbing into one must be able to see where they are. */
+.mk-node-label,
+.mk-node:not([data-selected='true']) .mk-node-tools {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.mk-node:hover .mk-node-label,
+.mk-node:hover .mk-node-tools,
+.mk-node:focus-within .mk-node-label,
+.mk-node:focus-within .mk-node-tools,
+.mk-node[data-selected='true'] .mk-node-label,
+.mk-node[data-selected='true'] .mk-node-tools {
+  opacity: 1;
+}
+
+/* A pointer-driven reveal is no use on a touch screen, where there is no hover
+   state to enter — so there the chrome is simply always on. */
+@media (hover: none) {
+  .mk-node-label,
+  .mk-node .mk-node-tools {
+    opacity: 1;
+  }
+}
+
+/* --- the workspace ------------------------------------------------------
+   The paper is now the width the email really is, which leaves ground around
+   it. That ground carries the email's own background colour (set inline from
+   `settings.backgroundColor`), so the framing an author chose is visible while
+   they work instead of only in Preview. The inset shadow keeps the paper
+   reading as paper when that colour happens to be white. */
+.mk-scroll {
+  box-shadow: inset 0 1px 0 var(--mk-border);
+}
+
+.mk-canvas {
+  box-shadow:
+    var(--mk-shadow-paper),
+    0 0 0 1px rgb(15 23 42 / 6%);
+}

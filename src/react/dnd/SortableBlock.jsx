@@ -238,54 +238,56 @@ export function SortableBlock({
         </span>
       ) : null}
 
-      {selected ? (
-        <>
-          {/* The toolbar takes the top-left slot while editing, so the type
+      {/* Chrome is rendered for every block, not only the selected one, and
+          CSS fades it in on hover. Before this a block gave no sign it was an
+          object until you clicked it — every editor in this class reveals move,
+          duplicate and delete on mouseover. It stays mounted rather than
+          mounting on hover so the buttons are reachable by keyboard too. */}
+      <>
+        {/* The toolbar takes the top-left slot while editing, so the type
               label steps aside rather than stacking two chips on one corner. */}
-          {editing ? null : <span className="mk-node-label">{def?.label ?? block.type}</span>}
-          <div className="mk-node-tools">
-            {/* The handle is always present while selected, not just while
-                editing: once a text block is selected its body becomes
-                contentEditable and loses its drag listeners, and a selected
-                block you cannot move is a dead end. */}
-            <button
-              type="button"
-              className="mk-node-tool"
-              data-handle="true"
-              aria-label={t('canvas.drag')}
-              title={t('canvas.drag')}
-              {...attributes}
-              {...listeners}
-            >
-              <IconDrag />
-            </button>
-            <button
-              type="button"
-              className="mk-node-tool"
-              aria-label={t('canvas.duplicate')}
-              title={t('canvas.duplicate')}
-              onClick={(event) => {
-                event.stopPropagation()
-                onDuplicate(block.id)
-              }}
-            >
-              <IconCopy />
-            </button>
-            <button
-              type="button"
-              className="mk-node-tool"
-              aria-label={t('canvas.delete')}
-              title={t('canvas.delete')}
-              onClick={(event) => {
-                event.stopPropagation()
-                onDelete(block.id)
-              }}
-            >
-              <IconTrash />
-            </button>
-          </div>
-        </>
-      ) : null}
+        {editing ? null : <span className="mk-node-label">{def?.label ?? block.type}</span>}
+        <div className="mk-node-tools">
+          {/* The handle is present whenever the chrome is: once a text block
+                is selected its body becomes contentEditable and loses its drag
+                listeners, and a block you cannot move is a dead end. */}
+          <button
+            type="button"
+            className="mk-node-tool"
+            data-handle="true"
+            aria-label={t('canvas.drag')}
+            title={t('canvas.drag')}
+            {...attributes}
+            {...listeners}
+          >
+            <IconDrag />
+          </button>
+          <button
+            type="button"
+            className="mk-node-tool"
+            aria-label={t('canvas.duplicate')}
+            title={t('canvas.duplicate')}
+            onClick={(event) => {
+              event.stopPropagation()
+              onDuplicate(block.id)
+            }}
+          >
+            <IconCopy />
+          </button>
+          <button
+            type="button"
+            className="mk-node-tool"
+            aria-label={t('canvas.delete')}
+            title={t('canvas.delete')}
+            onClick={(event) => {
+              event.stopPropagation()
+              onDelete(block.id)
+            }}
+          >
+            <IconTrash />
+          </button>
+        </div>
+      </>
 
       {/* Classed, not bare: the "condition is false" dimming has to target the
           block's content without also dimming the chrome that lets you turn the
