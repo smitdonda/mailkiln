@@ -63,7 +63,7 @@
     "typecheck": "tsc -p jsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{js,jsx,css,json,md}\"",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "test:watch": "vitest",
     "verify:pack": "npm run build && publint && npm run verify:attw",
     "verify:attw": "attw --pack . --ignore-rules no-resolution",

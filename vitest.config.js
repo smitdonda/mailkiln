@@ -10,6 +10,7 @@ export default defineConfig({
     // run on linkedom here, which also exercises the injected-parser path that
     // Node consumers actually use.
     environment: 'node',
+    setupFiles: ['tests/support/setup.js'],
     include: ['tests/**/*.test.{js,jsx}'],
     coverage: {
       provider: 'v8',
