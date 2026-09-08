@@ -305,6 +305,62 @@ describe('keyboard', () => {
     expect(latest()).toBeUndefined()
   })
 
+  it('still hears escape after focus has left the editor entirely', () => {
+    // The dialog is not a focus trap's only line of defence: a click on chrome
+    // that takes no focus, or the blur that ends an inline edit, both leave
+    // focus on <body>. The root element's own handler cannot see a keystroke
+    // from there, and Escape used to reach nobody at all.
+    mount()
+    fireEvent.keyDown(root(), { key: '/' })
+    expect(screen.getByRole('dialog', { name: 'Quick insert' })).toBeTruthy()
+
+    // Leaving the field is what a Tab out of the dialog does in a browser;
+    // jsdom will not move focus to <body> by focusing it.
+    const focused = /** @type {HTMLElement | null} */ (document.activeElement)
+    focused?.blur()
+    expect(document.activeElement).toBe(document.body)
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('leaves a keystroke aimed at the host application alone', () => {
+    // The document-level pass must not turn the editor into a global keylogger
+    // for whatever else is on the page.
+    mount()
+    const outside = document.createElement('input')
+    document.body.appendChild(outside)
+    outside.focus()
+
+    fireEvent.keyDown(outside, { key: '/' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+    outside.remove()
+  })
+
+  it('gives focus back to the editor when quick insert closes', () => {
+    mount()
+    root().focus()
+    fireEvent.keyDown(root(), { key: '/' })
+    const dialog = screen.getByRole('dialog', { name: 'Quick insert' })
+
+    fireEvent.keyDown(within(dialog).getByLabelText('Search blocks…'), { key: 'Escape' })
+    expect(document.activeElement).toBe(root())
+  })
+
+  it('keeps tab inside the dialog it says is modal', () => {
+    mount()
+    fireEvent.keyDown(root(), { key: '/' })
+    const dialog = screen.getByRole('dialog', { name: 'Quick insert' })
+    const input = within(dialog).getByLabelText('Search blocks…')
+    input.focus()
+
+    fireEvent.keyDown(input, { key: 'Tab' })
+    expect(dialog.contains(document.activeElement)).toBe(true)
+
+    fireEvent.keyDown(input, { key: 'Tab', shiftKey: true })
+    expect(dialog.contains(document.activeElement)).toBe(true)
+  })
+
   it('deselects on escape once nothing is covering the canvas', () => {
     mount()
     fireEvent.click(paletteTile('text'))
@@ -617,6 +673,69 @@ describe('the canvas as a DOM surface', () => {
 
     expect(latest()).toBeDefined()
     expect(allBlocksIn(latest())[0].props.text).toBe('Total {{order.total}} paid')
+  })
+})
+
+describe('a document with nothing left in it', () => {
+  /** The starter document with its only section deleted. */
+  function emptied() {
+    const doc = normalize(docOf([createBlock('text')]))
+    return { ...doc, sections: [] }
+  }
+
+  it('is a state the editor can actually reach', () => {
+    const { latest } = mount({ defaultValue: normalize(docOf([createBlock('text')])) })
+    const sectionNode = /** @type {HTMLElement} */ (
+      screen.getByLabelText('Structure').querySelector('.mk-tree-node')
+    )
+    fireEvent.click(sectionNode)
+    const panel = /** @type {HTMLElement} */ (document.querySelector('aside.mk-panel'))
+    fireEvent.click(within(panel).getByRole('button', { name: /^Delete Section$/ }))
+    expect(latest().sections).toHaveLength(0)
+    expect(isPristine(latest())).toBe(true)
+  })
+
+  it('offers a way out on every button the blank state shows', () => {
+    const { latest } = mount({ defaultValue: emptied() })
+
+    fireEvent.click(screen.getByRole('button', { name: /Add text/ }))
+    expect(latest().sections).toHaveLength(1)
+    expect(allBlocksIn(latest()).map((b) => b.type)).toEqual(['text'])
+  })
+
+  it('makes the layout button build the section it needs', () => {
+    const { latest } = mount({ defaultValue: emptied() })
+
+    fireEvent.click(screen.getByRole('button', { name: /Add columns/ }))
+    expect(latest().sections).toHaveLength(1)
+    expect(latest().sections[0].rows[0].columns).toHaveLength(2)
+  })
+
+  it('lets the palette insert into it', () => {
+    const { latest } = mount({ defaultValue: emptied() })
+
+    fireEvent.click(paletteTile('button'))
+    expect(allBlocksIn(latest()).map((b) => b.type)).toEqual(['button'])
+  })
+
+  it('lets quick insert into it', () => {
+    const { latest } = mount({ defaultValue: emptied() })
+
+    fireEvent.keyDown(root(), { key: '/' })
+    const dialog = screen.getByRole('dialog', { name: 'Quick insert' })
+    fireEvent.change(within(dialog).getByLabelText('Search blocks…'), {
+      target: { value: 'divid' },
+    })
+    fireEvent.keyDown(within(dialog).getByLabelText('Search blocks…'), { key: 'Enter' })
+    expect(allBlocksIn(latest()).map((b) => b.type)).toEqual(['divider'])
+  })
+
+  it('lets the Rows tab pick a layout, as it always could', () => {
+    const { latest } = mount({ defaultValue: emptied() })
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Rows' }))
+    fireEvent.click(screen.getByRole('button', { name: '2 : 1' }))
+    expect(latest().sections[0].rows[0].columns.map((c) => c.props.width)).toEqual([67, 33])
   })
 })
 

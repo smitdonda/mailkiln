@@ -239,6 +239,37 @@ export function MailKiln({
     [store, panelOpen, quickOpen],
   )
 
+  // The handler above is on the root element, so it only ever sees a keystroke
+  // while focus is inside the editor — and focus leaves routinely. One Tab out
+  // of the quick-insert dialog, the `blur()` that ends an inline edit, or a
+  // click on something that takes no focus all land it on `<body>`, and from
+  // there Escape reached nobody: the dialog covering the canvas, and the
+  // overlay panel on a narrow viewport, could not be dismissed from the
+  // keyboard at all.
+  //
+  // This covers exactly that gap and no more. A keystroke the editor already
+  // received is left alone, and so is one aimed at a control elsewhere on the
+  // page — the fallback runs only when nothing at all owns focus.
+  useEffect(() => {
+    const root = rootRef.current
+    const ownerDocument = root?.ownerDocument
+    if (!root || !ownerDocument) return undefined
+
+    /** @param {KeyboardEvent} event */
+    const onDocumentKeyDown = (event) => {
+      const target = /** @type {Node | null} */ (event.target)
+      if (target && root.contains(target)) return
+      const active = ownerDocument.activeElement
+      if (active && active !== ownerDocument.body && active !== ownerDocument.documentElement) {
+        return
+      }
+      handleKeyDown(/** @type {any} */ (event))
+    }
+
+    ownerDocument.addEventListener('keydown', onDocumentKeyDown)
+    return () => ownerDocument.removeEventListener('keydown', onDocumentKeyDown)
+  }, [handleKeyDown])
+
   return (
     <I18nProvider locale={locale} messages={messages}>
       <MailKilnProvider value={contextValue}>
