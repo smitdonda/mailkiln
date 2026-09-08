@@ -370,6 +370,64 @@ describe('image rules', () => {
     )
   })
 
+  it('reports a source the editor can show but an inbox cannot fetch', () => {
+    // Every one of these renders perfectly on the canvas, which is the whole
+    // problem: the linter is the only thing standing between them and a
+    // broken image in every client. The demo's own upload hands back a blob:
+    // URL, and the HTML importer keeps relative paths as it finds them.
+    /** @param {string} src */
+    const forSrc = (src) =>
+      issuesFor(docOf([createBlock('image', { src, alt: 'a', width: '200' })]), 'image-src')[0]
+
+    expect(forSrc('blob:http://localhost:5180/abc')).toMatchObject({
+      level: 'error',
+      message: 'Image source is a blob: URL.',
+    })
+    expect(forSrc('/logo.png')).toMatchObject({
+      level: 'error',
+      message: 'Image source "/logo.png" is a relative path.',
+    })
+    expect(forSrc('images/logo.png').level).toBe('error')
+    expect(forSrc('//cdn.test/logo.png')).toMatchObject({
+      level: 'error',
+      message: 'Image source is protocol-relative.',
+    })
+    expect(forSrc('data:image/png;base64,AAA')).toMatchObject({
+      level: 'warn',
+      message: 'Image source is a data: URI.',
+    })
+    expect(forSrc('cid:logo').level).toBe('warn')
+    expect(forSrc('http://i.test/a.png')).toMatchObject({
+      level: 'warn',
+      message: 'Image is served over http, not https.',
+    })
+  })
+
+  it('says nothing about a source that will actually load', () => {
+    /** @param {string} src */
+    const forSrc = (src) =>
+      issuesFor(docOf([createBlock('image', { src, alt: 'a', width: '200' })]), 'image-src')
+
+    expect(forSrc('https://i.test/a.png')).toHaveLength(0)
+    // A merge tag is a promise about send time, not an address to check now.
+    expect(forSrc('{{product.image}}')).toHaveLength(0)
+    expect(forSrc('https://i.test/a.png?w=600&h=2')).toHaveLength(0)
+  })
+
+  it('carries the offending source, so a fix-it can reach it', () => {
+    const [issue] = issuesFor(
+      docOf([createBlock('image', { src: '/logo.png', alt: 'a' })]),
+      'image-src',
+    )
+    expect(issue.data).toEqual({ src: '/logo.png' })
+    expect(issue.nodeId).toBeTruthy()
+  })
+
+  it('checks a video thumbnail by the same rule', () => {
+    const doc = docOf([createBlock('videoThumb', { thumbnailUrl: '/thumb.png' })])
+    expect(issuesFor(doc, 'image-src')[0]?.level).toBe('error')
+  })
+
   it('warns about a missing alt only when there is a source', () => {
     // Both the document rule and the image block's own hook report this id.
     const reported = issuesFor(
