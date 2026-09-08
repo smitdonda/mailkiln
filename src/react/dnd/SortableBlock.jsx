@@ -16,9 +16,14 @@
  * @module mailkiln/react/dnd/SortableBlock
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
-import { getBlockDef, normalizePastedHtml, normalizeRichText } from '../../core/index.js'
+import {
+  getBlockDef,
+  normalizePastedHtml,
+  normalizeRichText,
+  stripUnsafeHtml,
+} from '../../core/index.js'
 import { useI18n } from '../i18n/index.jsx'
 import { IconCopy, IconDrag, IconTrash } from '../icons.jsx'
 import { exec } from './exec.js'
@@ -81,16 +86,24 @@ export function SortableBlock({
   // commits *while the caret is in the element*: keying off `html` would tear
   // the contentEditable attribute off a focused element on every bold, and
   // removing it blurs.
+  //
+  // What goes in is sanitized first. `props.text` is inline HTML by design and
+  // the document is plain JSON, so the markup here can have come from an
+  // imported third-party email or a template file — and `innerHTML` attaches
+  // `onerror`/`onclick` handlers, which then run in the host app's origin. The
+  // export path is untouched: an email client strips these anyway, and the
+  // linter is what tells the author they are there.
+  const safeHtml = useMemo(() => stripUnsafeHtml(html), [html])
   const [domVersion, setDomVersion] = useState(0)
   useEffect(() => {
     const node = bodyRef.current
     if (!node) return
     if (node.contains(document.activeElement)) return
-    if (node.innerHTML !== html) {
-      node.innerHTML = html
+    if (node.innerHTML !== safeHtml) {
+      node.innerHTML = safeHtml
       setDomVersion((version) => version + 1)
     }
-  }, [html])
+  }, [safeHtml])
 
   const commit = useCallback(
     /** @param {HTMLElement} target */

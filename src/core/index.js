@@ -132,6 +132,7 @@ export {
 
 // --- rich text -------------------------------------------------------------
 export { normalizeRichText, normalizePastedHtml, RICHTEXT_TAGS } from './richtext.js'
+export { stripUnsafeHtml } from './sanitize.js'
 export { SPECIAL_LINKS, SPECIAL_LINK_PATHS, isSpecialLink } from './links.js'
 
 // --- display conditions & repeats -------------------------------------------
@@ -170,7 +171,7 @@ export {
 } from './render/jsx.js'
 export { renderToMjml } from './render/mjml.js'
 export { renderToText, renderBlockText, wrap } from './render/text.js'
-export { createRenderContext, withScope } from './render/context.js'
+export { createRenderContext, withRawTags, withScope } from './render/context.js'
 export {
   el,
   raw,

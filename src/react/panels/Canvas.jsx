@@ -16,11 +16,13 @@ import {
   conditionSummary,
   createRenderContext,
   evaluateCondition,
+  getBlockDef,
   normalizeCondition,
   normalizeRepeat,
   renderBlockHtml,
   repeatScopes,
   spacingToCss,
+  withRawTags,
   withScope,
 } from '../../core/index.js'
 import { useMailKilnContext } from '../context.jsx'
@@ -141,6 +143,27 @@ export function conditionState(node, ctx) {
     label: conditionSummary(node.showIf),
     hidden: !evaluateCondition(node.showIf, ctx.scope),
   }
+}
+
+/**
+ * The context one block renders with.
+ *
+ * Every block but one gets the shared context, which resolves `{{tags}}`
+ * against the sample data — that is the point of a WYSIWYG canvas. The
+ * exception is the block currently open for inline editing: what is in that
+ * element when the caret leaves *becomes* `props.text`, so rendering it
+ * resolved would commit one recipient's sample value over the merge variable
+ * and lose it. Under the caret, tags stay tags.
+ *
+ * @param {import('../../core/types.js').Block} block
+ * @param {import('../../core/types.js').RenderContext} ctx
+ * @param {string | null} selectedId
+ * @returns {import('../../core/types.js').RenderContext}
+ */
+export function blockCtx(block, ctx, selectedId) {
+  if (block.id !== selectedId) return ctx
+  if (!getBlockDef(block.type)?.inlineEdit) return ctx
+  return withRawTags(ctx)
 }
 
 /**
@@ -348,7 +371,7 @@ function ColumnView({ column, ctx }) {
               columnId={column.id}
               index={index}
               condition={conditionState(block, ctx)}
-              html={renderBlockHtml(block, ctx)}
+              html={renderBlockHtml(block, blockCtx(block, ctx, store.selectedId))}
               selected={store.selectedId === block.id}
               onSelect={store.select}
               onDelete={store.remove}
