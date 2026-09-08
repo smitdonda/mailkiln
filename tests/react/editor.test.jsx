@@ -324,6 +324,21 @@ describe('keyboard', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
+  it('takes only escape from outside — never a shortcut that changes the document', () => {
+    // Two editors on one page both see a keystroke that nobody has focus for.
+    // Escape closing both overlays is harmless; a stray Delete removing a block
+    // from each of them is not.
+    const { latest } = mount()
+    fireEvent.click(paletteTile('text'))
+    const focused = /** @type {HTMLElement | null} */ (document.activeElement)
+    focused?.blur()
+
+    fireEvent.keyDown(document, { key: 'Delete' })
+    fireEvent.keyDown(document, { key: '/' })
+    expect(allBlocksIn(latest())).toHaveLength(1)
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
   it('leaves a keystroke aimed at the host application alone', () => {
     // The document-level pass must not turn the editor into a global keylogger
     // for whatever else is on the page.

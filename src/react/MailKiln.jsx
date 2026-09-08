@@ -247,9 +247,12 @@ export function MailKiln({
   // overlay panel on a narrow viewport, could not be dismissed from the
   // keyboard at all.
   //
-  // This covers exactly that gap and no more. A keystroke the editor already
-  // received is left alone, and so is one aimed at a control elsewhere on the
-  // page — the fallback runs only when nothing at all owns focus.
+  // This covers exactly that gap and no more. Escape only: it is the one
+  // shortcut whose whole job is to dismiss what is in the way, and it is the
+  // only one that is safe to run for an editor nobody is focused on — two
+  // editors on a page would otherwise both take a stray Delete. A keystroke
+  // the editor already received is left alone, and so is one aimed at a
+  // control elsewhere on the page.
   useEffect(() => {
     const root = rootRef.current
     const ownerDocument = root?.ownerDocument
@@ -257,6 +260,7 @@ export function MailKiln({
 
     /** @param {KeyboardEvent} event */
     const onDocumentKeyDown = (event) => {
+      if (event.key !== 'Escape') return
       const target = /** @type {Node | null} */ (event.target)
       if (target && root.contains(target)) return
       const active = ownerDocument.activeElement
