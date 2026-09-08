@@ -200,7 +200,13 @@ export function SortableBlock({
     transition,
   }
 
-  const dragProps = editing ? {} : { ...attributes, ...listeners }
+  // One activator at a time. The whole block drags while it is not selected;
+  // once it is, the body may be contentEditable (which swallows the pointer)
+  // so the handle in the strip takes over. Spreading the same `useSortable`
+  // props onto both at once gives dnd-kit two activators for one draggable,
+  // and duplicates the role and aria-describedby it sets.
+  const dragProps = editing || selected ? {} : { ...attributes, ...listeners }
+  const handleProps = selected ? { ...attributes, ...listeners } : {}
 
   return (
     <div
@@ -248,23 +254,24 @@ export function SortableBlock({
               label steps aside rather than stacking two chips on one corner. */}
         {editing ? null : <span className="mk-node-label">{def?.label ?? block.type}</span>}
         <div className="mk-node-tools">
-          {/* The handle is present whenever the chrome is: once a text block
-                is selected its body becomes contentEditable and loses its drag
-                listeners, and a block you cannot move is a dead end. */}
+          {/* Takes the drag listeners over from the block itself once the
+                block is selected: a selected text block is contentEditable,
+                and a block you cannot move is a dead end. */}
           <button
             type="button"
             className="mk-node-tool"
+            tabIndex={selected ? 0 : -1}
             data-handle="true"
             aria-label={t('canvas.drag')}
             title={t('canvas.drag')}
-            {...attributes}
-            {...listeners}
+            {...handleProps}
           >
             <IconDrag />
           </button>
           <button
             type="button"
             className="mk-node-tool"
+            tabIndex={selected ? 0 : -1}
             aria-label={t('canvas.duplicate')}
             title={t('canvas.duplicate')}
             onClick={(event) => {
@@ -277,6 +284,7 @@ export function SortableBlock({
           <button
             type="button"
             className="mk-node-tool"
+            tabIndex={selected ? 0 : -1}
             aria-label={t('canvas.delete')}
             title={t('canvas.delete')}
             onClick={(event) => {

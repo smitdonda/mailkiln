@@ -172,6 +172,21 @@ describe('the canvas as a surface to judge by', () => {
     expect(document.querySelector('.mk-node-tools')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Drag' })).toBeTruthy()
   })
+
+  it('keeps an unselected block’s chrome out of the tab order', () => {
+    // Mounted for hover, but three extra tab stops on every block would make a
+    // twenty-block document miserable to move through from the keyboard.
+    mount({ defaultValue: normalize(docOf([createBlock('text'), createBlock('button')])) })
+    const tools = [...document.querySelectorAll('.mk-node-tool')]
+    expect(tools.length).toBe(6)
+    expect(tools.every((button) => button.getAttribute('tabindex') === '-1')).toBe(true)
+
+    fireEvent.click(/** @type {HTMLElement} */ (document.querySelector('.mk-node')))
+    const selected = /** @type {HTMLElement} */ (
+      document.querySelector('.mk-node[data-selected] .mk-node-tool')
+    )
+    expect(selected.getAttribute('tabindex')).toBe('0')
+  })
 })
 
 describe('the palette as a place to work', () => {
