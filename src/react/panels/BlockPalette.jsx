@@ -89,8 +89,9 @@ export function BlockPalette() {
    */
   const append = (type) => {
     if (exhausted.has(type)) return
-    const columnId = targetColumnId(store)
-    if (columnId) store.insertBlock(columnId, { type })
+    // Passed through even when it is null: a document with no column at all
+    // is reachable, and the store makes one rather than leaving a dead tile.
+    store.insertBlock(targetColumnId(store), { type })
   }
 
   return (

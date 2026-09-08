@@ -8,7 +8,7 @@
  * @module mailkiln/react/panels/QuickInsert
  */
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
 import { targetColumnId } from './BlockPalette.jsx'
@@ -26,6 +26,23 @@ export function QuickInsert({ onClose }) {
   const [query, setQuery] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
   const inputRef = useRef(/** @type {HTMLInputElement | null} */ (null))
+  const dialogRef = useRef(/** @type {HTMLDivElement | null} */ (null))
+
+  // `aria-modal` is a promise that focus cannot get out, and it used to be a
+  // lie: one Tab put focus on `<body>`, behind the overlay, where neither this
+  // dialog nor the editor could hear Escape. Whatever was focused when the
+  // dialog opened gets it back on the way out, so the editor's own shortcuts
+  // are live again the moment this closes.
+  //
+  // Captured during the first render rather than in the effect below: the
+  // search field's `autoFocus` runs at commit, so by the time an effect looks,
+  // the thing to hand focus back to is already this dialog.
+  const returnFocusRef = useRef(
+    /** @type {HTMLElement | null} */ (
+      typeof document === 'undefined' ? null : document.activeElement
+    ),
+  )
+  useEffect(() => () => returnFocusRef.current?.focus?.({ preventScroll: true }), [])
 
   const matches = useMemo(() => {
     // A tool at its usage limit is dropped rather than greyed out here: this list
@@ -45,8 +62,7 @@ export function QuickInsert({ onClose }) {
    */
   const insert = (def) => {
     if (!def) return
-    const columnId = targetColumnId(store)
-    if (columnId) store.insertBlock(columnId, { type: def.type })
+    store.insertBlock(targetColumnId(store), { type: def.type })
     onClose()
   }
 
@@ -71,17 +87,41 @@ export function QuickInsert({ onClose }) {
     } else if (event.key === 'Escape') {
       event.preventDefault()
       onClose()
+    } else if (event.key === 'Tab') {
+      // The trap. Written over whatever is focusable rather than hard-coding
+      // the search field, so it keeps working if this dialog grows a second
+      // control.
+      const focusable = /** @type {HTMLElement[]} */ ([
+        ...(dialogRef.current?.querySelectorAll(
+          'input, button, select, textarea, a[href], [tabindex]:not([tabindex="-1"])',
+        ) ?? []),
+      ]).filter((element) => !element.hasAttribute('disabled'))
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = /** @type {HTMLElement} */ (document.activeElement)
+      if (event.shiftKey && (active === first || !dialogRef.current?.contains(active))) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && (active === last || !dialogRef.current?.contains(active))) {
+        event.preventDefault()
+        first.focus()
+      }
     }
   }
 
   return (
     <div className="mk-overlay mk-overlay-top" role="presentation" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="mk-quick"
         role="dialog"
         aria-modal="true"
         aria-label={t('quick.title')}
         onClick={(event) => event.stopPropagation()}
+        // Also here, not only on the search field: the trap has to hold
+        // wherever inside the dialog focus happens to be.
+        onKeyDown={onKeyDown}
       >
         <div className="mk-quick-search">
           <IconSearch />

@@ -68,8 +68,7 @@ export function BlankState({ onQuickInsert }) {
    * @param {string} type
    */
   const add = (type) => {
-    const columnId = targetColumnId(store)
-    if (columnId) store.insertBlock(columnId, { type })
+    store.insertBlock(targetColumnId(store), { type })
   }
 
   return (
@@ -90,7 +89,7 @@ export function BlankState({ onQuickInsert }) {
         <button
           type="button"
           className="mk-btn mk-btn-outline"
-          onClick={run(() => store.addRow(store.doc.sections[0]?.id, 2))}
+          onClick={run(() => store.addRow(store.doc.sections[0]?.id ?? null, 2))}
         >
           <IconRows />
           {t('blank.addSection')}

@@ -53,3 +53,21 @@ export function withScope(ctx, scope) {
   if (ctx.raw || scope === ctx.scope) return ctx
   return { ...ctx, scope, resolve: (text) => interpolate(text ?? '', scope) }
 }
+
+/**
+ * The same context with merge tags left alone.
+ *
+ * The canvas resolves `{{order.total}}` against the sample data so the author
+ * sees the email, not the plumbing — but the block that is being edited in
+ * place is a different case: whatever is in that element on blur *becomes*
+ * `props.text`, so a resolved tag would be committed as one recipient's sample
+ * value and the variable would be gone for good. The block under the caret is
+ * therefore rendered with its tags intact.
+ *
+ * @param {RenderContext} ctx
+ * @returns {RenderContext}
+ */
+export function withRawTags(ctx) {
+  if (ctx.raw) return ctx
+  return { ...ctx, raw: true, resolve: (text) => text ?? '' }
+}

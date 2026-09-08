@@ -30,9 +30,7 @@ export function RowLayouts() {
    * @param {number[]} widths
    */
   const addRow = (widths) => {
-    const sectionId = targetSectionId(store)
-    if (sectionId) store.addRow(sectionId, widths)
-    else store.addSection({ widths })
+    store.addRow(targetSectionId(store), widths)
   }
 
   return (

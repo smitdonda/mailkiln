@@ -24,6 +24,7 @@ import {
   insertRow as insertRowOp,
   insertSection as insertSectionOp,
   lintDocument,
+  listColumns,
   moveBlock as moveBlockOp,
   moveRow as moveRowOp,
   moveSection as moveSectionOp,
@@ -67,14 +68,14 @@ import {
  * @property {() => void} redo
  * @property {boolean} canUndo
  * @property {boolean} canRedo
- * @property {(columnId: string, init?: { index?: number, type?: string, block?: Block, props?: Record<string, any> }) => void} insertBlock
+ * @property {(columnId: string | null, init?: { index?: number, type?: string, block?: Block, props?: Record<string, any> }) => void} insertBlock
  * @property {(move: { blockId: string, toColumnId: string, toIndex?: number }) => void} moveBlock
  * @property {(id: string, patch: Record<string, any>, tagKey?: string) => void} patch
  * @property {(patch: Partial<import('../core/types.js').DocumentSettings>, tagKey?: string) => void} patchSettings
  * @property {(id: string) => void} remove
  * @property {(id: string) => void} duplicate
  * @property {(init?: { index?: number, columns?: number, widths?: number[] }) => void} addSection
- * @property {(sectionId: string, layout?: number | number[]) => void} addRow
+ * @property {(sectionId: string | null, layout?: number | number[]) => void} addRow
  * @property {(rowId: string, count: number) => void} setRowColumns
  * @property {(rowId: string, widths: number[]) => void} setColumnWidths
  * @property {(rowId: string, widths: number[]) => void} setRowLayout
@@ -261,7 +262,8 @@ function useEditorStore(args) {
   const actions = useMemo(
     () => ({
       /**
-       * @param {string} columnId
+       * @param {string | null} columnId Falls back to the last column, or a new
+       *   section when the document has none.
        * @param {object} [init]
        * @param {number} [init.index]
        * @param {string} [init.type]
@@ -271,9 +273,11 @@ function useEditorStore(args) {
       insertBlock(columnId, init = {}) {
         let insertedId = null
         apply((current) => {
-          const next = insertBlockOp(current, { columnId, ...init })
+          const target = insertTarget(current, columnId)
+          if (!target.columnId) return current
+          const next = insertBlockOp(target.doc, { columnId: target.columnId, ...init })
           // Select what was just added — the Inspector should be showing it.
-          const before = new Set(collectBlockIds(current))
+          const before = new Set(collectBlockIds(target.doc))
           insertedId = collectBlockIds(next).find((id) => !before.has(id)) ?? null
           return next
         })
@@ -330,12 +334,22 @@ function useEditorStore(args) {
       },
 
       /**
-       * @param {string} sectionId
+       * @param {string | null} sectionId When there is no such section, the row
+       *   becomes one.
        * @param {number | number[]} [layout] A column count, or explicit widths.
        */
       addRow(sectionId, layout) {
         const init = Array.isArray(layout) ? { widths: layout } : { columns: layout }
-        apply((current) => insertRowOp(current, { sectionId, ...init }))
+        apply((current) => {
+          // Deleting the last section leaves a document with nowhere to put a
+          // row. Rather than making every caller check, the row becomes a
+          // section — which is what the person clicking "2 columns" on an empty
+          // canvas meant anyway.
+          if (sectionId && findNode(current, sectionId)?.kind === 'section') {
+            return insertRowOp(current, { sectionId, ...init })
+          }
+          return insertSectionOp(current, init)
+        })
       },
 
       /**
@@ -449,6 +463,28 @@ function columnIdOf(selection) {
   if (selection.kind === 'row') return selection.node.columns?.[0]?.id ?? null
   if (selection.kind === 'section') return selection.node.rows?.[0]?.columns?.[0]?.id ?? null
   return null
+}
+
+/**
+ * The column an insert should land in, and the document that has it.
+ *
+ * A document can genuinely have no column to insert into: deleting the last
+ * section leaves zero, and every insert path — the palette, quick insert, the
+ * blank state — then had nothing to aim at and silently did nothing, with no
+ * way back except the Rows tab. Recovering here rather than in each button
+ * means there is one rule and no dead controls.
+ *
+ * @param {EmailDocument} doc
+ * @param {string | null} [columnId] The caller's preferred target.
+ * @returns {{ doc: EmailDocument, columnId: string | null }}
+ */
+function insertTarget(doc, columnId) {
+  if (columnId && findNode(doc, columnId)?.kind === 'column') return { doc, columnId }
+  const columns = listColumns(doc)
+  if (columns.length) return { doc, columnId: columns[columns.length - 1].id }
+  const next = insertSectionOp(doc, { columns: 1 })
+  const created = listColumns(next)
+  return { doc: next, columnId: created[created.length - 1]?.id ?? null }
 }
 
 /**
