@@ -187,7 +187,12 @@ export function Toolbar({
       {/* Ambient, not a control — the word count of an email. There is nothing
           to click because the Checks tab beside it is already the way in. */}
       <span className="mk-size" data-level={sizeLevel} title={t('toolbar.sizeHint')}>
-        {t('toolbar.size', { size: Math.round(sizeBytes / 1024) })}
+        {t('toolbar.size', {
+          size: Math.round(sizeBytes / 1024),
+          // The budget belongs beside the number, not only in the tooltip: a
+          // bare "8 KB" gives nobody a reason to care until it is too late.
+          limit: Math.round(GMAIL_LIMIT / 1024),
+        })}
       </span>
 
       {onToggleAppearance ? (

@@ -17,7 +17,7 @@ export const en = {
   'toolbar.theme': 'Toggle dark mode',
   'toolbar.name': 'Template name',
   'toolbar.untitled': 'Untitled email',
-  'toolbar.size': '{size} KB',
+  'toolbar.size': '{size} / {limit} KB',
   'toolbar.sizeHint': 'Rendered size. Gmail clips a message over 100 KB.',
 
   // views
@@ -58,6 +58,7 @@ export const en = {
 
   // palette
   'palette.title': 'Blocks',
+  'palette.all': 'All',
   'palette.search': 'Search blocks',
   'palette.categories': 'Block categories',
   'palette.empty': 'No blocks match “{query}”.',

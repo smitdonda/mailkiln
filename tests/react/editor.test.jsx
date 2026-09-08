@@ -143,6 +143,104 @@ describe('adding blocks', () => {
   })
 })
 
+describe('the canvas as a surface to judge by', () => {
+  it('draws the paper at the width the email is sent at', () => {
+    // A canvas that stretches to the pane makes every line length and column
+    // split on screen wrong, in the view people spend all their time in.
+    mount({ defaultValue: normalize(docOf([createBlock('text')])) })
+    const paper = /** @type {HTMLElement} */ (document.querySelector('.mk-canvas'))
+    expect(paper.style.maxWidth).toBe('600px')
+  })
+
+  it('follows a width the author changes', () => {
+    const doc = normalize(docOf([createBlock('text')]))
+    mount({ defaultValue: { ...doc, settings: { ...doc.settings, width: 640 } } })
+    expect(/** @type {HTMLElement} */ (document.querySelector('.mk-canvas')).style.maxWidth).toBe(
+      '640px',
+    )
+  })
+
+  it('prints the size against the 100 KB budget its own tooltip names', () => {
+    mount()
+    expect(screen.getByText(/\d+ \/ 100 KB/)).toBeTruthy()
+  })
+
+  it('mounts each block’s chrome so hover can reveal it', () => {
+    mount({ defaultValue: normalize(docOf([createBlock('text')])) })
+    // Not selected, and the tools are in the DOM anyway — CSS fades them in on
+    // hover, and a keyboard user can tab straight to them.
+    expect(document.querySelector('.mk-node-tools')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Drag' })).toBeTruthy()
+  })
+
+  it('keeps an unselected block’s chrome out of the tab order', () => {
+    // Mounted for hover, but three extra tab stops on every block would make a
+    // twenty-block document miserable to move through from the keyboard.
+    mount({ defaultValue: normalize(docOf([createBlock('text'), createBlock('button')])) })
+    const tools = [...document.querySelectorAll('.mk-node-tool')]
+    expect(tools.length).toBe(6)
+    expect(tools.every((button) => button.getAttribute('tabindex') === '-1')).toBe(true)
+
+    fireEvent.click(/** @type {HTMLElement} */ (document.querySelector('.mk-node')))
+    const selected = /** @type {HTMLElement} */ (
+      document.querySelector('.mk-node[data-selected] .mk-node-tool')
+    )
+    expect(selected.getAttribute('tabindex')).toBe('0')
+  })
+})
+
+describe('the palette as a place to work', () => {
+  it('opens on every block, not on whichever category sorted first', () => {
+    // The default used to be the group of the first block in the palette, so a
+    // consumer ordering their tools with `position` decided which category
+    // everyone landed in — and the demo's own config landed them in Advanced.
+    mount({
+      blocks: [
+        defineBlock({
+          type: 'gadget',
+          label: 'Gadget',
+          group: 'Advanced',
+          defaultProps: { title: '' },
+          render: { html: () => '<div></div>' },
+        }),
+      ],
+      tools: { gadget: { position: 0 } },
+    })
+
+    expect(document.querySelectorAll('[data-palette-block]').length).toBeGreaterThan(8)
+    expect(paletteTile('text')).toBeTruthy()
+    expect(paletteTile('button')).toBeTruthy()
+    unregisterBlock('gadget')
+  })
+
+  it('filters to one category and back to all', () => {
+    mount()
+    const all = document.querySelectorAll('[data-palette-block]').length
+
+    fireEvent.click(screen.getByTitle('Layout'))
+    const layout = document.querySelectorAll('[data-palette-block]').length
+    expect(layout).toBeLessThan(all)
+
+    fireEvent.click(screen.getByTitle('All'))
+    expect(document.querySelectorAll('[data-palette-block]').length).toBe(all)
+  })
+
+  it('keeps the tabs while a block is selected, so the palette is one click away', () => {
+    const { latest } = mount()
+    fireEvent.click(paletteTile('text'))
+
+    // Properties opened, and the other three tabs are still there.
+    expect(panelLabel()).toBe('Properties')
+    expect(screen.getByRole('tab', { name: 'Properties' })).toBeTruthy()
+    expect(screen.getByRole('tab', { name: 'Content' })).toBeTruthy()
+
+    // One click back to the blocks — not a round trip through a back button.
+    fireEvent.click(screen.getByRole('tab', { name: 'Content' }))
+    fireEvent.click(paletteTile('button'))
+    expect(allBlocksIn(latest()).map((b) => b.type)).toEqual(['text', 'button'])
+  })
+})
+
 describe('the side panel', () => {
   it('swaps between its three tabs', () => {
     mount()

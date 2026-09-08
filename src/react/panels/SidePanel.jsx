@@ -1,19 +1,22 @@
 /**
  * The side panel.
  *
- * One panel, three tabs — Content, Rows, Settings — and it *swaps* to the
- * selected node's properties instead of showing them somewhere else. That swap is
- * the whole reason this component exists: with a separate always-on inspector,
- * the thing you are editing and the controls that edit it sit at opposite edges
- * of the screen, and you spend the session looking back and forth.
+ * One panel, one tab row: Content, Rows, Settings, and — once something is
+ * selected — Properties, which the panel switches to on its own.
  *
- * Selecting a block therefore replaces the tabs with a titled header and a back
- * button; deselecting returns to whichever tab you were on.
+ * Properties used to *replace* the whole panel, on the reasoning that the thing
+ * you are editing and the controls that edit it should not sit at opposite edges
+ * of the screen. They still don't; but replacing the tabs threw the block list
+ * away on every insert, so adding six blocks cost eleven extra clicks getting
+ * back to it. A fourth tab keeps both: properties open where you are already
+ * looking, and the palette is one click away instead of a round trip.
+ *
+ * Deselecting returns to whichever tab you were on before the selection.
  *
  * @module mailkiln/react/panels/SidePanel
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { findNode, getBlockDef } from '../../core/index.js'
 import { useMailKilnContext } from '../context.jsx'
 import { useI18n } from '../i18n/index.jsx'
@@ -22,7 +25,7 @@ import { RowLayouts } from './RowLayouts.jsx'
 import { DocumentFields, NodeFields } from './Inspector.jsx'
 import { IconArrowLeft, IconClose, IconCopy, IconTrash } from '../icons.jsx'
 
-/** @typedef {'content' | 'rows' | 'settings'} PanelTab */
+/** @typedef {'content' | 'rows' | 'settings' | 'properties'} PanelTab */
 
 /**
  * @param {object} props
@@ -37,102 +40,73 @@ export function SidePanel({ onClose }) {
   const [tab, setTab] = useState(/** @type {PanelTab} */ ('content'))
   const { selection } = store
 
-  // Selecting a structural node is a layout intent, so land on Rows for it and
-  // on Content for a block. Without this the panel opens on whatever tab you
-  // last used, which is rarely the one you want next.
+  // Where deselecting goes back to. Selecting a structural node is a layout
+  // intent, so that one returns to Rows rather than to wherever you happened to
+  // be — which is the tab you almost always want next after moving a row.
+  const previousTab = useRef(/** @type {PanelTab} */ ('content'))
+
   useEffect(() => {
-    if (selection && selection.kind !== 'block') setTab('rows')
+    if (selection) {
+      if (selection.kind !== 'block') previousTab.current = 'rows'
+      setTab('properties')
+    } else {
+      setTab(previousTab.current)
+    }
   }, [selection])
 
-  if (selection) {
-    const label =
-      selection.kind === 'block'
-        ? (getBlockDef(selection.node.type)?.label ?? selection.node.type)
-        : t(`inspector.${selection.kind}`)
-
-    return (
-      <aside className="mk-panel" aria-label={t('inspector.title')}>
-        <div className="mk-panel-head">
-          <button
-            type="button"
-            className="mk-btn mk-btn-icon"
-            aria-label={t('panel.back')}
-            title={t('panel.back')}
-            onClick={() => store.select(null)}
-          >
-            <IconArrowLeft />
-          </button>
-          <span className="mk-panel-title">{label}</span>
-          {/* A second, always-visible route to duplicate/delete. The canvas strip
-              is easy to miss on a short node, and "I added a row I don't want"
-              must never be a dead end. */}
-          <button
-            type="button"
-            className="mk-btn mk-btn-icon"
-            aria-label={`${t('canvas.duplicate')} ${label}`}
-            title={t('canvas.duplicate')}
-            onClick={() => store.duplicate(selection.node.id)}
-          >
-            <IconCopy />
-          </button>
-          <button
-            type="button"
-            className="mk-btn mk-btn-icon"
-            aria-label={`${t('canvas.delete')} ${label}`}
-            title={t('canvas.delete')}
-            onClick={() => store.remove(selection.node.id)}
-          >
-            <IconTrash />
-          </button>
-          {onClose ? (
-            <button
-              type="button"
-              className="mk-btn mk-btn-icon mk-panel-close"
-              aria-label={t('panel.close')}
-              title={t('panel.close')}
-              onClick={onClose}
-            >
-              <IconClose />
-            </button>
-          ) : null}
-        </div>
-        <Breadcrumbs selection={selection} />
-        <div className="mk-panel-body">
-          <NodeFields location={selection} />
-        </div>
-      </aside>
-    )
+  /** @param {PanelTab} next */
+  const pick = (next) => {
+    if (next !== 'properties') previousTab.current = next
+    setTab(next)
+    // Leaving Properties by hand means you are done with that node; keeping it
+    // selected would leave the canvas outlined around something the panel is no
+    // longer about, and the next insert would target it.
+    if (next !== 'properties' && selection) store.select(null)
   }
 
-  // Text, no icons: three words fit, and an icon beside each one only makes the
+  const label = selection
+    ? selection.kind === 'block'
+      ? (getBlockDef(selection.node.type)?.label ?? selection.node.type)
+      : t(`inspector.${selection.kind}`)
+    : ''
+
+  const showProperties = tab === 'properties' && selection
+
+  // Text, no icons: the words fit, and an icon beside each one only makes the
   // tab row louder than the panel underneath it.
-  const tabs = /** @type {const} */ ([
-    ['content', 'panel.content'],
-    ['rows', 'panel.rows'],
-    ['settings', 'panel.settings'],
+  const tabs = /** @type {Array<[PanelTab, string]>} */ ([
+    ['content', t('panel.content')],
+    ['rows', t('panel.rows')],
+    ['settings', t('panel.settings')],
+    ...(selection ? [['properties', t('inspector.title')]] : []),
   ])
 
   return (
     <aside
       className="mk-panel"
-      aria-label={tab === 'content' ? t('palette.title') : t(`panel.${tab}`)}
+      aria-label={
+        showProperties
+          ? t('inspector.title')
+          : tab === 'content'
+            ? t('palette.title')
+            : t(`panel.${tab}`)
+      }
     >
       <div className="mk-panel-tabs">
-        {/* The three tabs are their own element rather than the whole header
-            row: a `tablist` may only contain tabs, and below the panel
-            breakpoint the close button shares this row. It was inside the
-            tablist, which made it a non-tab child of one. */}
+        {/* The tabs are their own element rather than the whole header row: a
+            `tablist` may only contain tabs, and below the panel breakpoint the
+            close button shares this row. */}
         <div className="mk-panel-switch" role="tablist" aria-label={t('inspector.title')}>
-          {tabs.map(([id, key]) => (
+          {tabs.map(([id, text]) => (
             <button
               key={id}
               type="button"
               role="tab"
               className="mk-panel-tab"
               aria-selected={tab === id}
-              onClick={() => setTab(id)}
+              onClick={() => pick(id)}
             >
-              {t(key)}
+              {text}
             </button>
           ))}
         </div>
@@ -149,10 +123,50 @@ export function SidePanel({ onClose }) {
         ) : null}
       </div>
 
+      {showProperties ? (
+        <>
+          <div className="mk-panel-head">
+            <button
+              type="button"
+              className="mk-btn mk-btn-icon"
+              aria-label={t('panel.back')}
+              title={t('panel.back')}
+              onClick={() => store.select(null)}
+            >
+              <IconArrowLeft />
+            </button>
+            <span className="mk-panel-title">{label}</span>
+            {/* A second, always-visible route to duplicate/delete. The canvas
+                strip is easy to miss on a short node, and "I added a row I don't
+                want" must never be a dead end. */}
+            <button
+              type="button"
+              className="mk-btn mk-btn-icon"
+              aria-label={`${t('canvas.duplicate')} ${label}`}
+              title={t('canvas.duplicate')}
+              onClick={() => store.duplicate(selection.node.id)}
+            >
+              <IconCopy />
+            </button>
+            <button
+              type="button"
+              className="mk-btn mk-btn-icon"
+              aria-label={`${t('canvas.delete')} ${label}`}
+              title={t('canvas.delete')}
+              onClick={() => store.remove(selection.node.id)}
+            >
+              <IconTrash />
+            </button>
+          </div>
+          <Breadcrumbs selection={selection} />
+        </>
+      ) : null}
+
       <div className="mk-panel-body">
-        {tab === 'content' ? <BlockPalette /> : null}
-        {tab === 'rows' ? <RowLayouts /> : null}
-        {tab === 'settings' ? <DocumentFields /> : null}
+        {showProperties ? <NodeFields location={selection} /> : null}
+        {!showProperties && tab === 'content' ? <BlockPalette /> : null}
+        {!showProperties && tab === 'rows' ? <RowLayouts /> : null}
+        {!showProperties && tab === 'settings' ? <DocumentFields /> : null}
       </div>
     </aside>
   )
