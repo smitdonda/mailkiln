@@ -62,7 +62,7 @@
     "build:types": "tsc -p jsconfig.dts.json && node -e \"const{copyFileSync}=require('fs');copyFileSync('dist/index.d.ts','dist/index.d.cts');copyFileSync('dist/core/index.d.ts','dist/core/index.d.cts')\"",
     "typecheck": "tsc -p jsconfig.json",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.{js,jsx,css,json,md}\"",
+    "format": "prettier --write \"**/*.{js,jsx,css,json}\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "verify:pack": "npm run build && publint && npm run verify:attw",
