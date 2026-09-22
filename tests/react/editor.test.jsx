@@ -302,6 +302,118 @@ describe('the side panel', () => {
   })
 })
 
+describe('the panel as an overlay', () => {
+  // Below the panel breakpoint the panel is not a column — it sits off-canvas
+  // until something slides it in. jsdom applies no media queries, so the
+  // breakpoint is faked here and what is asserted is the state the CSS keys off
+  // (`data-panel-open` on the shell) rather than a computed width.
+
+  /** @type {typeof window.matchMedia} */
+  let realMatchMedia
+
+  /** Every `max-width` query matches: a viewport narrow enough for the overlay. */
+  function narrowViewport() {
+    realMatchMedia = window.matchMedia
+    window.matchMedia = /** @type {any} */ (
+      (/** @type {string} */ query) => ({
+        matches: query.includes('max-width'),
+        media: query,
+        onchange: null,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+        dispatchEvent: () => false,
+      })
+    )
+  }
+
+  afterEach(() => {
+    if (realMatchMedia) window.matchMedia = realMatchMedia
+  })
+
+  /** @returns {boolean} */
+  function panelIsOpen() {
+    return document.querySelector('.mk-shell')?.getAttribute('data-panel-open') === 'true'
+  }
+
+  it('slides in when a node is selected, so the properties are not off-screen', () => {
+    narrowViewport()
+    mount()
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(paletteTile('text'))
+    expect(panelIsOpen()).toBe(true)
+    expect(panelLabel()).toBe('Properties')
+  })
+
+  it('opens for a node selected on the canvas, not only for an insert', () => {
+    // The bug this covers: on a phone, tapping a block switched the closed
+    // overlay to Properties where nobody could see it, and the tap read as
+    // doing nothing. There is no other route to a block's properties at that
+    // width — the structure pane is hidden below 640px.
+    narrowViewport()
+    mount({ defaultValue: normalize(docOf([createBlock('text', { html: 'Hi' })])) })
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(/** @type {HTMLElement} */ (document.querySelector('.mk-node')))
+    expect(panelIsOpen()).toBe(true)
+    expect(panelLabel()).toBe('Properties')
+  })
+
+  it('closes from the toolbar, its own button, the scrim and escape', () => {
+    narrowViewport()
+    mount()
+    const toggle = screen.getByRole('button', { name: 'Panel' })
+
+    fireEvent.click(toggle)
+    expect(panelIsOpen()).toBe(true)
+    fireEvent.click(toggle)
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(paletteTile('text'))
+    expect(panelIsOpen()).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Close panel' }))
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(toggle)
+    fireEvent.pointerDown(/** @type {HTMLElement} */ (document.querySelector('.mk-scrim')))
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(toggle)
+    fireEvent.keyDown(root(), { key: 'Escape' })
+    expect(panelIsOpen()).toBe(false)
+  })
+
+  it('stays shut once dismissed over a node that is still selected', () => {
+    // Only a *change* of selection opens it. Re-opening on every commit would
+    // make the panel impossible to get out of while editing a block.
+    narrowViewport()
+    const { latest } = mount()
+    fireEvent.click(paletteTile('text'))
+    fireEvent.click(screen.getByRole('button', { name: 'Close panel' }))
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.change(screen.getByLabelText('Template name'), { target: { value: 'Welcome' } })
+    expect(latest().settings.name).toBe('Welcome')
+    expect(panelIsOpen()).toBe(false)
+  })
+
+  it('is a column on a wide viewport, with no open state to get in the way', () => {
+    // The default stub matches nothing, so this is the wide case. Escape has to
+    // reach the selection rather than being spent "closing" a panel that is
+    // already beside the canvas and cannot move.
+    mount()
+    fireEvent.click(paletteTile('text'))
+    expect(panelIsOpen()).toBe(false)
+    expect(screen.queryByRole('button', { name: 'Panel' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
+
+    fireEvent.keyDown(root(), { key: 'Escape' })
+    expect(panelLabel()).toBe('Blocks')
+  })
+})
+
 describe('the toolbar', () => {
   it('renames the template as you type', () => {
     const { latest } = mount()

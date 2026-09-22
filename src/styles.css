@@ -3203,7 +3203,10 @@
     right: 0;
     bottom: 0;
     z-index: 30;
-    width: min(340px, 86vw);
+    /* Percent, not `vw`: the editor is rarely flush with the viewport, so a vw
+       width on a panel positioned inside the shell hangs off the side and clips
+       its own contents. Same reasoning as the 480px rule below. */
+    width: min(340px, 86%);
     border-left: 1px solid var(--mk-border);
     box-shadow: -12px 0 32px -18px rgb(15 23 42 / 45%);
     transform: translateX(101%);
