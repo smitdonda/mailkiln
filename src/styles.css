@@ -142,6 +142,14 @@
   --mk-panel-width: 320px;
   --mk-tree-width: 264px;
 
+  /* Headroom above the paper for a node's label, which is drawn 18px *above* the
+     box it names (see `.mk-node-label`). The canvas scroller clips, so any top
+     padding smaller than this cuts the first node's badge in half — which is
+     exactly what the narrow breakpoints used to do: 18px at 900, 14px at 640,
+     10px at 480. It is the same number at every width, because the label does
+     not get smaller when the screen does. */
+  --mk-label-headroom: 20px;
+
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -3305,7 +3313,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: 18px 14px 96px;
+    padding: var(--mk-label-headroom) 14px 96px;
   }
 }
 
@@ -3319,10 +3327,15 @@
     display: none;
   }
 
+  /* Three rows of controls is structural at this width — the name, the views,
+     and the panel/width/Export row — so the only thing left to give is the
+     space between them. 4px rows and 6px ends rather than 6 and 8: on a touch
+     screen the controls themselves grew to 42px, and the gaps are the part of
+     that nobody taps. */
   .mk-toolbar {
     min-height: 52px;
-    gap: 6px;
-    padding: 8px 10px;
+    gap: 4px;
+    padding: 6px 10px;
   }
 
   /* The name takes its own line rather than crushing the controls. This sits on
@@ -3343,7 +3356,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: 14px 10px 88px;
+    padding: var(--mk-label-headroom) 10px 88px;
   }
 
   /* Comfortable touch targets: 36px is the smallest that does not mis-tap. */
@@ -3364,7 +3377,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: 10px 8px 80px;
+    padding: var(--mk-label-headroom) 8px 80px;
   }
 
   /* Four wrapped rows of toolbar on a phone leaves no canvas. Tightening the
@@ -3402,6 +3415,69 @@
   }
 }
 
+/* ===========================================================================
+   Touch sizing
+
+   Keyed on the pointer, not the width, because the two questions are different
+   ones. Width decides the *layout* — how many columns of chrome fit. The pointer
+   decides how big a target has to be, and a finger is the same size on a 390px
+   phone as on an 820px tablet, while a 500px-wide desktop window is still being
+   driven by a mouse and does not want 42px controls.
+
+   The editor already declared its own floor — "36px is the smallest that does
+   not mis-tap", beside the rule that applies it to toolbar buttons, tabs and
+   palette tiles at 640px. Everything else kept its desktop size, and measuring a
+   phone found the controls that matter most sitting well under it: the per-block
+   drag/duplicate/delete strip and the inline formatting bar at 22px, the panel's
+   close/back/duplicate/delete and the breadcrumbs at 26px, undo and redo 26px
+   wide. The three buttons that delete things were the smallest in the editor.
+
+   The two control tokens move together: a trough is its child plus its 3px
+   padding either side, so `--mk-control` has to stay 6px above
+   `--mk-control-icon` or every segmented control overflows its own groove.
+   =========================================================================== */
+
+@media (pointer: coarse) {
+  .mk-root {
+    --mk-control-icon: 36px;
+    --mk-control: 42px;
+    --mk-control-primary: 44px;
+  }
+
+  /* Hardcoded rather than tokenised, because these two live *over* the document
+     rather than in the chrome: the strip of actions on a block, and the
+     formatting bar above the text you are editing. Same floor all the same —
+     Delete is Delete wherever it is drawn. */
+  .mk-node-tool,
+  .mk-rt-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* An icon-only switch (the device widths) has no label to give it width, so
+     the height token alone left it a 31px target in a 36px groove. */
+  .mk-segmented > button {
+    min-width: 36px;
+  }
+
+  /* The folded structure rail, which is where a tablet lands: 40px wide, so 36
+     would leave the stub touching both edges. 34 with the rail's 3px gutters is
+     the most a 40px rail can give a finger. */
+  .mk-tree-stub {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* The route back up from a selected block. Not 36: a row of three at that
+     height is a band the width of the panel, and the trail is read far more
+     often than it is tapped. 30px with room either side of the word is enough
+     not to mis-hit while still reading as a breadcrumb. */
+  .mk-crumb {
+    min-height: 30px;
+    padding: 4px 8px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mk-panel,
   .mk-scrim {
@@ -3432,14 +3508,26 @@
   opacity: 1;
 }
 
-/* A pointer-driven reveal is no use on a touch screen, where there is no hover
-   state to enter — so there the chrome is simply always on. */
-@media (hover: none) {
-  .mk-node-label,
-  .mk-node .mk-node-tools {
-    opacity: 1;
-  }
-}
+/* On a touch screen there is no hover to reveal any of this, so the chrome
+ * follows the *selection* instead — which is what a tap produces, and what the
+ * tool strip already did here even before this was written down.
+ *
+ * The label used to be pinned on instead, on the reasoning that a canvas which
+ * answers nothing reads as a preview rather than an editor. True with one block.
+ * With three it puts a badge over the copy of the block above: a label is drawn
+ * 18px above the box it names, stacked blocks have no gap between them, and
+ * nothing on a phone reveals one label at a time — so `Text` lands inside the
+ * heading and `Button` inside the paragraph. Measured on a 390px viewport, and
+ * plainly worse than the problem it solved.
+ *
+ * What replaces it is the panel: tapping a block opens Properties, whose header
+ * names the block. The type is one tap away rather than permanently written over
+ * the document.
+ *
+ * The rule also named `.mk-node .mk-node-tools`, which never did anything —
+ * `.mk-node:not([data-selected='true']) .mk-node-tools` above is one class more
+ * specific, so the strips followed the selection regardless. That behaviour was
+ * right; only the claim was wrong. */
 
 /* --- the workspace ------------------------------------------------------
    The paper is now the width the email really is, which leaves ground around
