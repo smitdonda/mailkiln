@@ -187,6 +187,29 @@ describe('the canvas as a surface to judge by', () => {
     )
     expect(selected.getAttribute('tabindex')).toBe('0')
   })
+
+  // The paper is a query container, and the stylesheet stacks a row's columns
+  // once it is narrower than the email's own content width — the same thing the
+  // exported HTML does with `@media (max-width: width - 1)`. jsdom evaluates
+  // neither a container query nor a media query, so what is pinned here is the
+  // attribute the two sides agree on. Without it the canvas kept two 170px
+  // columns on a phone, wrapped a heading one word per line, and pushed a social
+  // row off the edge of the paper.
+  it('marks a row as stacking, which is what the narrow paper keys off', () => {
+    mount({ defaultValue: normalize(docOf([createBlock('text')])) })
+    const row = /** @type {HTMLElement} */ (document.querySelector('.mk-row'))
+    expect(row.hasAttribute('data-stack')).toBe(true)
+  })
+
+  it('leaves the mark off a row that opted out, exactly as the renderer does', () => {
+    // `stackOnMobile: false` means "stay side by side and squeeze". That is what
+    // the sent email does, so it has to be what the canvas does.
+    mount({
+      defaultValue: normalize(docOf([createBlock('text')], { row: { stackOnMobile: false } })),
+    })
+    const row = /** @type {HTMLElement} */ (document.querySelector('.mk-row'))
+    expect(row.hasAttribute('data-stack')).toBe(false)
+  })
 })
 
 describe('the palette as a place to work', () => {

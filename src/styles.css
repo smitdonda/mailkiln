@@ -142,13 +142,21 @@
   --mk-panel-width: 320px;
   --mk-tree-width: 264px;
 
-  /* Headroom above the paper for a node's label, which is drawn 18px *above* the
-     box it names (see `.mk-node-label`). The canvas scroller clips, so any top
-     padding smaller than this cuts the first node's badge in half — which is
-     exactly what the narrow breakpoints used to do: 18px at 900, 14px at 640,
-     10px at 480. It is the same number at every width, because the label does
-     not get smaller when the screen does. */
-  --mk-label-headroom: 20px;
+  /* Headroom above the paper for the chrome that is drawn *above* a node rather
+     than inside it. The canvas scroller clips, and the first block sits flush
+     with the top of the paper — a section has no top padding by default — so
+     this padding is the only thing standing between that chrome and the edge.
+
+     Sized for the tallest of it, which is the inline formatting bar at 30px
+     (`top: -30px` on `.mk-inline-toolbar`), not the 18px type label. Every
+     narrow breakpoint had shrunk this below both: 22px at 1200, 18px at 900,
+     14px at 640, 10px at 480 — so the label lost up to 9px of itself and the
+     formatting bar, the moment you edited the first block in a template, lost
+     up to 20px of itself at every width below 1200. 32px is what the desktop
+     padding already was, so this is one number rather than five.
+
+     Touch raises it, because a 36px tap target makes that bar 42px tall. */
+  --mk-chrome-headroom: 32px;
 
   box-sizing: border-box;
   display: flex;
@@ -1220,7 +1228,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--mk-space-3);
-  padding: var(--mk-space-6) var(--mk-space-6) 120px;
+  padding: var(--mk-chrome-headroom) var(--mk-space-6) 120px;
 }
 
 .mk-canvas {
@@ -1230,6 +1238,46 @@
   border-radius: 8px;
   box-shadow: var(--mk-shadow-paper);
   transition: max-width 220ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* The paper is a query container so the columns below can stack on its own
+     width rather than the window's. That is the width the email is actually
+     being laid out at — it is what the mobile device frame changes, and what a
+     narrow editor embedded in a wide page has — and the window knows none of it. */
+  container-type: inline-size;
+  container-name: mk-paper;
+}
+
+/* Columns stack when the paper is narrower than the email's own content width,
+   which is what the exported HTML does: `render/html.js` puts `STACK_CLASS` on
+   every column cell and `@media (max-width: contentWidth - 1)` turns it into
+   `display:block;width:100%`. The canvas did not, at any width — so a two-column
+   row on a phone kept two columns of 170px, wrapped a heading one word per line
+   and pushed a social row off the right edge of the paper. It was wrong at the
+   Mobile device width on a desktop too, which is the one view whose entire job
+   is to show what a phone will do.
+   
+   `599px` is the default 600px content width minus one, the same arithmetic as
+   `mobileBreakpoint()`. A document with a custom `contentWidth` stacks in the
+   real email at its own width and here at this one; a container query cannot
+   read a custom property in its condition, so this is the part that is a
+   constant rather than derived.
+   
+   `!important` because the widths are inline styles on the column — they carry
+   the author's percentages, so they cannot live in the stylesheet, and nothing
+   but `!important` outranks them. The same reason `[data-device='mobile']` uses
+   it on the paper above.
+   
+   `[data-stack]` mirrors the renderer exactly: a row with `stackOnMobile: false`
+   keeps its columns side by side and squeezes, here and in the inbox both. */
+@container mk-paper (max-width: 599px) {
+  .mk-row[data-stack] {
+    flex-wrap: wrap;
+  }
+
+  .mk-row[data-stack] > .mk-col {
+    flex-basis: 100% !important;
+    max-width: 100% !important;
+  }
 }
 
 /* Mobile framing in the design view — the same document, narrowed. */
@@ -3156,7 +3204,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: 22px 18px 100px;
+    padding: var(--mk-chrome-headroom) 18px 100px;
   }
 }
 
@@ -3313,7 +3361,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: var(--mk-label-headroom) 14px 96px;
+    padding: var(--mk-chrome-headroom) 14px 96px;
   }
 }
 
@@ -3356,7 +3404,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: var(--mk-label-headroom) 10px 88px;
+    padding: var(--mk-chrome-headroom) 10px 88px;
   }
 
   /* Comfortable touch targets: 36px is the smallest that does not mis-tap. */
@@ -3377,7 +3425,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: var(--mk-label-headroom) 8px 80px;
+    padding: var(--mk-chrome-headroom) 8px 80px;
   }
 
   /* Four wrapped rows of toolbar on a phone leaves no canvas. Tightening the
@@ -3442,16 +3490,67 @@
     --mk-control-icon: 36px;
     --mk-control: 42px;
     --mk-control-primary: 44px;
+
+    /* 42px of formatting bar plus the 2px gap it keeps on a mouse. */
+    --mk-chrome-headroom: 46px;
+  }
+
+  /* The bar is 36px of button plus 3px of padding either side, so a -30px anchor
+     sized for a 28px bar now hung 12px *into* the first line of the text being
+     edited. Measured, not guessed: the whole point of a formatting bar is to not
+     be over the words. */
+  .mk-inline-toolbar {
+    top: -44px;
+    /* Both pieces of chrome share this band — bar at the left, actions strip at
+       the right — and at these sizes they do not both fit across a phone-width
+       paper: a text block's seven buttons come to 276px and the strip to 116px,
+       against 340px of paper. So the bar takes what is left and scrolls, rather
+       than growing under the strip where its last button would be unreachable
+       behind it. A heading has five buttons and never reaches the limit. */
+    max-width: calc(100% - 124px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mk-inline-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Same arithmetic, same fix, for the actions strip — which is tucked into the
+     block's top-right corner and therefore *over* the document by design. A 22px
+     badge grazes the corner; a 42px one covers the end of the first line, which
+     on a text block is words you are trying to read.
+
+     So on touch it moves up into the headroom band beside the formatting bar,
+     which is what that band is now sized for. Rounded on top rather than the
+     corner-tucked radius, because it is no longer tucked into anything.
+
+     It cannot simply hide while editing instead: for a text or heading block
+     `editing` *is* `selected`, so that would take duplicate and delete off the
+     canvas for the two most common block types. */
+  .mk-node-tools {
+    top: -44px;
+    border-radius: var(--mk-radius-sm) var(--mk-radius-sm) 0 0;
+  }
+
+  .mk-node-tools[data-orientation='horizontal'] {
+    border-radius: var(--mk-radius-sm) var(--mk-radius-sm) 0 0;
   }
 
   /* Hardcoded rather than tokenised, because these two live *over* the document
      rather than in the chrome: the strip of actions on a block, and the
      formatting bar above the text you are editing. Same floor all the same —
-     Delete is Delete wherever it is drawn. */
+     Delete is Delete wherever it is drawn.
+
+     `flex-shrink: 0` is not decoration. Both of these sit in flex rows, and the
+     formatting bar is width-constrained below — without this the buttons simply
+     shrank back to 28px to fit it, which is a 36px rule that silently does
+     nothing. Measured: seven buttons, 28px each, in a 216px bar. */
   .mk-node-tool,
   .mk-rt-button {
     width: 36px;
     height: 36px;
+    flex-shrink: 0;
   }
 
   /* An icon-only switch (the device widths) has no label to give it width, so

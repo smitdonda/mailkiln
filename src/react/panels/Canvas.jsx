@@ -284,6 +284,11 @@ function RowView({ row, ctx, sectionId, index, count }) {
       data-conditional={condition || repeat ? '' : undefined}
       data-cond-off={condition?.hidden || undefined}
       data-row-id={row.id}
+      // What the HTML renderer decides with a class, the canvas decides with
+      // this: the stylesheet stacks the columns once the paper is narrower than
+      // the content width. Same condition as `render/html.js` — a row that opted
+      // out of stacking keeps its columns side by side in both places.
+      data-stack={props.stackOnMobile === false ? undefined : ''}
       style={{
         padding: spacingToCss(props.padding) || undefined,
         backgroundColor: props.backgroundColor || undefined,
