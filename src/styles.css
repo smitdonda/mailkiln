@@ -608,8 +608,11 @@
   display: flex;
   align-items: center;
   gap: var(--mk-space-2);
-  height: 48px;
-  padding: 0 var(--mk-space-3);
+  /* Grows with the switch rather than pinning it: on a narrow panel the four
+     tabs take two rows (see `.mk-panel-switch`), and a fixed 48px clipped the
+     second one. */
+  min-height: 48px;
+  padding: 4px var(--mk-space-3);
   border-bottom: 1px solid var(--mk-border);
   flex-shrink: 0;
 }
@@ -631,10 +634,21 @@
   flex: 1;
   min-width: 0;
   gap: 2px;
-  height: var(--mk-control);
+  min-height: var(--mk-control);
   padding: 3px;
   border-radius: 9px;
   background: var(--mk-bg-sunken);
+
+  /* Wrapping is allowed but does not happen on its own: the tabs below are
+     `flex: 1`, which is `1 1 0%`, and a zero basis always fits on one line. It
+     is the container query further down that opts a narrow trough into a real
+     basis and so into a second row. The trough is its own query container
+     because *it* is the box that runs out of room — the panel width alone does
+     not say: a 320px panel on a desktop holds four tabs, while a 328px overlay
+     on a phone does not, because the overlay's header also carries the close
+     button. Containment is safe here; the trough holds nothing but buttons. */
+  flex-wrap: wrap;
+  container-type: inline-size;
 }
 
 /* Equal thirds, and that is what makes the weight change on selection free: with
@@ -664,6 +678,31 @@
 
 .mk-panel-tab:hover:not([aria-selected='true']) {
   color: var(--mk-fg);
+}
+
+/* Four labelled tabs stop fitting a narrow trough, and the widest of them sets
+   the width of all four: at 257px of trough (a 288px panel at 1100px, or a 328px
+   overlay on a 390px phone) "Properties" is 4px wider than its quarter, and at
+   229px (a 264px panel at 1024px, or a 300px overlay on a 360px phone) 7px wider
+   — so the selected tab's own label sat on top of the tab beside it.
+
+   Truncation is not the way out: `overflow: hidden` on the button does nothing
+   because the label is an anonymous flex item, so `text-overflow` never applies
+   to it, and moving the label into a span to make it work turns a 56px slot into
+   "Cont… Rows Setti… Prop…", which is not a tab row anyone can read.
+
+   So a narrow trough gets a real third-of-a-row basis instead: three tabs to a
+   row, the fourth wrapping to a full-width row of its own, every label whole.
+   With only three tabs it is the same single row as before — which is why this
+   needs no `:has()`, a third being a third either way. 270px sits between the
+   257 that overflows and the 289 that does not.
+
+   A child selector, and placed after the rule it overrides: `flex: 1` is
+   shorthand, so it resets `flex-basis` to 0 and would otherwise win outright. */
+@container (max-width: 270px) {
+  .mk-panel-switch > .mk-panel-tab {
+    flex-basis: calc(33.333% - 2px);
+  }
 }
 
 .mk-panel-tab[aria-selected='true'] {
