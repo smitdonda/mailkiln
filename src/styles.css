@@ -142,6 +142,22 @@
   --mk-panel-width: 320px;
   --mk-tree-width: 264px;
 
+  /* Headroom above the paper for the chrome that is drawn *above* a node rather
+     than inside it. The canvas scroller clips, and the first block sits flush
+     with the top of the paper — a section has no top padding by default — so
+     this padding is the only thing standing between that chrome and the edge.
+
+     Sized for the tallest of it, which is the inline formatting bar at 30px
+     (`top: -30px` on `.mk-inline-toolbar`), not the 18px type label. Every
+     narrow breakpoint had shrunk this below both: 22px at 1200, 18px at 900,
+     14px at 640, 10px at 480 — so the label lost up to 9px of itself and the
+     formatting bar, the moment you edited the first block in a template, lost
+     up to 20px of itself at every width below 1200. 32px is what the desktop
+     padding already was, so this is one number rather than five.
+
+     Touch raises it, because a 36px tap target makes that bar 42px tall. */
+  --mk-chrome-headroom: 32px;
+
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -423,7 +439,13 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  height: var(--mk-control);
+  /* `min-height`, not `height`: a fixed height cannot be told about a taller
+     child, so any rule that grows the chips — a touch floor, a longer font — put
+     them through the walls of their own groove instead of growing it. Same
+     reasoning as `.mk-panel-switch`, which already worked this way. At the
+     current tokens this changes nothing: the chips are 6px shorter than the
+     trough by construction. */
+  min-height: var(--mk-control);
   padding: 3px;
   border-radius: 9px;
   background: var(--mk-bg-sunken);
@@ -592,8 +614,11 @@
   display: flex;
   align-items: center;
   gap: var(--mk-space-2);
-  height: 48px;
-  padding: 0 var(--mk-space-3);
+  /* A floor, not a height. 48px is the band a desktop draws; a coarse pointer's
+     trough is 42px and needs 50, and a fixed 48 clipped it. `align-items: center`
+     is what keeps the trough centred in the band at either size. */
+  min-height: 48px;
+  padding: 4px var(--mk-space-3);
   border-bottom: 1px solid var(--mk-border);
   flex-shrink: 0;
 }
@@ -615,23 +640,56 @@
   flex: 1;
   min-width: 0;
   gap: 2px;
-  height: var(--mk-control);
+  min-height: var(--mk-control);
   padding: 3px;
   border-radius: 9px;
   background: var(--mk-bg-sunken);
+
+  /* A valve, not a layout. The tabs below are sized to their labels, so they only
+     wrap where the labels genuinely do not fit across the trough — which no
+     supported width and neither shipped locale reaches. A wrapped row beats a
+     clipped word if a translation ever gets there. */
+  flex-wrap: wrap;
 }
 
-/* Equal thirds, and that is what makes the weight change on selection free: with
-   the widths fixed, a label can go semibold without the two tabs beside it
-   sliding out from under the pointer. */
+/* Sized to its label, with the leftover space shared out evenly — *not* equal
+   quarters.
+
+   Equal quarters were the first design, and they cannot fit four labels in a
+   phone's trough. Every segment has to hold the widest label, so "Rows" (28px of
+   text) got the same box as "Properties" (53px), and four of the widest come to
+   282px against the 258px a 360px phone has. The old rule bought the fit with a
+   `@container (max-width: 270px)` third-of-a-row basis, which wrapped the fourth
+   tab onto a row of its own where `flex-grow` blew it up to the full 258px: one
+   enormous chip under three small ones, which reads as a broken layout rather
+   than a switch. Measured on a 360px viewport, four tabs, both pointer types.
+
+   Content width costs 220px for the same four labels, so they fit one row at
+   every width down to 320px with room to spare, and the 270px threshold — tuned
+   against the pixel width of the English word "Properties", and so wrong in any
+   other language — goes away with it.
+
+   What equal quarters were protecting is kept below: the row does not move when
+   the selected label goes semibold. */
 .mk-panel-tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  min-width: 0;
+  display: inline-grid;
+  /* One column, three rows: the label in the middle, and a collapsed row either
+     side of it holding the width reservations described below. The column is as
+     wide as the widest of the three, and only the middle row has any height. */
+  grid-template-columns: 1fr;
+  grid-template-rows: 0 auto 0;
+  align-content: center;
+  justify-items: center;
+  /* `auto` basis, so the label sets the width; `grow: 1`, so the slack is shared
+     equally and the four still span the trough. No `min-width: 0` — the
+     automatic minimum *is* the label, and that is what keeps a tab from being
+     shrunk until its text spills over the tab beside it. */
+  flex: 1 1 auto;
   height: var(--mk-control-icon);
-  padding: 0 var(--mk-space-2);
+  /* 6px, not 8. The tightest trough in the editor is the 264px panel a 1024px
+     desktop gets: 233px of content box against 236px of four labels at 8px of
+     padding, and 220px at 6px. Three pixels decided whether this wrapped. */
+  padding: 0 6px;
   border: 0;
   border-radius: var(--mk-radius-md);
   background: transparent;
@@ -648,6 +706,43 @@
 
 .mk-panel-tab:hover:not([aria-selected='true']) {
   color: var(--mk-fg);
+}
+
+/* The selected tab's label is semibold, and a word does not occupy the same width
+   at 400 and at 600 — so on content-width tabs, picking one would shift the tabs
+   beside it. These two reserve *both* widths in every state: the same text at 400
+   and at 600, hidden, in the collapsed rows above and below the label, sharing its
+   column. The column is therefore always `max(regular, semibold)` whichever state
+   the tab is in, and selecting a tab changes nothing but the paint.
+
+   Both weights, not just the bold one: which of the two is wider depends on the
+   font, and it is not always the bold. In the stack this editor asks for, semibold
+   "Content" measures 1px *narrower* than regular — so reserving only 600 made the
+   row twitch in the other direction.
+
+   `overflow: clip`, never `hidden`. `hidden` makes a scroll container, and a
+   scroll container contributes zero to intrinsic width, which silently turns the
+   whole reservation into a no-op. `clip` paints nothing outside the box without
+   giving up the contribution. Measured both ways.
+
+   `attr()` from a `data-` attribute rather than a duplicated string, so the
+   reservation cannot drift from the label or from a translation. It degrades
+   safely: no attribute, empty content, tab falls back to its own width.
+   `visibility: hidden` — a pseudo-element cannot carry `aria-hidden` — is what
+   keeps the two duplicates out of the accessibility tree. */
+.mk-panel-tab::before,
+.mk-panel-tab::after {
+  content: attr(data-label);
+  overflow: clip;
+  visibility: hidden;
+}
+
+.mk-panel-tab::before {
+  font-weight: 400;
+}
+
+.mk-panel-tab::after {
+  font-weight: 600;
 }
 
 .mk-panel-tab[aria-selected='true'] {
@@ -1212,7 +1307,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--mk-space-3);
-  padding: var(--mk-space-6) var(--mk-space-6) 120px;
+  padding: var(--mk-chrome-headroom) var(--mk-space-6) 120px;
 }
 
 .mk-canvas {
@@ -1222,6 +1317,46 @@
   border-radius: 8px;
   box-shadow: var(--mk-shadow-paper);
   transition: max-width 220ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* The paper is a query container so the columns below can stack on its own
+     width rather than the window's. That is the width the email is actually
+     being laid out at — it is what the mobile device frame changes, and what a
+     narrow editor embedded in a wide page has — and the window knows none of it. */
+  container-type: inline-size;
+  container-name: mk-paper;
+}
+
+/* Columns stack when the paper is narrower than the email's own content width,
+   which is what the exported HTML does: `render/html.js` puts `STACK_CLASS` on
+   every column cell and `@media (max-width: contentWidth - 1)` turns it into
+   `display:block;width:100%`. The canvas did not, at any width — so a two-column
+   row on a phone kept two columns of 170px, wrapped a heading one word per line
+   and pushed a social row off the right edge of the paper. It was wrong at the
+   Mobile device width on a desktop too, which is the one view whose entire job
+   is to show what a phone will do.
+   
+   `599px` is the default 600px content width minus one, the same arithmetic as
+   `mobileBreakpoint()`. A document with a custom `contentWidth` stacks in the
+   real email at its own width and here at this one; a container query cannot
+   read a custom property in its condition, so this is the part that is a
+   constant rather than derived.
+   
+   `!important` because the widths are inline styles on the column — they carry
+   the author's percentages, so they cannot live in the stylesheet, and nothing
+   but `!important` outranks them. The same reason `[data-device='mobile']` uses
+   it on the paper above.
+   
+   `[data-stack]` mirrors the renderer exactly: a row with `stackOnMobile: false`
+   keeps its columns side by side and squeezes, here and in the inbox both. */
+@container mk-paper (max-width: 599px) {
+  .mk-row[data-stack] {
+    flex-wrap: wrap;
+  }
+
+  .mk-row[data-stack] > .mk-col {
+    flex-basis: 100% !important;
+    max-width: 100% !important;
+  }
 }
 
 /* Mobile framing in the design view — the same document, narrowed. */
@@ -3148,7 +3283,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: 22px 18px 100px;
+    padding: var(--mk-chrome-headroom) 18px 100px;
   }
 }
 
@@ -3203,7 +3338,10 @@
     right: 0;
     bottom: 0;
     z-index: 30;
-    width: min(340px, 86vw);
+    /* Percent, not `vw`: the editor is rarely flush with the viewport, so a vw
+       width on a panel positioned inside the shell hangs off the side and clips
+       its own contents. Same reasoning as the 480px rule below. */
+    width: min(340px, 86%);
     border-left: 1px solid var(--mk-border);
     box-shadow: -12px 0 32px -18px rgb(15 23 42 / 45%);
     transform: translateX(101%);
@@ -3240,11 +3378,18 @@
     font-weight: 600;
   }
 
+  /* One padding declaration, not three added on top of the base rule: the old
+     `padding-bottom: 8px` landed on a base `padding: 4px 12px`, which left the
+     trough 4px from the top of the band and 9px from the bottom — visibly
+     top-hugging, and the taller the trough got the more it showed.
+
+     Left and right stay uneven on purpose. The close button's glyph is 14px in a
+     36px box, so 8px of padding puts the mark about 19px in from the panel's
+     edge, which is what the trough's 12px reads as on the other side. */
   .mk-panel-tabs {
     align-items: center;
-    padding-right: 8px;
+    padding: 6px 8px 6px 12px;
     border-bottom: 1px solid var(--mk-border);
-    padding-bottom: 8px;
   }
 
   /* Reads as a sheet over the canvas rather than a second page. */
@@ -3302,7 +3447,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: 18px 14px 96px;
+    padding: var(--mk-chrome-headroom) 14px 96px;
   }
 }
 
@@ -3316,10 +3461,15 @@
     display: none;
   }
 
+  /* Three rows of controls is structural at this width — the name, the views,
+     and the panel/width/Export row — so the only thing left to give is the
+     space between them. 4px rows and 6px ends rather than 6 and 8: on a touch
+     screen the controls themselves grew to 42px, and the gaps are the part of
+     that nobody taps. */
   .mk-toolbar {
     min-height: 52px;
-    gap: 6px;
-    padding: 8px 10px;
+    gap: 4px;
+    padding: 6px 10px;
   }
 
   /* The name takes its own line rather than crushing the controls. This sits on
@@ -3340,15 +3490,23 @@
   }
 
   .mk-canvas-wrap {
-    padding: 14px 10px 88px;
+    padding: var(--mk-chrome-headroom) 10px 88px;
   }
 
-  /* Comfortable touch targets: 36px is the smallest that does not mis-tap. */
-  .mk-toolbar button,
-  .mk-panel-tab,
-  .mk-tile {
-    min-height: 36px;
-  }
+  /* The 36px touch floor used to be applied here, keyed on width. It is keyed on
+     the pointer now (see the Touch sizing block below), and leaving both in place
+     was actively wrong rather than merely redundant.
+
+     On a coarse pointer it was already dead: `--mk-control-icon` is 36px there,
+     so every control this rule named was at or above the floor without it. On a
+     *fine* pointer under 640px — a narrow desktop window, and Chrome's own
+     responsive mode, which reports `pointer: fine` until you turn on touch
+     emulation — it forced 36px children into `.mk-segmented`, whose 32px height
+     leaves them 26px of content box. Measured: the view and device chips stood
+     2px out of their own trough at 360, 390, 430 and 480px, top and bottom, so
+     the switch read as three loose buttons with a grey sliver behind them.
+
+     `.mk-tile` never needed it either — a palette tile is 64px tall. */
 }
 
 @media (max-width: 480px) {
@@ -3361,7 +3519,7 @@
   }
 
   .mk-canvas-wrap {
-    padding: 10px 8px 80px;
+    padding: var(--mk-chrome-headroom) 8px 80px;
   }
 
   /* Four wrapped rows of toolbar on a phone leaves no canvas. Tightening the
@@ -3399,6 +3557,125 @@
   }
 }
 
+/* ===========================================================================
+   Touch sizing
+
+   Keyed on the pointer, not the width, because the two questions are different
+   ones. Width decides the *layout* — how many columns of chrome fit. The pointer
+   decides how big a target has to be, and a finger is the same size on a 390px
+   phone as on an 820px tablet, while a 500px-wide desktop window is still being
+   driven by a mouse and does not want 42px controls.
+
+   The editor already declared its own floor — 36px is the smallest that does not
+   mis-tap — in a width-keyed rule at 640px that raised toolbar buttons, tabs and
+   palette tiles. That rule is gone: keyed on width it made 36px children of a
+   32px trough on a fine pointer, and keyed on the pointer the tokens below do the
+   same job for every control at once. Everything else kept its desktop size, and
+   measuring a phone found the controls that matter most under the floor: the
+   per-block drag/duplicate/delete strip and the inline formatting bar at 22px,
+   the panel's close/back/duplicate/delete and the breadcrumbs at 26px, undo and
+   redo 26px wide. The three buttons that delete things were the smallest in the
+   editor.
+
+   The two control tokens move together: a trough is its child plus its 3px
+   padding either side, so `--mk-control` has to stay 6px above
+   `--mk-control-icon`. The troughs take a `min-height` rather than a `height` so
+   that getting this wrong is a taller switch rather than chips hanging out of it,
+   but the invariant is still the thing to keep.
+   =========================================================================== */
+
+@media (pointer: coarse) {
+  .mk-root {
+    --mk-control-icon: 36px;
+    --mk-control: 42px;
+    --mk-control-primary: 44px;
+
+    /* 42px of formatting bar plus the 2px gap it keeps on a mouse. */
+    --mk-chrome-headroom: 46px;
+  }
+
+  /* The bar is 36px of button plus 3px of padding either side, so a -30px anchor
+     sized for a 28px bar now hung 12px *into* the first line of the text being
+     edited. Measured, not guessed: the whole point of a formatting bar is to not
+     be over the words. */
+  .mk-inline-toolbar {
+    top: -44px;
+    /* Both pieces of chrome share this band — bar at the left, actions strip at
+       the right — and at these sizes they do not both fit across a phone-width
+       paper: a text block's seven buttons come to 276px and the strip to 116px,
+       against 340px of paper. So the bar takes what is left and scrolls, rather
+       than growing under the strip where its last button would be unreachable
+       behind it. A heading has five buttons and never reaches the limit. */
+    max-width: calc(100% - 124px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mk-inline-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Same arithmetic, same fix, for the actions strip — which is tucked into the
+     block's top-right corner and therefore *over* the document by design. A 22px
+     badge grazes the corner; a 42px one covers the end of the first line, which
+     on a text block is words you are trying to read.
+
+     So on touch it moves up into the headroom band beside the formatting bar,
+     which is what that band is now sized for. Rounded on top rather than the
+     corner-tucked radius, because it is no longer tucked into anything.
+
+     It cannot simply hide while editing instead: for a text or heading block
+     `editing` *is* `selected`, so that would take duplicate and delete off the
+     canvas for the two most common block types. */
+  .mk-node-tools {
+    top: -44px;
+    border-radius: var(--mk-radius-sm) var(--mk-radius-sm) 0 0;
+  }
+
+  .mk-node-tools[data-orientation='horizontal'] {
+    border-radius: var(--mk-radius-sm) var(--mk-radius-sm) 0 0;
+  }
+
+  /* Hardcoded rather than tokenised, because these two live *over* the document
+     rather than in the chrome: the strip of actions on a block, and the
+     formatting bar above the text you are editing. Same floor all the same —
+     Delete is Delete wherever it is drawn.
+
+     `flex-shrink: 0` is not decoration. Both of these sit in flex rows, and the
+     formatting bar is width-constrained below — without this the buttons simply
+     shrank back to 28px to fit it, which is a 36px rule that silently does
+     nothing. Measured: seven buttons, 28px each, in a 216px bar. */
+  .mk-node-tool,
+  .mk-rt-button {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  /* An icon-only switch (the device widths) has no label to give it width, so
+     the height token alone left it a 31px target in a 36px groove. */
+  .mk-segmented > button {
+    min-width: 36px;
+  }
+
+  /* The folded structure rail, which is where a tablet lands: 40px wide, so 36
+     would leave the stub touching both edges. 34 with the rail's 3px gutters is
+     the most a 40px rail can give a finger. */
+  .mk-tree-stub {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* The route back up from a selected block. Not 36: a row of three at that
+     height is a band the width of the panel, and the trail is read far more
+     often than it is tapped. 30px with room either side of the word is enough
+     not to mis-hit while still reading as a breadcrumb. */
+  .mk-crumb {
+    min-height: 30px;
+    padding: 4px 8px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mk-panel,
   .mk-scrim {
@@ -3429,14 +3706,26 @@
   opacity: 1;
 }
 
-/* A pointer-driven reveal is no use on a touch screen, where there is no hover
-   state to enter — so there the chrome is simply always on. */
-@media (hover: none) {
-  .mk-node-label,
-  .mk-node .mk-node-tools {
-    opacity: 1;
-  }
-}
+/* On a touch screen there is no hover to reveal any of this, so the chrome
+ * follows the *selection* instead — which is what a tap produces, and what the
+ * tool strip already did here even before this was written down.
+ *
+ * The label used to be pinned on instead, on the reasoning that a canvas which
+ * answers nothing reads as a preview rather than an editor. True with one block.
+ * With three it puts a badge over the copy of the block above: a label is drawn
+ * 18px above the box it names, stacked blocks have no gap between them, and
+ * nothing on a phone reveals one label at a time — so `Text` lands inside the
+ * heading and `Button` inside the paragraph. Measured on a 390px viewport, and
+ * plainly worse than the problem it solved.
+ *
+ * What replaces it is the panel: tapping a block opens Properties, whose header
+ * names the block. The type is one tap away rather than permanently written over
+ * the document.
+ *
+ * The rule also named `.mk-node .mk-node-tools`, which never did anything —
+ * `.mk-node:not([data-selected='true']) .mk-node-tools` above is one class more
+ * specific, so the strips followed the selection regardless. That behaviour was
+ * right; only the claim was wrong. */
 
 /* --- the workspace ------------------------------------------------------
    The paper is now the width the email really is, which leaves ground around

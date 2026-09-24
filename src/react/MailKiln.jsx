@@ -27,6 +27,41 @@ import { LintPanel } from './panels/LintPanel.jsx'
 import { QuickInsert } from './panels/QuickInsert.jsx'
 
 /**
+ * The width at which the side panel stops being a column and becomes an overlay.
+ *
+ * Kept in step by hand with the panel breakpoint in `styles.css` — a media query
+ * cannot read a custom property, so there is no single source of truth to share.
+ * The editor needs the answer in JS as well as CSS because two behaviours only
+ * make sense for an overlay: a selection slides the panel in, and Escape closes
+ * it. Neither is a thing you can do to a column.
+ */
+const PANEL_OVERLAY_QUERY = '(max-width: 900px)'
+
+/**
+ * Whether the side panel is currently an overlay over the canvas rather than a
+ * column beside it.
+ *
+ * Starts `false` and probes in an effect, so the first render is the same on the
+ * server as in the browser.
+ *
+ * @returns {boolean}
+ */
+function usePanelIsOverlay() {
+  const [overlay, setOverlay] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined
+    const query = window.matchMedia(PANEL_OVERLAY_QUERY)
+    setOverlay(query.matches)
+    const listener = (/** @type {any} */ event) => setOverlay(event.matches)
+    query.addEventListener?.('change', listener)
+    return () => query.removeEventListener?.('change', listener)
+  }, [])
+
+  return overlay
+}
+
+/**
  * @param {object} props
  * @param {import('../core/types.js').EmailDocument} [props.value] Controlled document.
  * @param {import('../core/types.js').EmailDocument} [props.defaultValue] Initial document when uncontrolled.
@@ -84,7 +119,9 @@ export function MailKiln({
   const [device, setDevice] = useState(/** @type {'desktop' | 'mobile' | 'text'} */ ('desktop'))
   const [quickOpen, setQuickOpen] = useState(false)
   // Below the panel breakpoint the side panel is an overlay, so it needs a way
-  // in and a way out. Above it the panel is a column and this state is inert.
+  // in and a way out. Above it the panel is a column, which cannot be open or
+  // closed — so this state is only ever true while `panelIsOverlay` is.
+  const panelIsOverlay = usePanelIsOverlay()
   const [panelOpen, setPanelOpen] = useState(false)
   // `showPalette` and `showInspector` both gate the panel: either one is enough
   // to want it. It only exists in the design view.
@@ -107,6 +144,29 @@ export function MailKiln({
   )
 
   const store = useMailKiln({ value, defaultValue, onChange, vars: vars ?? null, lintDisable })
+
+  // Selecting a node is a request to edit it, and the controls that edit it are
+  // in the panel — so on a narrow viewport the selection has to bring the panel
+  // with it. It did not: the panel is a closed overlay there, so tapping a block
+  // switched it to Properties *off-screen* and the tap read as doing nothing.
+  // The Inspector was unreachable on a phone unless you already knew to go and
+  // find the toolbar's Panel button — and below 640px the structure pane is
+  // hidden too, so there was no other route to a block's properties at all.
+  //
+  // Only while the panel is an overlay: above the breakpoint it is already
+  // beside the canvas, and marking a column "open" would hand Escape a surface
+  // to dismiss that nobody can see move.
+  useEffect(() => {
+    if (panelIsOverlay && store.selectedId) setPanelOpen(true)
+  }, [panelIsOverlay, store.selectedId])
+
+  // Widening the window turns the overlay back into a column. Forgetting the
+  // state on the way is what keeps "open" meaningful: left set, it would take
+  // an Escape press that should have deselected, and the panel would spring
+  // open again the moment the window narrowed.
+  useEffect(() => {
+    if (!panelIsOverlay) setPanelOpen(false)
+  }, [panelIsOverlay])
 
   // `text` is a preview width, not a design one — the toolbar hides it outside
   // the Preview view. Leaving it *set* when the view changes put the canvas in a
@@ -300,7 +360,9 @@ export function MailKiln({
               onDevice={setDevice}
               onExport={onExport}
               panelOpen={panelOpen}
-              onTogglePanel={showPanel ? () => setPanelOpen((open) => !open) : undefined}
+              onTogglePanel={
+                showPanel && panelIsOverlay ? () => setPanelOpen((open) => !open) : undefined
+              }
               appearance={resolvedAppearance}
             />
 
@@ -341,7 +403,7 @@ export function MailKiln({
                     aria-hidden="true"
                     onPointerDown={() => setPanelOpen(false)}
                   />
-                  <SidePanel onClose={() => setPanelOpen(false)} />
+                  <SidePanel onClose={panelIsOverlay ? () => setPanelOpen(false) : undefined} />
                 </>
               ) : null}
             </div>

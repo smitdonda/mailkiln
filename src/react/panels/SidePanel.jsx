@@ -104,6 +104,11 @@ export function SidePanel({ onClose }) {
               role="tab"
               className="mk-panel-tab"
               aria-selected={tab === id}
+              // The label again, for CSS to reserve its semibold width with, so
+              // selecting a tab does not nudge the ones beside it. Presentational
+              // only; `visibility: hidden` keeps the duplicate out of the
+              // accessibility tree.
+              data-label={text}
               onClick={() => pick(id)}
             >
               {text}

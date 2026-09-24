@@ -187,6 +187,29 @@ describe('the canvas as a surface to judge by', () => {
     )
     expect(selected.getAttribute('tabindex')).toBe('0')
   })
+
+  // The paper is a query container, and the stylesheet stacks a row's columns
+  // once it is narrower than the email's own content width — the same thing the
+  // exported HTML does with `@media (max-width: width - 1)`. jsdom evaluates
+  // neither a container query nor a media query, so what is pinned here is the
+  // attribute the two sides agree on. Without it the canvas kept two 170px
+  // columns on a phone, wrapped a heading one word per line, and pushed a social
+  // row off the edge of the paper.
+  it('marks a row as stacking, which is what the narrow paper keys off', () => {
+    mount({ defaultValue: normalize(docOf([createBlock('text')])) })
+    const row = /** @type {HTMLElement} */ (document.querySelector('.mk-row'))
+    expect(row.hasAttribute('data-stack')).toBe(true)
+  })
+
+  it('leaves the mark off a row that opted out, exactly as the renderer does', () => {
+    // `stackOnMobile: false` means "stay side by side and squeeze". That is what
+    // the sent email does, so it has to be what the canvas does.
+    mount({
+      defaultValue: normalize(docOf([createBlock('text')], { row: { stackOnMobile: false } })),
+    })
+    const row = /** @type {HTMLElement} */ (document.querySelector('.mk-row'))
+    expect(row.hasAttribute('data-stack')).toBe(false)
+  })
 })
 
 describe('the palette as a place to work', () => {
@@ -299,6 +322,118 @@ describe('the side panel', () => {
 
     fireEvent.click(within(crumbs).getByRole('button', { name: 'Row' }))
     expect(panelLabel()).toBe('Properties')
+  })
+})
+
+describe('the panel as an overlay', () => {
+  // Below the panel breakpoint the panel is not a column — it sits off-canvas
+  // until something slides it in. jsdom applies no media queries, so the
+  // breakpoint is faked here and what is asserted is the state the CSS keys off
+  // (`data-panel-open` on the shell) rather than a computed width.
+
+  /** @type {typeof window.matchMedia} */
+  let realMatchMedia
+
+  /** Every `max-width` query matches: a viewport narrow enough for the overlay. */
+  function narrowViewport() {
+    realMatchMedia = window.matchMedia
+    window.matchMedia = /** @type {any} */ (
+      (/** @type {string} */ query) => ({
+        matches: query.includes('max-width'),
+        media: query,
+        onchange: null,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+        dispatchEvent: () => false,
+      })
+    )
+  }
+
+  afterEach(() => {
+    if (realMatchMedia) window.matchMedia = realMatchMedia
+  })
+
+  /** @returns {boolean} */
+  function panelIsOpen() {
+    return document.querySelector('.mk-shell')?.getAttribute('data-panel-open') === 'true'
+  }
+
+  it('slides in when a node is selected, so the properties are not off-screen', () => {
+    narrowViewport()
+    mount()
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(paletteTile('text'))
+    expect(panelIsOpen()).toBe(true)
+    expect(panelLabel()).toBe('Properties')
+  })
+
+  it('opens for a node selected on the canvas, not only for an insert', () => {
+    // The bug this covers: on a phone, tapping a block switched the closed
+    // overlay to Properties where nobody could see it, and the tap read as
+    // doing nothing. There is no other route to a block's properties at that
+    // width — the structure pane is hidden below 640px.
+    narrowViewport()
+    mount({ defaultValue: normalize(docOf([createBlock('text', { html: 'Hi' })])) })
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(/** @type {HTMLElement} */ (document.querySelector('.mk-node')))
+    expect(panelIsOpen()).toBe(true)
+    expect(panelLabel()).toBe('Properties')
+  })
+
+  it('closes from the toolbar, its own button, the scrim and escape', () => {
+    narrowViewport()
+    mount()
+    const toggle = screen.getByRole('button', { name: 'Panel' })
+
+    fireEvent.click(toggle)
+    expect(panelIsOpen()).toBe(true)
+    fireEvent.click(toggle)
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(paletteTile('text'))
+    expect(panelIsOpen()).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Close panel' }))
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(toggle)
+    fireEvent.pointerDown(/** @type {HTMLElement} */ (document.querySelector('.mk-scrim')))
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.click(toggle)
+    fireEvent.keyDown(root(), { key: 'Escape' })
+    expect(panelIsOpen()).toBe(false)
+  })
+
+  it('stays shut once dismissed over a node that is still selected', () => {
+    // Only a *change* of selection opens it. Re-opening on every commit would
+    // make the panel impossible to get out of while editing a block.
+    narrowViewport()
+    const { latest } = mount()
+    fireEvent.click(paletteTile('text'))
+    fireEvent.click(screen.getByRole('button', { name: 'Close panel' }))
+    expect(panelIsOpen()).toBe(false)
+
+    fireEvent.change(screen.getByLabelText('Template name'), { target: { value: 'Welcome' } })
+    expect(latest().settings.name).toBe('Welcome')
+    expect(panelIsOpen()).toBe(false)
+  })
+
+  it('is a column on a wide viewport, with no open state to get in the way', () => {
+    // The default stub matches nothing, so this is the wide case. Escape has to
+    // reach the selection rather than being spent "closing" a panel that is
+    // already beside the canvas and cannot move.
+    mount()
+    fireEvent.click(paletteTile('text'))
+    expect(panelIsOpen()).toBe(false)
+    expect(screen.queryByRole('button', { name: 'Panel' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
+
+    fireEvent.keyDown(root(), { key: 'Escape' })
+    expect(panelLabel()).toBe('Blocks')
   })
 })
 
