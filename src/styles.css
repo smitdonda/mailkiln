@@ -439,7 +439,13 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  height: var(--mk-control);
+  /* `min-height`, not `height`: a fixed height cannot be told about a taller
+     child, so any rule that grows the chips — a touch floor, a longer font — put
+     them through the walls of their own groove instead of growing it. Same
+     reasoning as `.mk-panel-switch`, which already worked this way. At the
+     current tokens this changes nothing: the chips are 6px shorter than the
+     trough by construction. */
+  min-height: var(--mk-control);
   padding: 3px;
   border-radius: 9px;
   background: var(--mk-bg-sunken);
@@ -608,9 +614,9 @@
   display: flex;
   align-items: center;
   gap: var(--mk-space-2);
-  /* Grows with the switch rather than pinning it: on a narrow panel the four
-     tabs take two rows (see `.mk-panel-switch`), and a fixed 48px clipped the
-     second one. */
+  /* A floor, not a height. 48px is the band a desktop draws; a coarse pointer's
+     trough is 42px and needs 50, and a fixed 48 clipped it. `align-items: center`
+     is what keeps the trough centred in the band at either size. */
   min-height: 48px;
   padding: 4px var(--mk-space-3);
   border-bottom: 1px solid var(--mk-border);
@@ -639,29 +645,51 @@
   border-radius: 9px;
   background: var(--mk-bg-sunken);
 
-  /* Wrapping is allowed but does not happen on its own: the tabs below are
-     `flex: 1`, which is `1 1 0%`, and a zero basis always fits on one line. It
-     is the container query further down that opts a narrow trough into a real
-     basis and so into a second row. The trough is its own query container
-     because *it* is the box that runs out of room — the panel width alone does
-     not say: a 320px panel on a desktop holds four tabs, while a 328px overlay
-     on a phone does not, because the overlay's header also carries the close
-     button. Containment is safe here; the trough holds nothing but buttons. */
+  /* A valve, not a layout. The tabs below are sized to their labels, so they only
+     wrap where the labels genuinely do not fit across the trough — which no
+     supported width and neither shipped locale reaches. A wrapped row beats a
+     clipped word if a translation ever gets there. */
   flex-wrap: wrap;
-  container-type: inline-size;
 }
 
-/* Equal thirds, and that is what makes the weight change on selection free: with
-   the widths fixed, a label can go semibold without the two tabs beside it
-   sliding out from under the pointer. */
+/* Sized to its label, with the leftover space shared out evenly — *not* equal
+   quarters.
+
+   Equal quarters were the first design, and they cannot fit four labels in a
+   phone's trough. Every segment has to hold the widest label, so "Rows" (28px of
+   text) got the same box as "Properties" (53px), and four of the widest come to
+   282px against the 258px a 360px phone has. The old rule bought the fit with a
+   `@container (max-width: 270px)` third-of-a-row basis, which wrapped the fourth
+   tab onto a row of its own where `flex-grow` blew it up to the full 258px: one
+   enormous chip under three small ones, which reads as a broken layout rather
+   than a switch. Measured on a 360px viewport, four tabs, both pointer types.
+
+   Content width costs 220px for the same four labels, so they fit one row at
+   every width down to 320px with room to spare, and the 270px threshold — tuned
+   against the pixel width of the English word "Properties", and so wrong in any
+   other language — goes away with it.
+
+   What equal quarters were protecting is kept below: the row does not move when
+   the selected label goes semibold. */
 .mk-panel-tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  min-width: 0;
+  display: inline-grid;
+  /* One column, three rows: the label in the middle, and a collapsed row either
+     side of it holding the width reservations described below. The column is as
+     wide as the widest of the three, and only the middle row has any height. */
+  grid-template-columns: 1fr;
+  grid-template-rows: 0 auto 0;
+  align-content: center;
+  justify-items: center;
+  /* `auto` basis, so the label sets the width; `grow: 1`, so the slack is shared
+     equally and the four still span the trough. No `min-width: 0` — the
+     automatic minimum *is* the label, and that is what keeps a tab from being
+     shrunk until its text spills over the tab beside it. */
+  flex: 1 1 auto;
   height: var(--mk-control-icon);
-  padding: 0 var(--mk-space-2);
+  /* 6px, not 8. The tightest trough in the editor is the 264px panel a 1024px
+     desktop gets: 233px of content box against 236px of four labels at 8px of
+     padding, and 220px at 6px. Three pixels decided whether this wrapped. */
+  padding: 0 6px;
   border: 0;
   border-radius: var(--mk-radius-md);
   background: transparent;
@@ -680,29 +708,41 @@
   color: var(--mk-fg);
 }
 
-/* Four labelled tabs stop fitting a narrow trough, and the widest of them sets
-   the width of all four: at 257px of trough (a 288px panel at 1100px, or a 328px
-   overlay on a 390px phone) "Properties" is 4px wider than its quarter, and at
-   229px (a 264px panel at 1024px, or a 300px overlay on a 360px phone) 7px wider
-   — so the selected tab's own label sat on top of the tab beside it.
+/* The selected tab's label is semibold, and a word does not occupy the same width
+   at 400 and at 600 — so on content-width tabs, picking one would shift the tabs
+   beside it. These two reserve *both* widths in every state: the same text at 400
+   and at 600, hidden, in the collapsed rows above and below the label, sharing its
+   column. The column is therefore always `max(regular, semibold)` whichever state
+   the tab is in, and selecting a tab changes nothing but the paint.
 
-   Truncation is not the way out: `overflow: hidden` on the button does nothing
-   because the label is an anonymous flex item, so `text-overflow` never applies
-   to it, and moving the label into a span to make it work turns a 56px slot into
-   "Cont… Rows Setti… Prop…", which is not a tab row anyone can read.
+   Both weights, not just the bold one: which of the two is wider depends on the
+   font, and it is not always the bold. In the stack this editor asks for, semibold
+   "Content" measures 1px *narrower* than regular — so reserving only 600 made the
+   row twitch in the other direction.
 
-   So a narrow trough gets a real third-of-a-row basis instead: three tabs to a
-   row, the fourth wrapping to a full-width row of its own, every label whole.
-   With only three tabs it is the same single row as before — which is why this
-   needs no `:has()`, a third being a third either way. 270px sits between the
-   257 that overflows and the 289 that does not.
+   `overflow: clip`, never `hidden`. `hidden` makes a scroll container, and a
+   scroll container contributes zero to intrinsic width, which silently turns the
+   whole reservation into a no-op. `clip` paints nothing outside the box without
+   giving up the contribution. Measured both ways.
 
-   A child selector, and placed after the rule it overrides: `flex: 1` is
-   shorthand, so it resets `flex-basis` to 0 and would otherwise win outright. */
-@container (max-width: 270px) {
-  .mk-panel-switch > .mk-panel-tab {
-    flex-basis: calc(33.333% - 2px);
-  }
+   `attr()` from a `data-` attribute rather than a duplicated string, so the
+   reservation cannot drift from the label or from a translation. It degrades
+   safely: no attribute, empty content, tab falls back to its own width.
+   `visibility: hidden` — a pseudo-element cannot carry `aria-hidden` — is what
+   keeps the two duplicates out of the accessibility tree. */
+.mk-panel-tab::before,
+.mk-panel-tab::after {
+  content: attr(data-label);
+  overflow: clip;
+  visibility: hidden;
+}
+
+.mk-panel-tab::before {
+  font-weight: 400;
+}
+
+.mk-panel-tab::after {
+  font-weight: 600;
 }
 
 .mk-panel-tab[aria-selected='true'] {
@@ -3338,11 +3378,18 @@
     font-weight: 600;
   }
 
+  /* One padding declaration, not three added on top of the base rule: the old
+     `padding-bottom: 8px` landed on a base `padding: 4px 12px`, which left the
+     trough 4px from the top of the band and 9px from the bottom — visibly
+     top-hugging, and the taller the trough got the more it showed.
+
+     Left and right stay uneven on purpose. The close button's glyph is 14px in a
+     36px box, so 8px of padding puts the mark about 19px in from the panel's
+     edge, which is what the trough's 12px reads as on the other side. */
   .mk-panel-tabs {
     align-items: center;
-    padding-right: 8px;
+    padding: 6px 8px 6px 12px;
     border-bottom: 1px solid var(--mk-border);
-    padding-bottom: 8px;
   }
 
   /* Reads as a sheet over the canvas rather than a second page. */
@@ -3446,12 +3493,20 @@
     padding: var(--mk-chrome-headroom) 10px 88px;
   }
 
-  /* Comfortable touch targets: 36px is the smallest that does not mis-tap. */
-  .mk-toolbar button,
-  .mk-panel-tab,
-  .mk-tile {
-    min-height: 36px;
-  }
+  /* The 36px touch floor used to be applied here, keyed on width. It is keyed on
+     the pointer now (see the Touch sizing block below), and leaving both in place
+     was actively wrong rather than merely redundant.
+
+     On a coarse pointer it was already dead: `--mk-control-icon` is 36px there,
+     so every control this rule named was at or above the floor without it. On a
+     *fine* pointer under 640px — a narrow desktop window, and Chrome's own
+     responsive mode, which reports `pointer: fine` until you turn on touch
+     emulation — it forced 36px children into `.mk-segmented`, whose 32px height
+     leaves them 26px of content box. Measured: the view and device chips stood
+     2px out of their own trough at 360, 390, 430 and 480px, top and bottom, so
+     the switch read as three loose buttons with a grey sliver behind them.
+
+     `.mk-tile` never needed it either — a palette tile is 64px tall. */
 }
 
 @media (max-width: 480px) {
@@ -3511,17 +3566,22 @@
    phone as on an 820px tablet, while a 500px-wide desktop window is still being
    driven by a mouse and does not want 42px controls.
 
-   The editor already declared its own floor — "36px is the smallest that does
-   not mis-tap", beside the rule that applies it to toolbar buttons, tabs and
-   palette tiles at 640px. Everything else kept its desktop size, and measuring a
-   phone found the controls that matter most sitting well under it: the per-block
-   drag/duplicate/delete strip and the inline formatting bar at 22px, the panel's
-   close/back/duplicate/delete and the breadcrumbs at 26px, undo and redo 26px
-   wide. The three buttons that delete things were the smallest in the editor.
+   The editor already declared its own floor — 36px is the smallest that does not
+   mis-tap — in a width-keyed rule at 640px that raised toolbar buttons, tabs and
+   palette tiles. That rule is gone: keyed on width it made 36px children of a
+   32px trough on a fine pointer, and keyed on the pointer the tokens below do the
+   same job for every control at once. Everything else kept its desktop size, and
+   measuring a phone found the controls that matter most under the floor: the
+   per-block drag/duplicate/delete strip and the inline formatting bar at 22px,
+   the panel's close/back/duplicate/delete and the breadcrumbs at 26px, undo and
+   redo 26px wide. The three buttons that delete things were the smallest in the
+   editor.
 
    The two control tokens move together: a trough is its child plus its 3px
    padding either side, so `--mk-control` has to stay 6px above
-   `--mk-control-icon` or every segmented control overflows its own groove.
+   `--mk-control-icon`. The troughs take a `min-height` rather than a `height` so
+   that getting this wrong is a taller switch rather than chips hanging out of it,
+   but the invariant is still the thing to keep.
    =========================================================================== */
 
 @media (pointer: coarse) {
